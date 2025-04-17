@@ -1,4 +1,4 @@
-create database modelo_fisico;
+create database maquiagem_db;
 
 CREATE TABLE Pessoa (
     CPF VARCHAR(14) PRIMARY key unique not null,
@@ -106,6 +106,6 @@ CREATE TABLE pede_produto (
     FOREIGN KEY (Diretor_fk_Funcionário_fk_Pessoa_CPF) REFERENCES Diretor(fk_Funcionário_fk_Pessoa_CPF)
 );
 
-alter table produto add column fk_fornecedor_CNPJ varchar(18) unique not null;
+alter table Produto add column fk_fornecedor_CNPJ varchar(18) not null;
 
-alter table produto add constraint foreign key (fk_fornecedor_CNPJ) references fornecedor(CNPJ);
+alter table Produto add constraint foreign key (fk_fornecedor_CNPJ) references Fornecedor(CNPJ);
