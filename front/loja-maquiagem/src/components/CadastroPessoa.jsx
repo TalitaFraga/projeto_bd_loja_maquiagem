@@ -7,7 +7,10 @@ import {
   TextField,
   Typography,
   Paper,
+  IconButton,
 } from "@mui/material";
+import HomeIcon from '@mui/icons-material/Home';
+import { Link } from 'react-router-dom'; // Importando Link corretamente
 
 const CadastroPessoa = () => {
   const [form, setForm] = useState({
@@ -37,9 +40,19 @@ const CadastroPessoa = () => {
   };
 
   return (
-    <Container maxWidth="md">
-      <Paper elevation={4} sx={{ padding: 4, borderRadius: 4, mt: 5 }}>
-        <Typography variant="h4" align="center" gutterBottom color="primary">
+    <>
+    <Box sx={{ position: 'absolute', top: 16, left: 16 }}>
+        <Link to="/">
+            <IconButton>
+                <HomeIcon sx={{ fontSize: 30, color: '#F06292' }} />
+            </IconButton>
+        </Link>
+    </Box>
+
+    <Container maxWidth="md" sx={{ position: 'relative' }}>
+
+      <Paper elevation={4} sx={{ padding: 4, borderRadius: 4, mt: 5, backgroundColor: '#F3F3F3' }}>
+        <Typography variant="h4" align="center" gutterBottom color="#D81B60">
           Cadastro de Pessoa
         </Typography>
         <Box component="form" onSubmit={handleSubmit}>
@@ -67,7 +80,7 @@ const CadastroPessoa = () => {
                   value={form[name]}
                   onChange={handleChange}
                   required={name !== "telefone2"}
-                  InputLabelProps={type == "date" ? {shrink: true}: undefined}
+                  InputLabelProps={type === "date" ? {shrink: true}: undefined}
                 />
               </Grid>
             ))}
@@ -76,13 +89,18 @@ const CadastroPessoa = () => {
             variant="contained"
             type="submit"
             fullWidth
-            sx={{ marginTop: 3, backgroundColor: "#d81b60", "&:hover": { backgroundColor: "#ad1457" } }}
+            sx={{
+              marginTop: 3,
+              backgroundColor: "#F48FB1", 
+              "&:hover": { backgroundColor: "#F06292" },
+            }}
           >
             Cadastrar
           </Button>
         </Box>
       </Paper>
     </Container>
+    </>
   );
 };
 
