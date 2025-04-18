@@ -97,7 +97,7 @@ const Login = () => {
 
         <Typography variant="body2" sx={{ marginTop: 2, color: '#BDBDBD' }}>
           Não tem uma conta?{' '}
-          <Link to="/cadastrar" style={{ textDecoration: 'none' }}>
+          <Link to="/pessoas" style={{ textDecoration: 'none' }}>
             <Button
               sx={{
                 textTransform: 'none',

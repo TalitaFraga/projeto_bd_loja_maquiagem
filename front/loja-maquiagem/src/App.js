@@ -4,6 +4,10 @@ import ListaPessoas from './components/ListaPessoas';
 import CadastrarPessoa from './components/CadastroPessoa';
 import Home from './components/Home';
 import Login from './components/Login';
+import VincularPessoa from './components/VincularPessoa';
+import CadastrarProduto from './components/CadastroProduto';
+import CadastrarFornecedor from './components/CadastroFornecedor';
+import Dashboard from './components/Dashboard';
 
 function App() {
   return (
@@ -11,8 +15,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/lista" element={<ListaPessoas />} />
-        <Route path="/cadastrar" element={<CadastrarPessoa />} />
+        <Route path="/pessoas" element={<CadastrarPessoa />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/vincular" element={<VincularPessoa />} />
+        <Route path="/produtos" element={<CadastrarProduto />} />
+        <Route path="/fornecedor" element={<CadastrarFornecedor/>}/>
+        <Route path="/dashboard" element={<Dashboard/>}/>
+
       </Routes>
     </Router>
   );

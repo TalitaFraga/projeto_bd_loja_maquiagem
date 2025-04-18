@@ -25,7 +25,7 @@ const Home = () => {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
           <Link to="/lista" style={{ textDecoration: 'none' }}>
           </Link>
-          <Link to="/cadastrar" style={{ textDecoration: 'none' }}>
+          <Link to="/pessoas" style={{ textDecoration: 'none' }}>
             <Button
               variant="contained"
               sx={{

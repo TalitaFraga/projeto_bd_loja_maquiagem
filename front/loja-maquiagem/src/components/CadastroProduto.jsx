@@ -13,23 +13,18 @@ import HomeIcon from '@mui/icons-material/Home';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const CadastrarPessoa = () => {
+const CadastrarProduto = () => {
   const [form, setForm] = useState({
+    codigo_barra: "",
+    lote_produto: "",
+    tipo_produto: "",
     nome: "",
-    cpf: "",
-    dataNasc: "",
-    rg: "",
-    email: "",
-    telefone1: "",
-    telefone2: "",
-    rua: "",
-    numero: "",
-    bairro: "",
-    cidade: "",
-    cep: "",
+    marca: "",
+    preco: "",
+    data_validade: "",
   });
-  
-  const navigate = useNavigate();  // Aqui usamos useNavigate
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,31 +33,18 @@ const CadastrarPessoa = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    try {
-      // Enviar os dados da pessoa sem um array
-      await axios.post("http://localhost:8080/pessoas", form);
-  
-      // Cadastrar como cliente ou funcionário
-      const tipo = form.tipo;
-      const cpfPayload = { fk_Pessoa_CPF: form.cpf };
-  
-      if (tipo === "CLIENTE") {
-        await axios.post("http://localhost:8080/clientes", cpfPayload);
-      } else {
-        await axios.post("http://localhost:8080/funcionarios", cpfPayload);
-      }
-  
-      alert("Cadastro realizado com sucesso!");
 
-      // Redireciona para a tela de Vinculação, passando o CPF
-      navigate({
-        pathname: '/vincular-pessoa',
-        state: { cpf: form.cpf } // Passa o CPF para a próxima tela
-      });
+    try {
+      // Enviar os dados do produto
+      await axios.post("http://localhost:8080/produtos", form);
+
+      alert("Produto cadastrado com sucesso!");
+
+      // Redireciona para a tela de listagem de produtos ou outra tela
+      navigate("/produtos");
     } catch (error) {
       console.error("Erro no cadastro:", error);
-      alert("Ocorreu um erro ao cadastrar.");
+      alert("Ocorreu um erro ao cadastrar o produto.");
     }
   };
 
@@ -79,25 +61,20 @@ const CadastrarPessoa = () => {
       <Container maxWidth="md" sx={{ position: 'relative' }}>
         <Paper elevation={4} sx={{ padding: 4, borderRadius: 4, mt: 5, backgroundColor: '#F3F3F3' }}>
           <Typography variant="h4" align="center" gutterBottom color="#D81B60">
-            Cadastro de Pessoa
+            Cadastro de Produto
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               {[
+                ["codigo_barra", "Código de Barra"],
+                ["lote_produto", "Lote do Produto"],
+                ["tipo_produto", "Tipo de Produto"],
                 ["nome", "Nome"],
-                ["cpf", "CPF"],
-                ["dataNasc", "Data de Nascimento", "date"],
-                ["rg", "RG"],
-                ["email", "Email", "email"],
-                ["telefone1", "Telefone 1"],
-                ["telefone2", "Telefone 2"],
-                ["rua", "Rua"],
-                ["numero", "Número"],
-                ["bairro", "Bairro"],
-                ["cidade", "Cidade"],
-                ["cep", "CEP"],
+                ["marca", "Marca"],
+                ["preco", "Preço", "number"],
+                ["data_validade", "Data de Validade", "date"],
               ].map(([name, label, type = "text"]) => (
-                <Grid item xs={12} sm={name === "nome" || name === "email" ? 12 : 6} key={name}>
+                <Grid item xs={12} sm={name === "nome" || name === "preco" ? 12 : 6} key={name}>
                   <TextField
                     fullWidth
                     type={type}
@@ -105,7 +82,7 @@ const CadastrarPessoa = () => {
                     name={name}
                     value={form[name]}
                     onChange={handleChange}
-                    required={name !== "telefone2"}
+                    required
                     InputLabelProps={type === "date" ? { shrink: true } : undefined}
                   />
                 </Grid>
@@ -122,7 +99,7 @@ const CadastrarPessoa = () => {
                 "&:hover": { backgroundColor: "#F06292" },
               }}
             >
-              Cadastrar Pessoa
+              Cadastrar Produto
             </Button>
           </Box>
         </Paper>
@@ -131,4 +108,4 @@ const CadastrarPessoa = () => {
   );
 };
 
-export default CadastrarPessoa;
+export default CadastrarProduto;
