@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import axios from "axios";
 import {
   Container,
@@ -17,6 +20,10 @@ import {
 const ListaPessoas = () => {
   const [pessoas, setPessoas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
 
   useEffect(() => {
     axios.get("http://localhost:8080/pessoas")
@@ -30,8 +37,41 @@ const ListaPessoas = () => {
       });
   }, []);
 
+  const handleExcluir = (cpf) => {
+    if (window.confirm("Tem certeza que deseja excluir essa pessoa?")) {
+      axios.delete(`http://localhost:8080/pessoas/${cpf}`)
+        .then(() => {
+          setPessoas(pessoas.filter(p => p.cpf !== cpf));
+          setSnackbarMessage("Pessoa excluída com sucesso!");
+          setSnackbarSeverity("success");
+          setSnackbarOpen(true);
+        })
+        .catch((error) => {
+          console.error("Erro ao excluir pessoa:", error);
+          setSnackbarMessage("Erro ao excluir pessoa.");
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
+        });
+    }
+  };
+  
+
   return (
     <Container maxWidth="lg" sx={{ mt: 5 }}>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
       <Paper elevation={4} sx={{ p: 3, backgroundColor: '#F3F3F3' }}>
         <Typography variant="h4" gutterBottom color="#D81B60">
           Lista de Pessoas
@@ -59,17 +99,19 @@ const ListaPessoas = () => {
                     <TableCell>{pessoa.email}</TableCell>
                     <TableCell>{pessoa.telefone1}</TableCell>
                     <TableCell align="right">
-                      <Button 
-                        variant="outlined" 
-                        size="small" 
-                        sx={{ 
-                          mr: 1, 
-                          borderColor: '#D81B60', 
-                          color: '#D81B60', 
-                          "&:hover": { borderColor: '#9C4D97', color: '#9C4D97' } 
-                        }}>
-                        Editar
-                      </Button>
+                      <Link to={`/pessoas/${pessoa.cpf}`} style={{ textDecoration: 'none' }}>
+                        <Button 
+                          variant="outlined" 
+                          size="small" 
+                          sx={{ 
+                            mr: 1, 
+                            borderColor: '#D81B60', 
+                            color: '#D81B60', 
+                            "&:hover": { borderColor: '#9C4D97', color: '#9C4D97' } 
+                          }}>
+                          Editar
+                        </Button>
+                      </Link>
                       <Button 
                         variant="contained" 
                         color="error" 
@@ -77,7 +119,9 @@ const ListaPessoas = () => {
                         sx={{ 
                           backgroundColor: '#D81B60', 
                           "&:hover": { backgroundColor: '#9C4D97' } 
-                        }}>
+                        }}
+                        onClick={()=> handleExcluir(pessoa.cpf)}
+                      >
                         Excluir
                       </Button>
                     </TableCell>

@@ -29,7 +29,7 @@ const CadastrarPessoa = () => {
     cep: "",
   });
   
-  const navigate = useNavigate();  // Aqui usamos useNavigate
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,25 +42,19 @@ const CadastrarPessoa = () => {
     try {
       // Enviar os dados da pessoa sem um array
       await axios.post("http://localhost:8080/pessoas", form);
-  
+
       // Cadastrar como cliente ou funcionário
-      const tipo = form.tipo;
       const cpfPayload = { fk_Pessoa_CPF: form.cpf };
-  
-      if (tipo === "CLIENTE") {
-        await axios.post("http://localhost:8080/clientes", cpfPayload);
-      } else {
-        await axios.post("http://localhost:8080/funcionarios", cpfPayload);
-      }
   
       alert("Cadastro realizado com sucesso!");
 
       // Redireciona para a tela de Vinculação, passando o CPF
       navigate({
-        pathname: '/vincular-pessoa',
-        state: { cpf: form.cpf } // Passa o CPF para a próxima tela
+        pathname: '/vincular',
+        state: { cpf: form.cpf }
       });
     } catch (error) {
+      console.log(error.response?.data)
       console.error("Erro no cadastro:", error);
       alert("Ocorreu um erro ao cadastrar.");
     }

@@ -10,7 +10,8 @@ import {
   IconButton
 } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
-import { Link } from 'react-router-dom'; // Correct import for Link
+import { Link } from 'react-router-dom';
+import axios from "axios";
 
 const VincularPessoa = () => {
   const [cpf, setCpf] = useState("");
@@ -20,18 +21,30 @@ const VincularPessoa = () => {
   // Validate CPF field (simple example)
   const isValidCpf = cpf.length === 11;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Basic form validation
+  
     if (!isValidCpf) {
       alert("CPF deve ter 11 dígitos!");
       return;
     }
-
-    // Submit the data here
-    console.log({ cpf, tipo, tipoFuncionario });
+  
+    try {
+      const payload = {
+        cpf,
+        tipo,
+        tipoFuncionario: tipo === "FUNCIONARIO" ? tipoFuncionario : null
+      };
+  
+      await axios.post("http://localhost:8080/api/pessoas", payload);
+  
+      alert("Pessoa vinculada com sucesso!");
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao vincular pessoa.");
+    }
   };
+  
 
   return (
     <>
