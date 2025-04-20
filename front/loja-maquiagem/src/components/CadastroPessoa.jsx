@@ -35,30 +35,23 @@ const CadastrarPessoa = () => {
     const { name, value } = e.target;
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     try {
-      // Enviar os dados da pessoa sem um array
       await axios.post("http://localhost:8080/pessoas", form);
-
-      // Cadastrar como cliente ou funcionário
-      const cpfPayload = { fk_Pessoa_CPF: form.cpf };
   
       alert("Cadastro realizado com sucesso!");
-
-      // Redireciona para a tela de Vinculação, passando o CPF
-      navigate({
-        pathname: '/vincular',
-        state: { cpf: form.cpf }
-      });
+  
+      // Redireciona para a tela de vinculação com o CPF na URL
+      navigate(`/vincular/${form.cpf}`);
     } catch (error) {
-      console.log(error.response?.data)
+      console.log(error.response?.data);
       console.error("Erro no cadastro:", error);
       alert("Ocorreu um erro ao cadastrar.");
     }
   };
+  
 
   return (
     <>
@@ -115,7 +108,7 @@ const CadastrarPessoa = () => {
                 backgroundColor: "#F48FB1",
                 "&:hover": { backgroundColor: "#F06292" },
               }}
-            >
+              >
               Cadastrar Pessoa
             </Button>
           </Box>
