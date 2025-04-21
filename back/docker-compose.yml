@@ -9,7 +9,7 @@ services:
       MYSQL_USER: user               # Cria um usuário adicional
       MYSQL_PASSWORD: password       # Senha para o usuário adicional
     ports:
-      - "3306:3306"                  # Mapeia a porta do MySQL para o host
+      - "3307:3306"                  # Mapeia a porta do MySQL para o host
     volumes:
       - mysql_data:/var/lib/mysql    # Volume persistente para os dados
     command: --default-authentication-plugin=mysql_native_password  # Usa o método de autenticação compatível com mais clientes
