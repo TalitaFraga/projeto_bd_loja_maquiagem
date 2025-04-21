@@ -29,7 +29,7 @@ public class ClienteRepository {
     public Cliente save(Cliente cliente) {
         pessoaRepository.save(cliente);
 
-        String sql = "INSERT INTO Cliente (fk_Pessoa_CPF) VALUES (?)";
+        String sql = "INSERT INTO Cliente (fk_Pessoa_cpf) VALUES (?)";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -48,7 +48,7 @@ public class ClienteRepository {
             return Optional.empty();
         }
 
-        String sql = "SELECT * FROM Cliente WHERE fk_Pessoa_CPF = ?";
+        String sql = "SELECT * FROM Cliente WHERE fk_Pessoa_cpf = ?";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -79,7 +79,7 @@ public class ClienteRepository {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar cliente por CPF", e);
+            throw new RuntimeException("Erro ao buscar cliente por cpf", e);
         }
     }
 
@@ -91,7 +91,7 @@ public class ClienteRepository {
     @Transactional
     public void delete(String cpf) {
         try {
-            String deleteClienteSql = "DELETE FROM Cliente WHERE fk_Pessoa_CPF = ?";
+            String deleteClienteSql = "DELETE FROM Cliente WHERE fk_Pessoa_cpf = ?";
             try (Connection conn = dataSource.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(deleteClienteSql)) {
 
@@ -117,7 +117,7 @@ public class ClienteRepository {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                String cpf = rs.getString("fk_Pessoa_CPF");
+                String cpf = rs.getString("fk_Pessoa_cpf");
                 pessoaRepository.findByCpf(cpf).ifPresent(pessoa -> {
                     Cliente cliente = new Cliente();
                     cliente.setCpf(pessoa.getCpf());
@@ -154,7 +154,7 @@ public class ClienteRepository {
         return clientes;
     }
     public void deleteSilencioso(String cpf) {
-        String sql = "DELETE FROM Cliente WHERE fk_Pessoa_CPF = ?";
+        String sql = "DELETE FROM Cliente WHERE fk_Pessoa_cpf = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, cpf);

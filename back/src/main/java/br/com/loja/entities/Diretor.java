@@ -8,5 +8,4 @@ import lombok.NoArgsConstructor;
 @Setter
 @NoArgsConstructor
 public class Diretor extends Funcionario {
-    // Atributos específicos do Diretor, se houver
 }
