@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import axios from "axios";
+import debounce from "lodash/debounce";
 import {
   Container,
   Paper,
@@ -15,6 +14,12 @@ import {
   TableRow,
   Button,
   CircularProgress,
+  Snackbar,
+  Alert,
+  TextField,
+  Stack,
+  Autocomplete,
+  Box,
 } from "@mui/material";
 
 const ListaPessoas = () => {
@@ -23,7 +28,8 @@ const ListaPessoas = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
+  const [opcoesNomes, setOpcoesNomes] = useState([]);
+  const [inputBusca, setInputBusca] = useState("");
 
   useEffect(() => {
     axios.get("http://localhost:8080/pessoas")
@@ -36,6 +42,37 @@ const ListaPessoas = () => {
         setLoading(false);
       });
   }, []);
+
+  const buscarSugestoesPorNome = debounce((input) => {
+    if (!input) return;
+
+    axios.get(`http://localhost:8080/pessoas/por-nome?nome=${encodeURIComponent(input)}`)
+      .then((res) => {
+        const nomes = res.data.map(p => p.nome);
+        setOpcoesNomes(nomes);
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar sugestões:", err);
+      });
+  }, 400);
+
+  const handleBuscarPorNome = (nome) => {
+    if (!nome.trim()) return;
+
+    setLoading(true);
+    axios.get(`http://localhost:8080/pessoas/por-nome?nome=${encodeURIComponent(nome)}`)
+      .then((response) => {
+        setPessoas(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar por nome:", error);
+        setSnackbarMessage("Erro ao buscar pessoa por nome.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        setLoading(false);
+      });
+  };
 
   const handleExcluir = (cpf) => {
     if (window.confirm("Tem certeza que deseja excluir essa pessoa?")) {
@@ -54,7 +91,6 @@ const ListaPessoas = () => {
         });
     }
   };
-  
 
   return (
     <Container maxWidth="lg" sx={{ mt: 5 }}>
@@ -76,6 +112,35 @@ const ListaPessoas = () => {
         <Typography variant="h4" gutterBottom color="#D81B60">
           Lista de Pessoas
         </Typography>
+
+        <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+          <Box sx={{flex: 1}}>
+            <Autocomplete
+              freeSolo
+              options={opcoesNomes}
+              inputValue={inputBusca}
+              onInputChange={(event, newInputValue) => {
+                setInputBusca(newInputValue);
+                buscarSugestoesPorNome(newInputValue);
+              }}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  handleBuscarPorNome(newValue);
+                }
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Buscar por nome" variant="outlined" fullWidth />
+              )}
+              />
+          </Box>
+          <Button 
+            variant="contained" 
+            onClick={() => handleBuscarPorNome(inputBusca)}
+            sx={{ backgroundColor: '#D81B60', "&:hover": { backgroundColor: '#9C4D97' } }}
+          >
+            Buscar
+          </Button>
+        </Stack>
 
         {loading ? (
           <CircularProgress />
@@ -120,7 +185,7 @@ const ListaPessoas = () => {
                           backgroundColor: '#D81B60', 
                           "&:hover": { backgroundColor: '#9C4D97' } 
                         }}
-                        onClick={()=> handleExcluir(pessoa.cpf)}
+                        onClick={() => handleExcluir(pessoa.cpf)}
                       >
                         Excluir
                       </Button>
