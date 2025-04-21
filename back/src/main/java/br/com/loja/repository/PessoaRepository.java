@@ -14,12 +14,28 @@ import java.util.Optional;
 public class PessoaRepository {
 
     private final DataSource dataSource;
+    private final FuncionarioRepository funcionarioRepository;
+    private final VendedorRepository vendedorRepository;
+    private final EstoquistaRepository estoquistaRepository;
+    private final DiretorRepository diretorRepository;
+    private final ClienteRepository clienteRepository;
+
 
     @Autowired
-    public PessoaRepository(DataSource dataSource) {
+    public PessoaRepository(
+            DataSource dataSource,
+            FuncionarioRepository funcionarioRepository,
+            VendedorRepository vendedorRepository,
+            EstoquistaRepository estoquistaRepository,
+            DiretorRepository diretorRepository,
+            ClienteRepository clienteRepository) {
         this.dataSource = dataSource;
+        this.funcionarioRepository = funcionarioRepository;
+        this.vendedorRepository = vendedorRepository;
+        this.estoquistaRepository = estoquistaRepository;
+        this.diretorRepository = diretorRepository;
+        this.clienteRepository = clienteRepository;
     }
-
     public Pessoa save(Pessoa pessoa) {
         String sql = "INSERT INTO Pessoa (cpf, data_nasc, nome, rua, cidade, numero, cep, " +
                 "bairro, telefone1, telefone2, email, rg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -103,17 +119,17 @@ public class PessoaRepository {
     }
 
     public void delete(String cpf) {
-        String sql = "DELETE FROM Pessoa WHERE cpf = ?";
+        vendedorRepository.deleteSilencioso(cpf);
+        estoquistaRepository.deleteSilencioso(cpf);
+        diretorRepository.deleteSilencioso(cpf);
+        funcionarioRepository.deleteSilencioso(cpf);
+        clienteRepository.deleteSilencioso(cpf);
 
+        String sql = "DELETE FROM Pessoa WHERE cpf = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setString(1, cpf);
-            int rowsAffected = stmt.executeUpdate();
-
-            if (rowsAffected == 0) {
-                throw new RuntimeException("Pessoa não encontrada com CPF: " + cpf);
-            }
+            stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao deletar pessoa", e);
         }
@@ -171,4 +187,16 @@ public class PessoaRepository {
         stmt.setString(11, pessoa.getEmail());
         stmt.setString(12, pessoa.getRg());
     }
+
+    public void deleteSilencioso(String cpf) {
+        String sql = "DELETE FROM Pessoa WHERE CPF = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, cpf);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao deletar pessoa", e);
+        }
+    }
+
 }
