@@ -19,13 +19,13 @@ const Home = () => {
         }}
       >
         <Typography variant="h4" align="center" gutterBottom sx={{ color: '#E91E63', fontWeight: 'bold' }}>
-          Bem-vindo à Loja *****
+          Bem-vindo à Maquiagem & Cia
         </Typography>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
           <Link to="/lista" style={{ textDecoration: 'none' }}>
           </Link>
-          <Link to="/pessoas" style={{ textDecoration: 'none' }}>
+          <Link to="/cadastro-pessoa" style={{ textDecoration: 'none' }}>
             <Button
               variant="contained"
               sx={{

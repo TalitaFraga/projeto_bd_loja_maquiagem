@@ -1,0 +1,149 @@
+Index: front/loja-maquiagem/src/components/Home.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react';\r\nimport { Link } from 'react-router-dom';\r\nimport { Button, Box, Typography, Container, Paper } from '@mui/material';\r\n\r\nconst Home = () => {\r\n  return (\r\n    <Container maxWidth=\"md\" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100vh' }}>\r\n      <Paper\r\n        elevation={4}\r\n        sx={{\r\n          padding: '40px',\r\n          borderRadius: '12px',\r\n          backgroundColor: '#fef9f7',\r\n          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',\r\n          display: 'flex',\r\n          flexDirection: 'column',\r\n          alignItems: 'center',\r\n          justifyContent: 'center',\r\n        }}\r\n      >\r\n        <Typography variant=\"h4\" align=\"center\" gutterBottom sx={{ color: '#E91E63', fontWeight: 'bold' }}>\r\n          Bem-vindo à Loja *****\r\n        </Typography>\r\n\r\n        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>\r\n          <Link to=\"/lista\" style={{ textDecoration: 'none' }}>\r\n          </Link>\r\n          <Link to=\"/pessoas\" style={{ textDecoration: 'none' }}>\r\n            <Button\r\n              variant=\"contained\"\r\n              sx={{\r\n                width: '100%',\r\n                backgroundColor: '#F48FB1', // Rosa suave\r\n                color: 'white',\r\n                '&:hover': {\r\n                  backgroundColor: '#F06292', // Rosa mais intenso\r\n                },\r\n                padding: '15px',\r\n                borderRadius: '8px',\r\n                fontSize: '18px',\r\n              }}\r\n            >\r\n              Cadastrar\r\n            </Button>\r\n          </Link>\r\n          <Link to=\"/login\" style={{ textDecoration: 'none' }}>\r\n            <Button\r\n              variant=\"outlined\"\r\n              sx={{\r\n                width: '100%',\r\n                borderColor: '#F48FB1', // Rosa suave\r\n                color: '#F48FB1', // Rosa suave\r\n                '&:hover': {\r\n                  borderColor: '#F06292',\r\n                  color: '#F06292',\r\n                },\r\n                padding: '15px',\r\n                borderRadius: '8px',\r\n                fontSize: '18px',\r\n              }}\r\n            >\r\n              Login\r\n            </Button>\r\n          </Link>\r\n        </Box>\r\n      </Paper>\r\n    </Container>\r\n  );\r\n};\r\n\r\nexport default Home;\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/front/loja-maquiagem/src/components/Home.jsx b/front/loja-maquiagem/src/components/Home.jsx
+--- a/front/loja-maquiagem/src/components/Home.jsx	(revision 5403a267153dc8d0ccee0e5a3062c6fd82d143fa)
++++ b/front/loja-maquiagem/src/components/Home.jsx	(date 1745328646286)
+@@ -19,7 +19,7 @@
+         }}
+       >
+         <Typography variant="h4" align="center" gutterBottom sx={{ color: '#E91E63', fontWeight: 'bold' }}>
+-          Bem-vindo à Loja *****
++          Bem-vindo à Maquiagem & Cia
+         </Typography>
+ 
+         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+Index: front/loja-maquiagem/src/components/CadastroPessoa.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React, { useState } from \"react\";\r\nimport {\r\n  Box,\r\n  Button,\r\n  Container,\r\n  Grid,\r\n  TextField,\r\n  Typography,\r\n  Paper,\r\n  IconButton,\r\n  MenuItem,\r\n} from \"@mui/material\";\r\nimport HomeIcon from '@mui/icons-material/Home';\r\nimport { Link, useNavigate } from 'react-router-dom';\r\nimport axios from 'axios';\r\n\r\nconst CadastrarPessoa = () => {\r\n  const [form, setForm] = useState({\r\n    nome: \"\",\r\n    cpf: \"\",\r\n    dataNasc: \"\",\r\n    rg: \"\",\r\n    email: \"\",\r\n    telefone1: \"\",\r\n    telefone2: \"\",\r\n    rua: \"\",\r\n    numero: \"\",\r\n    bairro: \"\",\r\n    cidade: \"\",\r\n    cep: \"\",\r\n    tipoPessoa: \"cliente\",  // Adicionando tipoPessoa no estado\r\n  });\r\n\r\n  const navigate = useNavigate();\r\n\r\n  const handleChange = (e) => {\r\n    const { name, value } = e.target;\r\n    setForm((prevForm) => ({ ...prevForm, [name]: value }));\r\n  };\r\n\r\n  const handleSubmit = async (e) => {\r\n    e.preventDefault();\r\n\r\n    try {\r\n      let url = \"http://localhost:8080/cadastro-pessoa\"; // URL base\r\n      // Verifica o tipo de pessoa e altera a URL de acordo\r\n      switch (form.tipoPessoa) {\r\n        case \"cliente\":\r\n          url += \"/clientes\";\r\n          break;\r\n        case \"diretor\":\r\n          url += \"/diretores\";\r\n          break;\r\n        case \"funcionario\":\r\n          url += \"/funcionarios\";\r\n          break;\r\n        case \"vendedor\":\r\n          url += \"/vendedores\";\r\n          break;\r\n        case \"estoquista\":\r\n          url += \"/estoquistas\";\r\n          break;\r\n        default:\r\n          alert(\"Tipo de pessoa inválido.\");\r\n          return;\r\n      }\r\n\r\n      // Envia a requisição para o backend\r\n      await axios.post(url, form);\r\n\r\n      alert(\"Cadastro realizado com sucesso!\");\r\n\r\n      // Redireciona para a tela de vinculação com o CPF na URL\r\n      navigate(`/vincular/${form.cpf}`);\r\n    } catch (error) {\r\n      console.log(error.response?.data);\r\n      console.error(\"Erro no cadastro:\", error);\r\n      alert(\"Ocorreu um erro ao cadastrar.\");\r\n    }\r\n  };\r\n\r\n  return (\r\n    <>\r\n      <Box sx={{ position: 'absolute', top: 16, left: 16 }}>\r\n        <Link to=\"/\">\r\n          <IconButton>\r\n            <HomeIcon sx={{ fontSize: 30, color: '#F06292' }} />\r\n          </IconButton>\r\n        </Link>\r\n      </Box>\r\n\r\n      <Container maxWidth=\"md\" sx={{ position: 'relative' }}>\r\n        <Paper elevation={4} sx={{ padding: 4, borderRadius: 4, mt: 5, backgroundColor: '#F3F3F3' }}>\r\n          <Typography variant=\"h4\" align=\"center\" gutterBottom color=\"#D81B60\">\r\n            Cadastro de Pessoa\r\n          </Typography>\r\n          <Box component=\"form\" onSubmit={handleSubmit}>\r\n            <Grid container spacing={2}>\r\n              {[\r\n                [\"nome\", \"Nome\"],\r\n                [\"cpf\", \"CPF\"],\r\n                [\"dataNasc\", \"Data de Nascimento\", \"date\"],\r\n                [\"rg\", \"RG\"],\r\n                [\"email\", \"Email\", \"email\"],\r\n                [\"telefone1\", \"Telefone 1\"],\r\n                [\"telefone2\", \"Telefone 2\"],\r\n                [\"rua\", \"Rua\"],\r\n                [\"numero\", \"Número\"],\r\n                [\"bairro\", \"Bairro\"],\r\n                [\"cidade\", \"Cidade\"],\r\n                [\"cep\", \"CEP\"],\r\n              ].map(([name, label, type = \"text\"]) => (\r\n                <Grid item xs={12} sm={name === \"nome\" || name === \"email\" ? 12 : 6} key={name}>\r\n                  <TextField\r\n                    fullWidth\r\n                    type={type}\r\n                    label={label}\r\n                    name={name}\r\n                    value={form[name]}\r\n                    onChange={handleChange}\r\n                    required={name !== \"telefone2\"}\r\n                    InputLabelProps={type === \"date\" ? { shrink: true } : undefined}\r\n                  />\r\n                </Grid>\r\n              ))}\r\n              {/* Adicionando campo de seleção de tipo de pessoa */}\r\n              <Grid item xs={12}>\r\n                <TextField\r\n                  select\r\n                  fullWidth\r\n                  label=\"Tipo de Pessoa\"\r\n                  name=\"tipoPessoa\"\r\n                  value={form.tipoPessoa}\r\n                  onChange={handleChange}\r\n                  required\r\n                >\r\n                  <MenuItem value=\"cliente\">Cliente</MenuItem>\r\n                  <MenuItem value=\"diretor\">Diretor</MenuItem>\r\n                  <MenuItem value=\"funcionario\">Funcionário</MenuItem>\r\n                  <MenuItem value=\"vendedor\">Vendedor</MenuItem>\r\n                  <MenuItem value=\"estoquista\">Estoquista</MenuItem>\r\n                </TextField>\r\n              </Grid>\r\n            </Grid>\r\n\r\n            <Button\r\n              variant=\"contained\"\r\n              type=\"submit\"\r\n              fullWidth\r\n              sx={{\r\n                marginTop: 3,\r\n                backgroundColor: \"#F48FB1\",\r\n                \"&:hover\": { backgroundColor: \"#F06292\" },\r\n              }}\r\n            >\r\n              Cadastrar Pessoa\r\n            </Button>\r\n          </Box>\r\n        </Paper>\r\n      </Container>\r\n    </>\r\n  );\r\n};\r\n\r\nexport default CadastrarPessoa;\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/front/loja-maquiagem/src/components/CadastroPessoa.jsx b/front/loja-maquiagem/src/components/CadastroPessoa.jsx
+--- a/front/loja-maquiagem/src/components/CadastroPessoa.jsx	(revision 5403a267153dc8d0ccee0e5a3062c6fd82d143fa)
++++ b/front/loja-maquiagem/src/components/CadastroPessoa.jsx	(date 1745328646299)
+@@ -42,29 +42,27 @@
+     e.preventDefault();
+ 
+     try {
+-      let url = "http://localhost:8080/cadastro-pessoa"; // URL base
++      let url = "http://localhost:8080"; // URL base
+       // Verifica o tipo de pessoa e altera a URL de acordo
+       switch (form.tipoPessoa) {
+         case "cliente":
+           url += "/clientes";
+           break;
+         case "diretor":
+-          url += "/diretores";
+-          break;
+-        case "funcionario":
+           url += "/funcionarios";
+           break;
+         case "vendedor":
+-          url += "/vendedores";
++          url += "/funcionarios";
+           break;
+         case "estoquista":
+-          url += "/estoquistas";
++          url += "/funcionarios";
+           break;
+         default:
+           alert("Tipo de pessoa inválido.");
+           return;
+       }
+ 
++
+       // Envia a requisição para o backend
+       await axios.post(url, form);
+ 
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"6c1a1998-8d20-4997-87ba-544404ee2327\" name=\"Changes\" comment=\"\">\r\n      <changelist_data name=\"Talita Fraga\" email=\"talitafraga@macbook-air-de-talita.local\" automatic=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/front/loja-maquiagem/package.json\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/front/loja-maquiagem/package.json\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/front/loja-maquiagem/src/App.js\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/front/loja-maquiagem/src/App.js\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"generalSettings\">\r\n      <MavenGeneralSettings>\r\n        <option name=\"mavenHomeTypeForPersistence\" value=\"WRAPPER\" />\r\n      </MavenGeneralSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 1\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2vS4KoiisS7jTj3w93GZwLRPTDR\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"Application.LojaApplication.executor\": \"Run\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"dart.analysis.tool.window.visible\": \"false\",\r\n    \"git-widget-placeholder\": \"front-end\",\r\n    \"kotlin-language-version-configured\": \"true\",\r\n    \"last_opened_file_path\": \"/Users/talitafraga/Documents/BD/projeto/loja\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\"\r\n  }\r\n}]]></component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"LojaApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"br.com.loja.LojaApplication\" />\r\n      <module name=\"loja\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"br.com.loja.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.LojaApplication\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"6c1a1998-8d20-4997-87ba-544404ee2327\" name=\"Changes\" comment=\"\" />\r\n      <created>1744125079633</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1744125079633</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"fornecedor\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"fornecedor\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 5403a267153dc8d0ccee0e5a3062c6fd82d143fa)
++++ b/.idea/workspace.xml	(date 1745328602787)
+@@ -7,9 +7,7 @@
+     <list default="true" id="6c1a1998-8d20-4997-87ba-544404ee2327" name="Changes" comment="">
+       <changelist_data name="Talita Fraga" email="talitafraga@macbook-air-de-talita.local" automatic="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/package.json" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/App.js" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/CadastroPessoa.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/CadastroPessoa.jsx" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -19,6 +17,18 @@
+   <component name="Git.Settings">
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+   </component>
++  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
++  "lastFilter": {
++    "state": "OPEN",
++    "assignee": "Felipesmarq"
++  }
++}]]></component>
++  <component name="GithubPullRequestsUISettings"><![CDATA[{
++  "selectedUrlAndAccountId": {
++    "url": "https://github.com/TalitaFraga/projeto_bd_loja_maquiagem.git",
++    "accountId": "52525be5-e10b-4400-98e8-d275c6416948"
++  }
++}]]></component>
+   <component name="MavenImportPreferences">
+     <option name="generalSettings">
+       <MavenGeneralSettings>
+@@ -38,11 +48,16 @@
+   "keyToString": {
+     "Application.LojaApplication.executor": "Run",
+     "RunOnceActivity.ShowReadmeOnStart": "true",
++    "RunOnceActivity.git.unshallow": "true",
+     "dart.analysis.tool.window.visible": "false",
+     "git-widget-placeholder": "front-end",
+     "kotlin-language-version-configured": "true",
+     "last_opened_file_path": "/Users/talitafraga/Documents/BD/projeto/loja",
+-    "node.js.selected.package.tslint": "(autodetect)"
++    "node.js.detected.package.eslint": "true",
++    "node.js.selected.package.eslint": "(autodetect)",
++    "node.js.selected.package.tslint": "(autodetect)",
++    "nodejs_package_manager_path": "npm",
++    "vue.rearranger.settings.migration": "true"
+   }
+ }]]></component>
+   <component name="RunManager">
+@@ -64,6 +79,14 @@
+         <item itemvalue="Application.LojaApplication" />
+       </list>
+     </recent_temporary>
++  </component>
++  <component name="SharedIndexes">
++    <attachedChunks>
++      <set>
++        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
++        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
++      </set>
++    </attachedChunks>
+   </component>
+   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+   <component name="TaskManager">
+@@ -73,8 +96,12 @@
+       <option name="number" value="Default" />
+       <option name="presentableId" value="Default" />
+       <updated>1744125079633</updated>
++      <workItem from="1745327505161" duration="1089000" />
+     </task>
+     <servers />
++  </component>
++  <component name="TypeScriptGeneratedFilesManager">
++    <option name="version" value="3" />
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="fornecedor" />
