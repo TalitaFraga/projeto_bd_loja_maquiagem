@@ -1,0 +1,55 @@
+Index: back/src/main/java/br/com/loja/controller/CadastroPessoaController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package br.com.loja.controller;\r\n\r\nimport br.com.loja.entities.Pessoa;\r\nimport br.com.loja.service.PessoaFactoryService;\r\nimport br.com.loja.service.PessoaFactoryService.TipoFuncionario;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.web.bind.annotation.*;\r\n\r\n@RestController\r\n@RequestMapping(\"/cadastro-pessoa\")\r\npublic class CadastroPessoaController {\r\n\r\n    private final PessoaFactoryService pessoaFactoryService;\r\n\r\n    @Autowired\r\n    public CadastroPessoaController(PessoaFactoryService pessoaFactoryService) {\r\n        this.pessoaFactoryService = pessoaFactoryService;\r\n    }\r\n\r\n    public static class CadastroPessoaDTO {\r\n        private Pessoa pessoa;\r\n        private boolean isCliente;\r\n        private TipoFuncionario tipoFuncionario;\r\n\r\n        public Pessoa getPessoa() { return pessoa; }\r\n        public void setPessoa(Pessoa pessoa) { this.pessoa = pessoa; }\r\n        public boolean isCliente() { return isCliente; }\r\n        public void setCliente(boolean cliente) { isCliente = cliente; }\r\n        public TipoFuncionario getTipoFuncionario() { return tipoFuncionario; }\r\n        public void setTipoFuncionario(TipoFuncionario tipoFuncionario) {\r\n            this.tipoFuncionario = tipoFuncionario;\r\n        }\r\n    }\r\n\r\n    @PostMapping\r\n    public ResponseEntity<?> cadastrarPessoa(@RequestBody CadastroPessoaDTO cadastroDTO) {\r\n        if (cadastroDTO.isCliente()) {\r\n            return ResponseEntity.status(HttpStatus.CREATED).body(\r\n                    pessoaFactoryService.cadastrarCliente(cadastroDTO.getPessoa())\r\n            );\r\n        } else {\r\n            return ResponseEntity.status(HttpStatus.CREATED).body(\r\n                    pessoaFactoryService.cadastrarFuncionario(\r\n                            cadastroDTO.getPessoa(),\r\n                            cadastroDTO.getTipoFuncionario()\r\n                    )\r\n            );\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java b/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java
+--- a/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java	(revision c45785dd6c342ac249bdf9766e70280a2c295929)
++++ b/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java	(date 1745282140753)
+@@ -8,6 +8,7 @@
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.web.bind.annotation.*;
+ 
++@CrossOrigin(origins = "http://localhost:3000")
+ @RestController
+ @RequestMapping("/cadastro-pessoa")
+ public class CadastroPessoaController {
+Index: front/loja-maquiagem/src/App.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react';\r\nimport { BrowserRouter as Router, Routes, Route } from 'react-router-dom';\r\nimport ListaPessoas from './components/ListaPessoas';\r\nimport CadastrarPessoa from './components/CadastroPessoa';\r\nimport Home from './components/Home';\r\nimport Login from './components/Login';\r\nimport VincularPessoa from './components/VincularPessoa';\r\nimport CadastrarProduto from './components/CadastroProduto';\r\nimport CadastrarFornecedor from './components/CadastroFornecedor';\r\nimport Dashboard from './components/Dashboard';\r\nimport EditarPessoa from './components/EditarPessoa';\r\n\r\nfunction App() {\r\n  return (\r\n    <Router>\r\n      <Routes>\r\n        <Route path=\"/\" element={<Home />} />\r\n        <Route path=\"/lista\" element={<ListaPessoas />} />\r\n        <Route path=\"/pessoas\" element={<CadastrarPessoa />} />\r\n        <Route path=\"/login\" element={<Login />} />\r\n        <Route path=\"/vincular\" element={<VincularPessoa />} />\r\n        <Route path=\"/produtos\" element={<CadastrarProduto />} />\r\n        <Route path=\"/fornecedor\" element={<CadastrarFornecedor/>}/>\r\n        <Route path=\"/dashboard\" element={<Dashboard/>}/>\r\n        <Route path=\"/pessoas/:cpf\" element={<EditarPessoa/>}/>\r\n\r\n      </Routes>\r\n    </Router>\r\n  );\r\n}\r\n\r\nexport default App;
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/front/loja-maquiagem/src/App.js b/front/loja-maquiagem/src/App.js
+--- a/front/loja-maquiagem/src/App.js	(revision c45785dd6c342ac249bdf9766e70280a2c295929)
++++ b/front/loja-maquiagem/src/App.js	(date 1745286225223)
+@@ -9,6 +9,8 @@
+ import CadastrarFornecedor from './components/CadastroFornecedor';
+ import Dashboard from './components/Dashboard';
+ import EditarPessoa from './components/EditarPessoa';
++import ListarFuncionarios from './components/ListarFuncionarios';
++import ListarClientes from './components/ListarClientes';
+ 
+ function App() {
+   return (
+@@ -16,14 +18,15 @@
+       <Routes>
+         <Route path="/" element={<Home />} />
+         <Route path="/lista" element={<ListaPessoas />} />
+-        <Route path="/pessoas" element={<CadastrarPessoa />} />
++        <Route path="/cadastrar-pessoa" element={<CadastrarPessoa />} />
+         <Route path="/login" element={<Login />} />
+         <Route path="/vincular" element={<VincularPessoa />} />
+         <Route path="/produtos" element={<CadastrarProduto />} />
+         <Route path="/fornecedor" element={<CadastrarFornecedor/>}/>
+         <Route path="/dashboard" element={<Dashboard/>}/>
+         <Route path="/pessoas/:cpf" element={<EditarPessoa/>}/>
+-
++        <Route path="/clientes" element={<ListarClientes />} />
++        <Route path="/funcionarios" element={<ListarFuncionarios />} />
+       </Routes>
+     </Router>
+   );

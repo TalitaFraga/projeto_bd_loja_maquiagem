@@ -5,33 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c1a1998-8d20-4997-87ba-544404ee2327" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mvn/DatabaseConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/maquiagem_db.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/LojaApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/config/DatabaseConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/config/OpenApiConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/controller/FornecedorController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/controller/PessoaController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/controller/ProdutoController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/entities/Fornecedor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/entities/Pessoa.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/entities/Produto.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/repository/FornecedorRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/repository/PessoaRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/repository/ProdutoRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/service/FornecedorService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/service/PessoaService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/br/com/loja/service/ProdutoService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/br/com/loja/LojaApplicationTests.java" beforeDir="false" />
+      <changelist_data name="Talita Fraga" email="talitafraga@macbook-air-de-talita.local" automatic="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back/src/main/java/br/com/loja/controller/CadastroPessoaController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/App.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,15 +34,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.LojaApplication.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/talitafraga/Documents/BD/projeto/loja&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.LojaApplication.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "front-end",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/talitafraga/Documents/BD/projeto/loja",
+    "node.js.selected.package.tslint": "(autodetect)"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="LojaApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="br.com.loja.LojaApplication" />
@@ -95,5 +75,9 @@
       <updated>1744125079633</updated>
     </task>
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fornecedor" />
+    <option name="LAST_COMMIT_MESSAGE" value="fornecedor" />
   </component>
 </project>

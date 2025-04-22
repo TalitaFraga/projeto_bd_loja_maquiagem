@@ -9,8 +9,11 @@ import CadastrarProduto from './components/CadastroProduto';
 import CadastrarFornecedor from './components/CadastroFornecedor';
 import Dashboard from './components/Dashboard';
 import EditarPessoa from './components/EditarPessoa';
-import ListarFornecedores from './components/ListaFornecedores';
-import EditarFornecedor from './components/EditarFornecedor';
+import ListarClientes from './components/ListarClientes';
+import ListarFuncionarios from './components/ListarFuncionarios';
+import ListaFornecedores from './components/ListaFornecedores';
+
+
 function App() {
   return (
     <Router>
@@ -24,8 +27,9 @@ function App() {
         <Route path="/fornecedor" element={<CadastrarFornecedor/>}/>
         <Route path="/dashboard" element={<Dashboard/>}/>
         <Route path="/pessoas/:cpf" element={<EditarPessoa/>}/>
-        <Route path="/lista-fornecedores" element={<ListarFornecedores/>}/>
-        <Route path="/editar-fornecedor/:cnpj" element={<EditarFornecedor/>}/>
+        <Route path="/clientes" element={<ListarClientes />} />
+        <Route path="/funcionarios" element={<ListarFuncionarios />} />
+        <Route path="/lista-fornecedores" element={<ListaFornecedores />} />
 
       </Routes>
     </Router>
