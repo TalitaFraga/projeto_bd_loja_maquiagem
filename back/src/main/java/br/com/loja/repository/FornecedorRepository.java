@@ -136,7 +136,7 @@ public class FornecedorRepository {
         fornecedor.setCnpj(rs.getString("cnpj"));
         fornecedor.setNome(rs.getString("nome"));
         fornecedor.setTelefone1(rs.getString("telefone1"));
-        fornecedor.setTelefone1(rs.getString("telefone2"));
+        fornecedor.setTelefone2(rs.getString("telefone2")); // Corrigido de setTelefone1 para setTelefone2
         return fornecedor;
     }
 
