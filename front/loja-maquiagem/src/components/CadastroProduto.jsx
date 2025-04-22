@@ -22,6 +22,7 @@ const CadastrarProduto = () => {
     marca: "",
     preco: "",
     data_validade: "",
+    fk_Fornecedor_cnpj: ""
   });
 
   const navigate = useNavigate();
@@ -35,15 +36,11 @@ const CadastrarProduto = () => {
     e.preventDefault();
 
     try {
-      // Enviar os dados do produto
       await axios.post("http://localhost:8080/produtos", form);
-
       alert("Produto cadastrado com sucesso!");
-
-      // Redireciona para a tela de listagem de produtos ou outra tela
       navigate("/produtos");
     } catch (error) {
-      console.error("Erro no cadastro:", error);
+      console.error("Erro no cadastro:", error.response?.data || error.message);
       alert("Ocorreu um erro ao cadastrar o produto.");
     }
   };
@@ -73,6 +70,7 @@ const CadastrarProduto = () => {
                 ["marca", "Marca"],
                 ["preco", "Preço", "number"],
                 ["data_validade", "Data de Validade", "date"],
+                ["fk_Fornecedor_cnpj", "CNPJ do Fornecedor"],
               ].map(([name, label, type = "text"]) => (
                 <Grid item xs={12} sm={name === "nome" || name === "preco" ? 12 : 6} key={name}>
                   <TextField

@@ -8,6 +8,7 @@ import {
   Typography,
   Paper,
   IconButton,
+  MenuItem,
 } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import { Link, useNavigate } from 'react-router-dom';
@@ -27,22 +28,48 @@ const CadastrarPessoa = () => {
     bairro: "",
     cidade: "",
     cep: "",
+    tipoPessoa: "cliente",  // Adicionando tipoPessoa no estado
   });
-  
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
-      await axios.post("http://localhost:8080/pessoas", form);
-  
+      let url = "http://localhost:8080/cadastro-pessoa"; // URL base
+      // Verifica o tipo de pessoa e altera a URL de acordo
+      switch (form.tipoPessoa) {
+        case "cliente":
+          url += "/clientes";
+          break;
+        case "diretor":
+          url += "/diretores";
+          break;
+        case "funcionario":
+          url += "/funcionarios";
+          break;
+        case "vendedor":
+          url += "/vendedores";
+          break;
+        case "estoquista":
+          url += "/estoquistas";
+          break;
+        default:
+          alert("Tipo de pessoa inválido.");
+          return;
+      }
+
+      // Envia a requisição para o backend
+      await axios.post(url, form);
+
       alert("Cadastro realizado com sucesso!");
-  
+
       // Redireciona para a tela de vinculação com o CPF na URL
       navigate(`/vincular/${form.cpf}`);
     } catch (error) {
@@ -51,7 +78,6 @@ const CadastrarPessoa = () => {
       alert("Ocorreu um erro ao cadastrar.");
     }
   };
-  
 
   return (
     <>
@@ -97,6 +123,24 @@ const CadastrarPessoa = () => {
                   />
                 </Grid>
               ))}
+              {/* Adicionando campo de seleção de tipo de pessoa */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Tipo de Pessoa"
+                  name="tipoPessoa"
+                  value={form.tipoPessoa}
+                  onChange={handleChange}
+                  required
+                >
+                  <MenuItem value="cliente">Cliente</MenuItem>
+                  <MenuItem value="diretor">Diretor</MenuItem>
+                  <MenuItem value="funcionario">Funcionário</MenuItem>
+                  <MenuItem value="vendedor">Vendedor</MenuItem>
+                  <MenuItem value="estoquista">Estoquista</MenuItem>
+                </TextField>
+              </Grid>
             </Grid>
 
             <Button
@@ -108,7 +152,7 @@ const CadastrarPessoa = () => {
                 backgroundColor: "#F48FB1",
                 "&:hover": { backgroundColor: "#F06292" },
               }}
-              >
+            >
               Cadastrar Pessoa
             </Button>
           </Box>

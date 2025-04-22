@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
   Paper,
-  IconButton,
+  IconButton
 } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,33 +15,29 @@ import axios from 'axios';
 
 const CadastrarFornecedor = () => {
   const [form, setForm] = useState({
-    CNPJ: "",
+    cnpj: "",
     nome: "",
     telefone1: "",
-    telefone2: "",
+    telefone2: ""
   });
 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Enviar os dados do fornecedor
       await axios.post("http://localhost:8080/fornecedores", form);
-
       alert("Fornecedor cadastrado com sucesso!");
-
-      // Redireciona para a tela de listagem de fornecedores ou outra tela
-      navigate("/fornecedores");
+      navigate("/lista-fornecedores");
     } catch (error) {
-      console.error("Erro no cadastro:", error);
-      alert("Ocorreu um erro ao cadastrar o fornecedor.");
+      console.error("Erro ao cadastrar:", error.response?.data || error.message);
+      alert("Erro ao cadastrar fornecedor.");
     }
   };
 
@@ -50,45 +46,46 @@ const CadastrarFornecedor = () => {
       <Box sx={{ position: 'absolute', top: 16, left: 16 }}>
         <Link to="/">
           <IconButton>
-            <HomeIcon sx={{ fontSize: 30, color: '#F06292' }} />
+            <HomeIcon sx={{ fontSize: 30, color: '#e91e63' }} />
           </IconButton>
         </Link>
       </Box>
 
-      <Container maxWidth="md" sx={{ position: 'relative' }}>
-        <Paper elevation={4} sx={{ padding: 4, borderRadius: 4, mt: 5, backgroundColor: '#F3F3F3' }}>
-          <Typography variant="h4" align="center" gutterBottom color="#D81B60">
+      <Container maxWidth="sm" sx={{ mt: 8 }}>
+        <Paper elevation={3} sx={{ padding: 4, borderRadius: 4 }}>
+          <Typography variant="h4" align="center" gutterBottom color="#e91e63">
             Cadastro de Fornecedor
           </Typography>
+
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               {[
-                ["CNPJ", "CNPJ"],
+                ["cnpj", "CNPJ"],
                 ["nome", "Nome"],
-                ["telefone1", "Telefone 1"],
-                ["telefone2", "Telefone 2"],
+                ["telefone1", "Telefone Principal"],
+                ["telefone2", "Telefone Secundário (opcional)"],
               ].map(([name, label]) => (
-                <Grid item xs={12} sm={name === "nome" ? 12 : 6} key={name}>
+                <Grid item xs={12} key={name}>
                   <TextField
                     fullWidth
                     label={label}
                     name={name}
                     value={form[name]}
                     onChange={handleChange}
-                    required={name !== "telefone2"}  // Telefone 2 é opcional
+                    required={name !== "telefone2"}
                   />
                 </Grid>
               ))}
             </Grid>
 
             <Button
-              variant="contained"
               type="submit"
+              variant="contained"
               fullWidth
               sx={{
-                marginTop: 3,
-                backgroundColor: "#F48FB1",
-                "&:hover": { backgroundColor: "#F06292" },
+                mt: 3,
+                backgroundColor: "#e91e63",
+                "&:hover": { backgroundColor: "#c2185b" }  
               }}
             >
               Cadastrar Fornecedor
