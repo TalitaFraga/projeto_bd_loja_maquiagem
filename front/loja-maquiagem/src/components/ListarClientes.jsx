@@ -125,7 +125,7 @@ const ListarClientes = () => {
                     variant="contained"
                     startIcon={<Add />}
                     component={Link}
-                    to="/pessoas"
+                    to="/cadastro-pessoa"
                     sx={{
                         backgroundColor: '#F48FB1',
                         '&:hover': { backgroundColor: '#F06292' },

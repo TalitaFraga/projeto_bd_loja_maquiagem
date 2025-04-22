@@ -7,9 +7,9 @@
     <list default="true" id="6c1a1998-8d20-4997-87ba-544404ee2327" name="Changes" comment="">
       <changelist_data name="Talita Fraga" email="talitafraga@macbook-air-de-talita.local" automatic="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/App.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/CadastroPessoa.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/CadastroPessoa.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/Home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/Home.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/ListarClientes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/ListarClientes.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/ListarFuncionarios.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/ListarFuncionarios.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +98,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1744125079633</updated>
-      <workItem from="1745327505161" duration="4741000" />
+      <workItem from="1745327505161" duration="7623000" />
     </task>
     <servers />
   </component>

@@ -27,7 +27,6 @@ const CadastrarPessoa = () => {
     bairro: "",
     cidade: "",
     cep: "",
-    tipoPessoa: "cliente",
   });
 
   const [isCliente, setIsCliente] = useState(true);
@@ -45,19 +44,17 @@ const CadastrarPessoa = () => {
     // Monta o payload dinamicamente
     const payload = {
       pessoa: form,
-      isCliente: isCliente
+      isCliente: isCliente,
     };
 
-    if (!isCliente) {
-      payload.tipoFuncionario = tipoFuncionario; // só adiciona se não for cliente
-    }
+    payload.tipoFuncionario = isCliente ? "DIRETOR" : tipoFuncionario;
 
     console.log("Enviando:", JSON.stringify(payload, null, 2));
 
     try {
       await axios.post("http://localhost:8080/cadastro-pessoa", payload);
       alert("Cadastro realizado com sucesso!");
-      navigate(isCliente ? "/clientes" : "/funcionarios");
+      navigate("/lista");
     } catch (error) {
       console.log(error.response?.data);
       console.error("Erro no cadastro:", error);
