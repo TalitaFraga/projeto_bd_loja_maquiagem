@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -18,4 +20,5 @@ public class Venda {
     private String cpfCliente;
     private String cpfVendedor;
     private LocalDateTime dataHoraVenda = LocalDateTime.now();
+    private List<ItemVenda> itens = new ArrayList<>();
 }

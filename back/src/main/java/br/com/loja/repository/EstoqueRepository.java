@@ -2,6 +2,7 @@ package br.com.loja.repository;
 
 import br.com.loja.entities.Estoque;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -14,6 +15,9 @@ import java.util.Optional;
 public class EstoqueRepository {
 
     private final DataSource dataSource;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
 
     @Autowired
     public EstoqueRepository(DataSource dataSource) {
@@ -106,6 +110,31 @@ public class EstoqueRepository {
             throw new RuntimeException("Erro ao deletar estoque", e);
         }
     }
+
+    public void diminuirEstoque(String codigoBarra, String loteProduto, int quantidade) {
+        String sql = "UPDATE Estoque SET qtde_produto = qtde_produto - ? WHERE fk_Produto_codigo_barra = ? AND fk_Produto_lote_produto = ?";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, quantidade);
+            stmt.setString(2, codigoBarra);
+            stmt.setString(3, loteProduto);
+
+            int linhasAfetadas = stmt.executeUpdate();
+            if (linhasAfetadas == 0) {
+                throw new RuntimeException("Erro ao diminuir o estoque. Produto não encontrado ou estoque insuficiente.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao diminuir estoque", e);
+        }
+    }
+
+    public void restaurarEstoque(String codigoBarra, String loteProduto, int quantidade) {
+        String sql = "UPDATE Estoque SET qtde_produto = qtde_produto + ? WHERE fk_Produto_codigo_barra = ? AND fk_Produto_lote_produto = ?";
+        jdbcTemplate.update(sql, quantidade, codigoBarra, loteProduto);
+    }
+
 
     private Estoque mapResultSetToEstoque(ResultSet rs) throws SQLException {
         Estoque estoque = new Estoque();

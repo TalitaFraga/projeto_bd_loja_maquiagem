@@ -14,11 +14,16 @@ import java.util.Optional;
 public class VendaRepository {
 
     private final DataSource dataSource;
+    private final ItemVendaRepository itemVendaRepository;
+
 
     @Autowired
-    public VendaRepository(DataSource dataSource) {
+    public VendaRepository(DataSource dataSource, ItemVendaRepository itemVendaRepository) {
         this.dataSource = dataSource;
+        this.itemVendaRepository = itemVendaRepository;
     }
+
+
 
     public Venda save(Venda venda) {
         String sql = "INSERT INTO Venda (id_venda, fk_Cliente_fk_Pessoa_cpf, fk_Vendedor_fk_Funcionario_fk_Pessoa_cpf, datahora_venda) VALUES (?, ?, ?, ?)";
@@ -93,6 +98,7 @@ public class VendaRepository {
 
 
     public void delete(String idVenda) {
+        itemVendaRepository.deleteSilencioso(idVenda);
         String sql = "DELETE FROM Venda WHERE id_venda = ?";
 
         try (Connection conn = dataSource.getConnection();

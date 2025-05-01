@@ -1,6 +1,7 @@
 package br.com.loja.controller;
 
 import br.com.loja.entities.Venda;
+import br.com.loja.entities.VendaComItensDTO;
 import br.com.loja.service.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,11 +22,6 @@ public class VendaController {
         this.vendaService = vendaService;
     }
 
-    @PostMapping
-    public ResponseEntity<Venda> criar(@RequestBody Venda venda) {
-        Venda vendaSalva = vendaService.salvar(venda);
-        return ResponseEntity.status(HttpStatus.CREATED).body(vendaSalva);
-    }
 
     @GetMapping("/{idVenda}")
     public ResponseEntity<Venda> buscarPorId(@PathVariable String idVenda) {
@@ -54,7 +50,14 @@ public class VendaController {
 
     @DeleteMapping("/{idVenda}")
     public ResponseEntity<Void> excluir(@PathVariable String idVenda) {
-        vendaService.excluir(idVenda);
+        vendaService.cancelarVenda(idVenda);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping
+    public ResponseEntity<Venda> criar(@RequestBody Venda venda) {
+        Venda vendaSalva = vendaService.registrarVendaComItens(venda);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vendaSalva);
+    }
+
 }
