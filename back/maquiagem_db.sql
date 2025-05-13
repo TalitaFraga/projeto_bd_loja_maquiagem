@@ -112,11 +112,12 @@ CREATE TABLE Item_venda (
 );
 
 CREATE TABLE Pede_produto (
+    id_pedido VARCHAR(36) PRIMARY KEY UNIQUE NOT NULL,
     fk_Produto_codigo_barra VARCHAR(20) NOT NULL,
     fk_Fornecedor_cnpj VARCHAR(18) NOT NULL,
     fk_Diretor_fk_Funcionario_fk_Pessoa_cpf VARCHAR(14) NOT NULL,
     fk_Produto_lote_produto VARCHAR(20) NOT NULL,
-    PRIMARY KEY (fk_Produto_codigo_barra, fk_Fornecedor_cnpj, fk_Diretor_fk_Funcionario_fk_Pessoa_cpf),
+    qtde_produto INT NOT NULL,
     FOREIGN KEY (fk_Produto_codigo_barra, fk_Produto_lote_produto) REFERENCES Produto(codigo_barra, lote_produto),
     FOREIGN KEY (fk_Fornecedor_cnpj) REFERENCES Fornecedor(cnpj),
     FOREIGN KEY (fk_Diretor_fk_Funcionario_fk_Pessoa_cpf) REFERENCES Diretor(fk_Funcionario_fk_Pessoa_cpf)
@@ -185,3 +186,9 @@ INSERT INTO Item_venda VALUES
 ('V001', '1001', 'L001', 2),
 ('V001', '3001', 'L001', 1),
 ('V002', '2002', 'L002', 1);
+
+-- Inserindo pedidos com IDs
+INSERT INTO Pede_produto VALUES
+('PED001', '1001', '11.222.333/0001-44', '078.379.601-90', 'L001', 50),
+('PED002', '2001', '11.222.333/0001-44', '078.379.601-90', 'L001', 30),
+('PED003', '3001', '11.222.333/0001-44', '078.379.601-90', 'L001', 25);
