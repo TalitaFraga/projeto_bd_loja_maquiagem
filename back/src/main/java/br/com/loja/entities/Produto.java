@@ -19,5 +19,12 @@ public class Produto {
     private java.math.BigDecimal preco;
     private LocalDate data_validade;
     private String fk_fornecedor_CNPJ;
+
+
+    public Produto(String nome, LocalDate data_validade) {
+        this.nome = nome;
+        this.data_validade = data_validade;
+    }
+
 }
 

@@ -5,6 +5,7 @@ import br.com.loja.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,5 +48,17 @@ public class ProdutoService {
     public void excluir(String codigo_barra) {
         buscarPorCodigoDeBarraOuFalhar(codigo_barra);
         produtoRepository.delete(codigo_barra);
+    }
+
+    public List<Produto> buscarProdutosPorMesEAno(int mes, int ano) throws SQLException {
+        if (mes < 1 || mes > 12) {
+            throw new IllegalArgumentException("Mês deve estar entre 1 e 12.");
+        }
+
+        if (ano < 1900 || ano > 2100) {
+            throw new IllegalArgumentException("Ano inválido.");
+        }
+
+        return produtoRepository.buscarProdutosPorMesEAno(mes, ano);
     }
 }

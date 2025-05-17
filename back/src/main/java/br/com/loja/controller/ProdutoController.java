@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -58,5 +59,19 @@ public class ProdutoController {
     public ResponseEntity<Void> excluir(@PathVariable String codigo_barra) {
         produtoService.excluir(codigo_barra);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/vencimentos")
+    public ResponseEntity<List<Produto>> buscarProdutosPorMesEAno(
+            @RequestParam int mes,
+            @RequestParam int ano) {
+        try {
+            List<Produto> produtos = produtoService.buscarProdutosPorMesEAno(mes, ano);
+            return ResponseEntity.ok(produtos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (SQLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

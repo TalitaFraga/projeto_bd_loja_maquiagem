@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -134,6 +135,37 @@ public class ProdutoRepository {
             throw new RuntimeException("Erro ao buscar produtos por nome", e);
         }
     }
+
+    public List<Produto> buscarProdutosPorMesEAno(int mes, int ano) throws SQLException {
+        List<Produto> produtos = new ArrayList<>();
+        String sql = "SELECT * FROM Produto " +
+                "WHERE MONTH(data_validade) = ? AND YEAR(data_validade) = ?";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, mes);
+            stmt.setInt(2, ano);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Produto produto = new Produto();
+                    produto.setCodigo_barra(rs.getString("codigo_barra"));
+                    produto.setLote_produto(rs.getString("lote_produto"));
+                    produto.setTipo_produto(rs.getString("tipo_produto"));
+                    produto.setNome(rs.getString("nome"));
+                    produto.setMarca(rs.getString("marca"));
+                    produto.setPreco(rs.getBigDecimal("preco"));
+                    produto.setData_validade(rs.getDate("data_validade").toLocalDate());
+                    produto.setFk_fornecedor_CNPJ(rs.getString("fk_fornecedor_CNPJ"));
+                    produtos.add(produto);
+                }
+            }
+        }
+        return produtos;
+    }
+
+
 
     private Produto mapResultSetToProduto(ResultSet rs) throws SQLException {
         // Usando construtor padrão e setters em vez de Builder
