@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ListaPessoas from './components/ListaPessoas';
 import CadastrarPessoa from './components/CadastroPessoa';
 import Home from './components/Home';
@@ -19,7 +19,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/lista" element={<ListaPessoas />} />
         <Route path="/cadastro-pessoa" element={<CadastrarPessoa />} />
         <Route path="/login" element={<Login />} />
