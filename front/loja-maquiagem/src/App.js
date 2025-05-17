@@ -7,7 +7,7 @@ import Login from './components/Login';
 import VincularPessoa from './components/VincularPessoa';
 import CadastrarProduto from './components/CadastroProduto';
 import CadastrarFornecedor from './components/CadastroFornecedor';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/dashboard/Dashboard';
 import EditarPessoa from './components/EditarPessoa';
 import ListarClientes from './components/ListarClientes';
 import ListarFuncionarios from './components/ListarFuncionarios';

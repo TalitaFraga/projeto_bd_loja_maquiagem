@@ -36,7 +36,7 @@ const CadastrarProduto = () => {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:8080/produtos", form);
+      await axios.post("http://localhost:8081/produtos", form);
       alert("Produto cadastrado com sucesso!");
       navigate("/produtos");
     } catch (error) {

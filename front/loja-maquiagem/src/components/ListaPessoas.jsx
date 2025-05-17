@@ -32,7 +32,7 @@ const ListaPessoas = () => {
   const [inputBusca, setInputBusca] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:8080/pessoas")
+    axios.get("http://localhost:8081/pessoas")
       .then((response) => {
         setPessoas(response.data);
         setLoading(false);

@@ -32,7 +32,7 @@ const CadastrarFornecedor = () => {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:8080/fornecedores", form);
+      await axios.post("http://localhost:8081/fornecedores", form);
       alert("Fornecedor cadastrado com sucesso!");
       navigate("/lista-fornecedores");
     } catch (error) {
