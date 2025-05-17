@@ -67,6 +67,29 @@ public class ItemVendaRepository {
         return itens;
     }
 
+    public List<ItemVenda> buscarTodos() {
+        String sql = "SELECT * FROM Item_venda";
+        List<ItemVenda> itens = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                ItemVenda itemVenda = new ItemVenda();
+                itemVenda.setIdVenda(rs.getString("fk_Venda_id_venda"));
+                itemVenda.setCodigoBarra(rs.getString("fk_Produto_codigo_barra"));
+                itemVenda.setLoteProduto(rs.getString("fk_Produto_lote_produto"));
+                itemVenda.setQtdeProduto(rs.getInt("qtde_produto"));
+                itens.add(itemVenda);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar todos os itens da venda", e);
+        }
+
+        return itens;
+    }
+
 
 
     public void delete(String idVenda) {
