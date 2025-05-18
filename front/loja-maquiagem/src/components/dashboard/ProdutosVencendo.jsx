@@ -30,21 +30,41 @@ const ProdutosVencendo = () => {
   const [openModal, setOpenModal] = useState(false);
 
   const buscarProdutosVencendo = async () => {
-    setLoadingVencimento(true);
-    setErrorVencimento(null);
-    try {
-      const res = await axios.get(
-        `http://localhost:8081/produtos/vencimentos?mes=${mesVencimento}&ano=${anoVencimento}`
+  setLoadingVencimento(true);
+  setErrorVencimento(null);
+  try {
+    console.log("Buscando produtos vencendo...");
+    const resVencendo = await axios.get(
+      `http://localhost:8081/produtos/vencimentos?mes=${mesVencimento}&ano=${anoVencimento}`
+    );
+    console.log("Produtos vencendo:", resVencendo.data);
+
+    const resEstoque = await axios.get(`http://localhost:8081/estoque`);
+    console.log("Estoque:", resEstoque.data);
+
+    const produtosComEstoque = resVencendo.data.map((produto) => {
+      const estoqueProduto = resEstoque.data.find(
+        (item) =>
+          item.codigoBarra === produto.codigo_barra &&
+          item.loteProduto === produto.lote_produto
       );
-      setProdutosVencendo(res.data);
-      setOpenModal(true);
-    } catch (error) {
-      setErrorVencimento("Erro ao buscar produtos vencendo.");
-      setProdutosVencendo([]);
-    } finally {
-      setLoadingVencimento(false);
-    }
-  };
+      return {
+        ...produto,
+        quantidade_estoque: estoqueProduto ? estoqueProduto.qtdeProduto : 0,
+      };
+    });
+
+    setProdutosVencendo(produtosComEstoque);
+    setOpenModal(true);
+  } catch (error) {
+    console.error("Erro ao buscar produtos ou estoque:", error);
+    setErrorVencimento("Erro ao buscar produtos vencendo.");
+    setProdutosVencendo([]);
+  } finally {
+    setLoadingVencimento(false);
+  }
+};
+
 
   const handleClose = () => {
     setOpenModal(false);
