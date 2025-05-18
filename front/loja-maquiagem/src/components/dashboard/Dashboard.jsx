@@ -13,7 +13,7 @@ import {
 import PeopleIcon from "@mui/icons-material/People";
 import StoreIcon from "@mui/icons-material/Store";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import Layout from '../../pages/Layout';
+import SideBar from '../../pages/SideBar';
 
 import VendasPorSemana from "./VendasPorSemana";
 import ClientesMaisCompram from "./ClientesMaisCompram";
@@ -33,8 +33,8 @@ const SummaryCard = ({ title, value, icon }) => (
       gap: 2,
       borderRadius: 2,
       bgcolor: "background.paper",
-      minHeight: 120,               // Altura mínima para uniformizar
-      flexDirection: "row",         // alinhamento horizontal
+      minHeight: 120,
+      flexDirection: "row",
     }}
   >
     <Box sx={{ color: "#F06292", fontSize: 50 }}>{icon}</Box>
@@ -107,7 +107,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Layout>
+    <SideBar>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <CssBaseline />
 
@@ -128,7 +128,7 @@ const Dashboard = () => {
           component="main"
           sx={{
             flexGrow: 1,
-            bgcolor: "#f5f5f5",  // cor clara para fundo do dashboard
+            bgcolor: "#f5f5f5",
             p: 3,
             minHeight: "100vh",
             maxWidth: 1200,          
@@ -137,7 +137,6 @@ const Dashboard = () => {
             width: "100%",          
           }}
         >
-          {/* Cards resumo */}
           <Grid container spacing={3} mb={4}>
             <Grid item xs={12} sm={6} md={3}>
               <SummaryCard
@@ -169,7 +168,6 @@ const Dashboard = () => {
             </Grid>
           </Grid>
 
-          {/* Outros componentes em grid */}
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
               <Paper
@@ -279,7 +277,7 @@ const Dashboard = () => {
           </Grid>
         </Box>
       </Box>
-    </Layout>
+    </SideBar>
   );
 };
 
