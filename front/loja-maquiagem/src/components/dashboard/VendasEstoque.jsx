@@ -108,7 +108,7 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
                 <YAxis />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
-                <Bar dataKey="vendas" fill="#1976d2" />
+                <Bar dataKey="vendas" fill="#F48FB1" />
               </BarChart>
             </ResponsiveContainer>
           </Box>
