@@ -52,7 +52,7 @@ const CadastrarPessoa = () => {
     console.log("Enviando:", JSON.stringify(payload, null, 2));
 
     try {
-      await axios.post("http://localhost:8080/cadastro-pessoa", payload);
+      await axios.post("http://localhost:8081/cadastro-pessoa", payload);
       alert("Cadastro realizado com sucesso!");
       navigate("/lista");
     } catch (error) {

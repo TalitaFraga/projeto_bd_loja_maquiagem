@@ -32,7 +32,7 @@ const ListaFornecedores = () => {
   const [inputBusca, setInputBusca] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:8080/fornecedores")
+    axios.get("http://localhost:8081/fornecedores")
       .then((response) => {
         setFornecedores(response.data);
         setLoading(false);

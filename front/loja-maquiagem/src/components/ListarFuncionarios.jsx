@@ -33,7 +33,7 @@ const ListarFuncionarios = () => {
     useEffect(() => {
         const fetchFuncionarios = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/funcionarios');
+                const response = await axios.get('http://localhost:8081/funcionarios');
 
                 console.log('Dados recebidos:', response.data);
 

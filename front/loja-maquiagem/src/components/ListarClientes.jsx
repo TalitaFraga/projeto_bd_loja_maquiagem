@@ -32,7 +32,7 @@ const ListarClientes = () => {
     useEffect(() => {
         const fetchClientes = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/clientes');
+                const response = await axios.get('http://localhost:8081/clientes');
 
                 console.log('Dados recebidos:', response.data);
 

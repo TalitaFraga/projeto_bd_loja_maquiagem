@@ -33,7 +33,7 @@ const EditarPessoa = () => {
   useEffect(() => {
     const fetchPessoa = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/pessoas/${cpf}`);
+        const response = await axios.get(`http://localhost:8081/pessoas/${cpf}`);
         setForm(response.data);
       } catch (error) {
         alert("Erro ao buscar dados da pessoa.");

@@ -16,7 +16,7 @@ const EditarFornecedor = () => {
   useEffect(() => {
     const fetchFornecedor = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/fornecedores/${cnpj}`);
+        const response = await axios.get(`http://localhost:8081/fornecedores/${cnpj}`);
         setFornecedor(response.data);
       } catch (error) {
         console.error("Erro ao carregar fornecedor", error);
