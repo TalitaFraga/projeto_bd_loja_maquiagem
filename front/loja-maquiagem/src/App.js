@@ -8,6 +8,7 @@ import VincularPessoa from './components/VincularPessoa';
 import CadastrarProduto from './components/CadastroProduto';
 import CadastrarFornecedor from './components/CadastroFornecedor';
 import Dashboard from './components/Dashboard';
+import DashboardVendedor from './components/DashboardVendedor';
 import EditarPessoa from './components/EditarPessoa';
 import ListarClientes from './components/ListarClientes';
 import ListarFuncionarios from './components/ListarFuncionarios';
@@ -27,6 +28,7 @@ function App() {
         <Route path="/produtos" element={<CadastrarProduto />} />
         <Route path="/fornecedor" element={<CadastrarFornecedor/>}/>
         <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/dashboard-vendedor" element={<DashboardVendedor/>}/>
         <Route path="/pessoas/:cpf" element={<EditarPessoa/>}/>
         <Route path="/clientes" element={<ListarClientes />} />
         <Route path="/funcionarios" element={<ListarFuncionarios />} />
