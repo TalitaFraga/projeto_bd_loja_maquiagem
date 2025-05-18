@@ -1,4 +1,3 @@
-// src/components/Layout.jsx
 import React from "react";
 import { Box, CssBaseline, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, AppBar } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
@@ -68,7 +67,6 @@ const Layout = ({ children }) => {
         sx={{ flexGrow: 1, bgcolor: "background.default", p: 3, minHeight: "100vh" }}
       >
         <Toolbar />
-        {/* Aqui é o conteúdo específico da página */}
         {children}
       </Box>
     </Box>
