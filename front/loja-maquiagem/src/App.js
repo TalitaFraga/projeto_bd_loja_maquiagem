@@ -14,6 +14,7 @@ import ListarClientes from './components/ListarClientes';
 import ListarFuncionarios from './components/ListarFuncionarios';
 import ListaFornecedores from './components/ListaFornecedores';
 import EditarFornecedor from './components/EditarFornecedor';
+import CadastroClienteDiretor from './components/CadastroClienteDiretor';
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/funcionarios" element={<ListarFuncionarios />} />
         <Route path="/lista-fornecedores" element={<ListaFornecedores />} />
         <Route path="/editar-fornecedor/:cnpj" element={<EditarFornecedor />} />
+        <Route path="/cadastro-cliente" element={<CadastroClienteDiretor />} />
 
       </Routes>
     </Router>
