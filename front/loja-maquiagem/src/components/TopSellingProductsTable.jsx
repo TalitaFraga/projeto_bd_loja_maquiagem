@@ -1,90 +1,111 @@
-import Table from "@mui/material/Table"
-import TableBody from "@mui/material/TableBody"
-import TableCell from "@mui/material/TableCell"
-import TableContainer from "@mui/material/TableContainer"
-import TableHead from "@mui/material/TableHead"
-import TableRow from "@mui/material/TableRow"
-import Box from "@mui/material/Box"
-import Chip from "@mui/material/Chip"
-import LinearProgress from "@mui/material/LinearProgress"
-
-const rows = [
-  { id: "01", name: "Produto 1", progress: 75, quantity: "45" },
-  { id: "02", name: "Produto 2", progress: 50, quantity: "10" },
-  { id: "03", name: "Produto 3", progress: 35, quantity: "20" },
-  { id: "04", name: "Produto 4", progress: 20, quantity: "5" },
-]
+import { useEffect, useState } from "react"
+import axios from "axios"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Box,
+  Chip,
+  LinearProgress,
+} from "@mui/material"
 
 export default function TopSellingProductsTable() {
+  const [produtosMaisVendidos, setProdutosMaisVendidos] = useState([])
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [resItens, resProdutos] = await Promise.all([
+          axios.get("http://localhost:8081/itens-venda"),
+          axios.get("http://localhost:8081/produtos"),
+        ])
+
+        const itens = resItens.data || []
+        const produtos = resProdutos.data || []
+
+        const mapaNomes = produtos.reduce((mapa, produto) => {
+          mapa[produto.codigo_barra] = produto.nome
+          return mapa
+        }, {})
+
+        const vendasPorProduto = {}
+
+        itens.forEach((item) => {
+          const id = item.codigoBarra || "semId"
+          if (!vendasPorProduto[id]) {
+            vendasPorProduto[id] = {
+              id,
+              name: mapaNomes[id] || `Produto ${id}`,
+              quantity: 0,
+            }
+          }
+          vendasPorProduto[id].quantity += item.qtdeProduto || 0
+        })
+
+        const produtosOrdenados = Object.values(vendasPorProduto)
+            .sort((a, b) => b.quantity - a.quantity)
+            .slice(0, 5)
+
+        const maiorQuantidade = produtosOrdenados[0]?.quantity || 1
+
+        const produtosComProgresso = produtosOrdenados.map((produto) => ({
+          ...produto,
+          progress: Math.round((produto.quantity / maiorQuantidade) * 100),
+        }))
+
+        setProdutosMaisVendidos(produtosComProgresso)
+      } catch (error) {
+        console.error("Erro ao buscar itens vendidos ou produtos:", error)
+      }
+    }
+
+    fetchData()
+  }, [])
+
   return (
-    <TableContainer>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>#</TableCell>
-            <TableCell>Nome</TableCell>
-            <TableCell>Vendas</TableCell>
-            <TableCell>Quantidade</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.id}</TableCell>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>
-                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                  <Box sx={{ width: "100%", mr: 1 }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={row.progress}
-                      sx={{
-                        height: 8,
-                        borderRadius: 5,
-                        backgroundColor: "#f5f5f5",
-                        "& .MuiLinearProgress-bar": {
-                          backgroundColor:
-                            row.id === "01"
-                              ? "#2196F3"
-                              : row.id === "02"
-                                ? "#00E676"
-                                : row.id === "03"
-                                  ? "#9C27B0"
-                                  : "#FF9800",
-                        },
-                      }}
-                    />
-                  </Box>
-                </Box>
-              </TableCell>
-              <TableCell>
-                <Chip
-                  label={row.quantity}
-                  size="small"
-                  sx={{
-                    backgroundColor:
-                      row.id === "01"
-                        ? "#E3F2FD"
-                        : row.id === "02"
-                          ? "#E8F5E9"
-                          : row.id === "03"
-                            ? "#EDE7F6"
-                            : "#FFF3E0",
-                    color:
-                      row.id === "01"
-                        ? "#1976D2"
-                        : row.id === "02"
-                          ? "#388E3C"
-                          : row.id === "03"
-                            ? "#7B1FA2"
-                            : "#E65100",
-                  }}
-                />
-              </TableCell>
+      <TableContainer sx={{ width: "100%" }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>#</TableCell>
+              <TableCell>Nome</TableCell>
+              <TableCell>Vendas</TableCell>
+              <TableCell>Quantidade</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {produtosMaisVendidos.map((row, index) => (
+                <TableRow key={row.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                      <Box sx={{ width: "100%", mr: 1 }}>
+                        <LinearProgress
+                            variant="determinate"
+                            value={row.progress}
+                            sx={{
+                              height: 8,
+                              borderRadius: 5,
+                              backgroundColor: "#f5f5f5",
+                              "& .MuiLinearProgress-bar": {
+                                backgroundColor: "#2196F3",
+                              },
+                            }}
+                        />
+                      </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={row.quantity} size="small" />
+                  </TableCell>
+                </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
   )
 }

@@ -6,10 +6,21 @@
   <component name="ChangeListManager">
     <list default="true" id="6c1a1998-8d20-4997-87ba-544404ee2327" name="Changes" comment="">
       <changelist_data name="Talita Fraga" email="talitafraga@macbook-air-de-talita.local" automatic="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2025_21_33_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2025_21_33__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2025_22_59_[Changes]1/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2025_22_59__Changes_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_04_2025_10_32_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_04_2025_10_32__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/CadastroPessoa.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/CadastroPessoa.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/ListarClientes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/ListarClientes.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/ListarFuncionarios.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/ListarFuncionarios.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/AnnualSalesChart.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/AnnualSalesChart.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/OverviewCards.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/OverviewCards.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/TopCustomersTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/TopCustomersTable.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/TopSellingProductsTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/TopSellingProductsTable.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/WeeklySalesChart.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/WeeklySalesChart.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/dashboard-vendedor/DashboardVendedor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/dashboard-vendedor/DashboardVendedor.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,7 +63,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;front-end&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/talitafraga/Documents/BD/projeto/loja&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -99,6 +110,8 @@
       <option name="presentableId" value="Default" />
       <updated>1744125079633</updated>
       <workItem from="1745327505161" duration="7623000" />
+      <workItem from="1747877287249" duration="1072000" />
+      <workItem from="1747908935455" duration="9790000" />
     </task>
     <servers />
   </component>
