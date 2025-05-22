@@ -14,29 +14,67 @@ import java.util.Optional;
 public class PessoaRepository {
 
     private final DataSource dataSource;
-    private final FuncionarioRepository funcionarioRepository;
-    private final VendedorRepository vendedorRepository;
-    private final EstoquistaRepository estoquistaRepository;
-    private final DiretorRepository diretorRepository;
-    private final ClienteRepository clienteRepository;
-
 
     @Autowired
-    public PessoaRepository(
-            DataSource dataSource,
-            FuncionarioRepository funcionarioRepository,
-            VendedorRepository vendedorRepository,
-            EstoquistaRepository estoquistaRepository,
-            DiretorRepository diretorRepository,
-            ClienteRepository clienteRepository) {
+    public PessoaRepository(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.funcionarioRepository = funcionarioRepository;
-        this.vendedorRepository = vendedorRepository;
-        this.estoquistaRepository = estoquistaRepository;
-        this.diretorRepository = diretorRepository;
-        this.clienteRepository = clienteRepository;
     }
+
+    // MÉTODO UTILITÁRIO: Formatar CPF
+    private String formatarCPF(String cpf) {
+        if (cpf == null) return null;
+
+        // Remove tudo que não é número
+        String cpfLimpo = cpf.replaceAll("\\D", "");
+
+        // Verifica se tem 11 dígitos
+        if (cpfLimpo.length() != 11) {
+            throw new IllegalArgumentException("CPF deve ter 11 dígitos: " + cpf);
+        }
+
+        // Formata: 123.456.789-01
+        return cpfLimpo.substring(0, 3) + "." +
+                cpfLimpo.substring(3, 6) + "." +
+                cpfLimpo.substring(6, 9) + "-" +
+                cpfLimpo.substring(9, 11);
+    }
+
+    // MÉTODO UTILITÁRIO: Limpar CPF (apenas números)
+    private String limparCPF(String cpf) {
+        if (cpf == null) return null;
+        return cpf.replaceAll("\\D", "");
+    }
+
+    // MÉTODO UTILITÁRIO: Formatar RG
+    private String formatarRG(String rg) {
+        if (rg == null) return null;
+        return rg.replaceAll("\\D", ""); // Apenas números para RG
+    }
+
     public Pessoa save(Pessoa pessoa) {
+        // FORMATAR CPF antes de validar e salvar
+        String cpfFormatado = formatarCPF(pessoa.getCpf());
+        pessoa.setCpf(cpfFormatado);
+
+        // FORMATAR RG
+        String rgFormatado = formatarRG(pessoa.getRg());
+        pessoa.setRg(rgFormatado);
+
+        // VALIDAÇÃO: Verificar se CPF já existe
+        if (findByCpf(cpfFormatado).isPresent()) {
+            throw new RuntimeException("CPF já cadastrado no sistema: " + cpfFormatado);
+        }
+
+        // VALIDAÇÃO: Verificar se RG já existe
+        if (findByRg(rgFormatado).isPresent()) {
+            throw new RuntimeException("RG já cadastrado no sistema: " + rgFormatado);
+        }
+
+        // VALIDAÇÃO: Verificar se Email já existe
+        if (findByEmail(pessoa.getEmail()).isPresent()) {
+            throw new RuntimeException("Email já cadastrado no sistema: " + pessoa.getEmail());
+        }
+
         String sql = "INSERT INTO Pessoa (cpf, data_nasc, nome, rua, cidade, numero, cep, " +
                 "bairro, telefone1, telefone2, email, rg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -47,17 +85,29 @@ public class PessoaRepository {
             stmt.executeUpdate();
             return pessoa;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao salvar pessoa", e);
+            // Tratar erros específicos do MySQL
+            if (e.getMessage().contains("Duplicate entry")) {
+                if (e.getMessage().contains("cpf")) {
+                    throw new RuntimeException("CPF já cadastrado no sistema: " + cpfFormatado);
+                } else if (e.getMessage().contains("RG")) {
+                    throw new RuntimeException("RG já cadastrado no sistema: " + rgFormatado);
+                }
+            }
+            throw new RuntimeException("Erro ao salvar pessoa: " + e.getMessage(), e);
         }
     }
 
     public Optional<Pessoa> findByCpf(String cpf) {
-        String sql = "SELECT * FROM Pessoa WHERE cpf = ?";
+        // Buscar tanto por CPF formatado quanto por CPF limpo
+        String cpfFormatado = formatarCPF(cpf);
+
+        String sql = "SELECT * FROM Pessoa WHERE cpf = ? OR cpf = ?";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, cpf);
+            stmt.setString(1, cpfFormatado);
+            stmt.setString(2, limparCPF(cpf));
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -67,6 +117,46 @@ public class PessoaRepository {
             return Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar pessoa por CPF", e);
+        }
+    }
+
+    // NOVO MÉTODO: Buscar por RG
+    public Optional<Pessoa> findByRg(String rg) {
+        String sql = "SELECT * FROM Pessoa WHERE rg = ?";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, formatarRG(rg));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToPessoa(rs));
+                }
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar pessoa por RG", e);
+        }
+    }
+
+    // NOVO MÉTODO: Buscar por Email
+    public Optional<Pessoa> findByEmail(String email) {
+        String sql = "SELECT * FROM Pessoa WHERE LOWER(email) = LOWER(?)";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email.trim());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToPessoa(rs));
+                }
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar pessoa por Email", e);
         }
     }
 
@@ -88,6 +178,29 @@ public class PessoaRepository {
     }
 
     public Pessoa update(Pessoa pessoa) {
+        // FORMATAR CPF e RG
+        String cpfFormatado = formatarCPF(pessoa.getCpf());
+        pessoa.setCpf(cpfFormatado);
+        pessoa.setRg(formatarRG(pessoa.getRg()));
+
+        // VALIDAÇÃO: Verificar se a pessoa existe
+        Optional<Pessoa> pessoaExistente = findByCpf(cpfFormatado);
+        if (pessoaExistente.isEmpty()) {
+            throw new RuntimeException("Pessoa não encontrada com CPF: " + cpfFormatado);
+        }
+
+        // VALIDAÇÃO: Verificar se RG já existe (exceto para a própria pessoa)
+        Optional<Pessoa> pessoaComRg = findByRg(pessoa.getRg());
+        if (pessoaComRg.isPresent() && !pessoaComRg.get().getCpf().equals(cpfFormatado)) {
+            throw new RuntimeException("RG já cadastrado para outra pessoa: " + pessoa.getRg());
+        }
+
+        // VALIDAÇÃO: Verificar se Email já existe (exceto para a própria pessoa)
+        Optional<Pessoa> pessoaComEmail = findByEmail(pessoa.getEmail());
+        if (pessoaComEmail.isPresent() && !pessoaComEmail.get().getCpf().equals(cpfFormatado)) {
+            throw new RuntimeException("Email já cadastrado para outra pessoa: " + pessoa.getEmail());
+        }
+
         String sql = "UPDATE Pessoa SET data_nasc = ?, nome = ?, rua = ?, cidade = ?, " +
                 "numero = ?, cep = ?, bairro = ?, telefone1 = ?, telefone2 = ?, email = ?, rg = ? " +
                 "WHERE cpf = ?";
@@ -104,13 +217,13 @@ public class PessoaRepository {
             stmt.setString(7, pessoa.getBairro());
             stmt.setString(8, pessoa.getTelefone1());
             stmt.setString(9, pessoa.getTelefone2());
-            stmt.setString(10, pessoa.getEmail());
+            stmt.setString(10, pessoa.getEmail().toLowerCase().trim());
             stmt.setString(11, pessoa.getRg());
-            stmt.setString(12, pessoa.getCpf());
+            stmt.setString(12, cpfFormatado);
 
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
-                throw new RuntimeException("Pessoa não encontrada com CPF: " + pessoa.getCpf());
+                throw new RuntimeException("Pessoa não encontrada com CPF: " + cpfFormatado);
             }
             return pessoa;
         } catch (SQLException e) {
@@ -119,16 +232,11 @@ public class PessoaRepository {
     }
 
     public void delete(String cpf) {
-        vendedorRepository.deleteSilencioso(cpf);
-        estoquistaRepository.deleteSilencioso(cpf);
-        diretorRepository.deleteSilencioso(cpf);
-        funcionarioRepository.deleteSilencioso(cpf);
-        clienteRepository.deleteSilencioso(cpf);
-
+        String cpfFormatado = formatarCPF(cpf);
         String sql = "DELETE FROM Pessoa WHERE cpf = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, cpf);
+            stmt.setString(1, cpfFormatado);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao deletar pessoa", e);
@@ -156,7 +264,6 @@ public class PessoaRepository {
     }
 
     private Pessoa mapResultSetToPessoa(ResultSet rs) throws SQLException {
-        // Usando construtor padrão e setters em vez de Builder
         Pessoa pessoa = new Pessoa();
         pessoa.setCpf(rs.getString("cpf"));
         pessoa.setDataNasc(rs.getDate("data_nasc").toLocalDate());
@@ -184,19 +291,19 @@ public class PessoaRepository {
         stmt.setString(8, pessoa.getBairro());
         stmt.setString(9, pessoa.getTelefone1());
         stmt.setString(10, pessoa.getTelefone2());
-        stmt.setString(11, pessoa.getEmail());
+        stmt.setString(11, pessoa.getEmail().toLowerCase().trim());
         stmt.setString(12, pessoa.getRg());
     }
 
     public void deleteSilencioso(String cpf) {
-        String sql = "DELETE FROM Pessoa WHERE CPF = ?";
+        String cpfFormatado = formatarCPF(cpf);
+        String sql = "DELETE FROM Pessoa WHERE cpf = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, cpf);
+            stmt.setString(1, cpfFormatado);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao deletar pessoa", e);
         }
     }
-
 }
