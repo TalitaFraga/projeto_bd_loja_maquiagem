@@ -109,8 +109,53 @@ const EditarFuncionarioDiretor = () => {
         console.log("Dados do funcionário recebidos:", response.data);
         console.log("Campo tipoFuncionario especificamente:", response.data.tipoFuncionario);
         
-        // Formatação da data para formato de input
+        // ✅ GAMBIARRA CORRIGIDA: Determinar tipo usando os endpoints corretos
         let dadosFuncionario = response.data;
+        
+        if (!dadosFuncionario.tipoFuncionario || dadosFuncionario.tipoFuncionario === '') {
+          const cpfOriginal = dadosFuncionario.cpf;
+          const cpfLimpo = dadosFuncionario.cpf.replace(/\D/g, '');
+          console.log("Determinando tipo de funcionário para CPF:", cpfOriginal);
+          
+          // ✅ CORREÇÃO: Usar os endpoints exatos do seu backend
+          const endpoints = [
+            { nome: 'VENDEDOR', url: 'vendedores' },
+            { nome: 'DIRETOR', url: 'diretores' },
+            { nome: 'ESTOQUISTA', url: 'estoquistas' }
+          ];
+          
+          let encontrado = false;
+          
+          for (const endpoint of endpoints) {
+            if (encontrado) break;
+            
+            // Tentar com CPF formatado primeiro, depois limpo
+            const cpfVariacoes = [cpfOriginal, cpfLimpo];
+            
+            for (const cpfTentativa of cpfVariacoes) {
+              try {
+                console.log(`Tentando: GET /${endpoint.url}/${cpfTentativa}`);
+                await axios.get(`http://localhost:8081/${endpoint.url}/${cpfTentativa}`);
+                dadosFuncionario.tipoFuncionario = endpoint.nome;
+                console.log(`✅ Funcionário identificado como ${endpoint.nome}`);
+                encontrado = true;
+                break;
+              } catch (error) {
+                if (error.response?.status === 404) {
+                  console.log(`❌ Não encontrado em /${endpoint.url}/${cpfTentativa}`);
+                } else {
+                  console.log(`⚠️ Erro em /${endpoint.url}/${cpfTentativa}:`, error.response?.status);
+                }
+              }
+            }
+          }
+          
+          // Se não encontrou em nenhum, usar padrão
+          if (!encontrado) {
+            dadosFuncionario.tipoFuncionario = "FUNCIONÁRIO";
+            console.log("Funcionário não encontrado em especializações, usando padrão: FUNCIONÁRIO");
+          }
+        }
         if (dadosFuncionario.dataNasc) {
           // Se a data estiver em formato array [ano, mês, dia]
           if (Array.isArray(dadosFuncionario.dataNasc)) {

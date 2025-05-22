@@ -54,12 +54,54 @@ const ListarFuncionarios = () => {
             const response = await axios.get('http://localhost:8081/funcionarios');
             console.log('Dados recebidos:', response.data);
 
-            const dadosProcessados = response.data.map(func => ({
-                tipoFuncionario: func.tipoFuncionario || 'NÃO DEFINIDO',
-                nome: func.nome || 'Não informado',
-                cpf: func.cpf || 'Não informado',
-                email: func.email || 'Não informado',
-                telefone: func.telefone1 || 'Não informado'
+            // ✅ GAMBIARRA CORRIGIDA: Usar os endpoints corretos do backend
+            const dadosProcessados = await Promise.all(response.data.map(async (func) => {
+                let tipoFuncionario = 'FUNCIONÁRIO'; // Padrão
+                
+                const cpfOriginal = func.cpf;
+                const cpfLimpo = func.cpf.replace(/\D/g, '');
+                
+                console.log(`🔍 Verificando tipo para: ${func.nome} - CPF: ${cpfOriginal}`);
+                
+                // ✅ CORREÇÃO: Usar os endpoints exatos do seu backend
+                const endpoints = [
+                    { nome: 'VENDEDOR', url: 'vendedores' },
+                    { nome: 'DIRETOR', url: 'diretores' },
+                    { nome: 'ESTOQUISTA', url: 'estoquistas' }
+                ];
+                
+                // Tentar cada tipo de funcionário
+                for (const endpoint of endpoints) {
+                    // Tentar com CPF formatado primeiro, depois limpo
+                    const cpfVariacoes = [cpfOriginal, cpfLimpo];
+                    
+                    for (const cpfTentativa of cpfVariacoes) {
+                        try {
+                            console.log(`   Tentando: GET /${endpoint.url}/${cpfTentativa}`);
+                            await axios.get(`http://localhost:8081/${endpoint.url}/${cpfTentativa}`);
+                            console.log(`   ✅ ENCONTRADO como ${endpoint.nome}!`);
+                            tipoFuncionario = endpoint.nome;
+                            break;
+                        } catch (error) {
+                            if (error.response?.status === 404) {
+                                console.log(`   ❌ Não encontrado em /${endpoint.url}/${cpfTentativa}`);
+                            } else {
+                                console.log(`   ⚠️  Erro em /${endpoint.url}/${cpfTentativa}:`, error.response?.status, error.message);
+                            }
+                        }
+                    }
+                    if (tipoFuncionario !== 'FUNCIONÁRIO') break;
+                }
+                
+                console.log(`🎯 Resultado final para ${func.nome}: ${tipoFuncionario}\n`);
+
+                return {
+                    tipoFuncionario: tipoFuncionario,
+                    nome: func.nome || 'Não informado',
+                    cpf: func.cpf || 'Não informado',
+                    email: func.email || 'Não informado',
+                    telefone: func.telefone1 || 'Não informado'
+                };
             }));
 
             setFuncionarios(dadosProcessados);

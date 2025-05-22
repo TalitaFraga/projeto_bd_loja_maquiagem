@@ -68,9 +68,10 @@ const CadastroFuncionarioDiretor = () => {
     severity: "success"
   });
 
-  // Opções de tipo de funcionário
+  // ✅ ADICIONADO: Opção DIRETOR
   const tiposFuncionario = [
     { value: "VENDEDOR", label: "Vendedor" },
+    { value: "DIRETOR", label: "Diretor" },
     { value: "ESTOQUISTA", label: "Estoquista" }
   ];
 
@@ -292,7 +293,7 @@ const CadastroFuncionarioDiretor = () => {
           cep: dadosLimpos.cep
         },
         isCliente: false, // ✅ Não é cliente
-        tipoFuncionario: dadosLimpos.tipo // ✅ VENDEDOR ou ESTOQUISTA
+        tipoFuncionario: dadosLimpos.tipo // ✅ VENDEDOR, DIRETOR ou ESTOQUISTA
       };
 
       console.log("Payload para funcionário:", JSON.stringify(payload, null, 2));
