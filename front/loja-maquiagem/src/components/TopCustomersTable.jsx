@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+import axios from "axios"
 import Table from "@mui/material/Table"
 import TableBody from "@mui/material/TableBody"
 import TableCell from "@mui/material/TableCell"
@@ -7,85 +9,94 @@ import TableRow from "@mui/material/TableRow"
 import Box from "@mui/material/Box"
 import Chip from "@mui/material/Chip"
 
-const rows = [
-  { id: "01", name: "Cliente 1", value: "R$ 1.500,00", quantity: "10" },
-  { id: "02", name: "Cliente 2", value: "R$ 1.100,00", quantity: "10" },
-  { id: "03", name: "Cliente 3", value: "R$ 980,00", quantity: "20" },
-  { id: "04", name: "Cliente 4", value: "R$ 700,00", quantity: "5" },
-]
-
 export default function TopCustomersTable() {
+  const [clientes, setClientes] = useState([])
+  const [vendas, setVendas] = useState([])
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [resClientes, resVendas] = await Promise.all([
+          axios.get("http://localhost:8081/clientes"),
+          axios.get("http://localhost:8081/vendas"),
+        ])
+        setClientes(resClientes.data || [])
+        setVendas(resVendas.data || [])
+      } catch (error) {
+        console.error("Erro ao buscar dados de clientes ou vendas", error)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const clientesComCompras = clientes.map((cliente) => {
+    const comprasDoCliente = vendas.filter((venda) => venda.cpfCliente === cliente.cpf)
+    const totalCompras = comprasDoCliente.reduce((acc, venda) => {
+      const total = (venda.itens || []).reduce((soma, item) => soma + (item.qtdeProduto || 0), 0)
+      return acc + total
+    }, 0)
+    const ultimaCompra = comprasDoCliente.reduce((maisRecente, vendaAtual) => {
+      const dataAtual = new Date(vendaAtual.dataHoraVenda)
+      return dataAtual > new Date(maisRecente) ? vendaAtual.dataHoraVenda : maisRecente
+    }, "1970-01-01T00:00:00Z")
+
+    return {
+      id: cliente.cpf,
+      name: cliente.nome,
+      totalCompras,
+      ultimaCompra: new Date(ultimaCompra).toLocaleDateString("pt-BR"),
+    }
+  })
+
+  // Ordena pelo total de compras e pega os 4 maiores
+  const topClientes = [...clientesComCompras]
+      .sort((a, b) => b.totalCompras - a.totalCompras)
+      .slice(0, 4)
+
   return (
-    <TableContainer>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>#</TableCell>
-            <TableCell>Nome</TableCell>
-            <TableCell>Compras</TableCell>
-            <TableCell>Última compra</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.id}</TableCell>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>
-                <Box
-                  sx={{
-                    backgroundColor:
-                      row.id === "01"
-                        ? "#E3F2FD"
-                        : row.id === "02"
-                          ? "#E8F5E9"
-                          : row.id === "03"
-                            ? "#EDE7F6"
-                            : "#FFF3E0",
-                    borderRadius: 1,
-                    p: 0.5,
-                    display: "inline-block",
-                    color:
-                      row.id === "01"
-                        ? "#1976D2"
-                        : row.id === "02"
-                          ? "#388E3C"
-                          : row.id === "03"
-                            ? "#7B1FA2"
-                            : "#E65100",
-                  }}
-                >
-                  {row.value}
-                </Box>
-              </TableCell>
-              <TableCell>
-                <Chip
-                  label={row.quantity}
-                  size="small"
-                  sx={{
-                    backgroundColor:
-                      row.id === "01"
-                        ? "#E3F2FD"
-                        : row.id === "02"
-                          ? "#E8F5E9"
-                          : row.id === "03"
-                            ? "#EDE7F6"
-                            : "#FFF3E0",
-                    color:
-                      row.id === "01"
-                        ? "#1976D2"
-                        : row.id === "02"
-                          ? "#388E3C"
-                          : row.id === "03"
-                            ? "#7B1FA2"
-                            : "#E65100",
-                  }}
-                />
-              </TableCell>
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>#</TableCell>
+              <TableCell>Nome</TableCell>
+              <TableCell>Compras</TableCell>
+              <TableCell>Última compra</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {topClientes.map((row, index) => (
+                <TableRow key={row.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>
+                    <Box
+                        sx={{
+                          backgroundColor: "#E3F2FD",
+                          borderRadius: 1,
+                          p: 0.5,
+                          display: "inline-block",
+                          color: "#1976D2",
+                        }}
+                    >
+                      {row.totalCompras}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                        label={row.ultimaCompra}
+                        size="small"
+                        sx={{
+                          backgroundColor: "#E8F5E9",
+                          color: "#388E3C",
+                        }}
+                    />
+                  </TableCell>
+                </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
   )
 }
