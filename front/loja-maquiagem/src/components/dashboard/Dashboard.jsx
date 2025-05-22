@@ -107,7 +107,7 @@ const Dashboard = () => {
   }
 
   return (
-    <SideBar>
+    // <SideBar>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <CssBaseline />
 
@@ -277,8 +277,8 @@ const Dashboard = () => {
           </Grid>
         </Box>
       </Box>
-    </SideBar>
-  );
+    // </SideBar>
+  )
 };
 
 export default Dashboard;

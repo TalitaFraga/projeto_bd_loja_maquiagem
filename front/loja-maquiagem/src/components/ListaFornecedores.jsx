@@ -46,7 +46,7 @@ const ListaFornecedores = () => {
   const buscarSugestoesPorNome = debounce((input) => {
     if (!input) return;
 
-    axios.get(`http://localhost:8080/fornecedores/por-nome?nome=${encodeURIComponent(input)}`)
+    axios.get(`http://localhost:8081/fornecedores/por-nome?nome=${encodeURIComponent(input)}`)
       .then((res) => {
         const nomes = res.data.map(f => f.nome);
         setOpcoesNomes(nomes);
@@ -60,7 +60,7 @@ const ListaFornecedores = () => {
     if (!nome.trim()) return;
 
     setLoading(true);
-    axios.get(`http://localhost:8080/fornecedores/por-nome?nome=${encodeURIComponent(nome)}`)
+    axios.get(`http://localhost:8081/fornecedores/por-nome?nome=${encodeURIComponent(nome)}`)
       .then((response) => {
         setFornecedores(response.data);
         setLoading(false);
@@ -76,7 +76,7 @@ const ListaFornecedores = () => {
 
   const handleExcluir = (cnpj) => {
     if (window.confirm("Tem certeza que deseja excluir esse fornecedor?")) {
-      axios.delete(`http://localhost:8080/fornecedores/${cnpj}`)
+      axios.delete(`http://localhost:8081/fornecedores/${cnpj}`)
         .then(() => {
           setFornecedores(fornecedores.filter(f => f.cnpj !== cnpj));
           setSnackbarMessage("Fornecedor excluído com sucesso!");
