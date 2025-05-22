@@ -18,23 +18,17 @@ import {
 import { styled } from "@mui/material/styles";
 import { Link, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
-import PeopleIcon from "@mui/icons-material/People";
 import StoreIcon from "@mui/icons-material/Store";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import HandshakeIcon from '@mui/icons-material/Handshake';
-import WorkIcon from '@mui/icons-material/Work';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import HistoryIcon from '@mui/icons-material/History';
-import AddBusinessIcon from '@mui/icons-material/AddBusiness';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
+import PersonIcon from "@mui/icons-material/Person";
 
 const drawerWidth = 280;
 
@@ -83,7 +77,7 @@ const StyledSubListItemButton = styled(ListItemButton)(({ theme }) => ({
   }
 }));
 
-const Layout = ({ children }) => {
+const SidebarVendedor = ({ children }) => {
   const location = useLocation();
   const [openMenus, setOpenMenus] = useState({});
 
@@ -98,7 +92,7 @@ const Layout = ({ children }) => {
     { 
       text: "Dashboard", 
       icon: <HomeIcon />, 
-      path: "/dashboard",
+      path: "/dashboard-vendedor",
       type: "single" 
     },
     {
@@ -120,38 +114,6 @@ const Layout = ({ children }) => {
       subItems: [
         { text: "Cadastro de Produtos", icon: <StoreIcon />, path: "/produtos" },
         { text: "Visualizar Produtos", icon: <VisibilityIcon />, path: "/visualizar-produtos" }
-      ]
-    },
-    {
-      text: "Fornecedores",
-      icon: <HandshakeIcon />,
-      type: "submenu",
-      key: "fornecedores",
-      subItems: [
-        { text: "Cadastrar Fornecedor", icon: <AddBusinessIcon />, path: "/fornecedor" },
-        { text: "Visualizar Fornecedores", icon: <VisibilityIcon />, path: "/lista-fornecedores" },
-        { text: "Registro de Reabastecimento", icon: <LocalShippingIcon />, path: "/registro-reabastecimento" },
-        { text: "Histórico de Reabastecimento", icon: <HistoryIcon />, path: "/historico-reabastecimento" }
-      ]
-    },
-    {
-      text: "Clientes",
-      icon: <PeopleIcon />,
-      type: "submenu",
-      key: "clientes",
-      subItems: [
-        { text: "Cadastrar Clientes", icon: <PersonAddIcon />, path: "/cadastro-cliente-pelo-diretor" },
-        { text: "Visualizar Clientes", icon: <VisibilityIcon />, path: "/lista-clientes-pelo-diretor" }
-      ]
-    },
-    {
-      text: "Funcionários",
-      icon: <WorkIcon />,
-      type: "submenu",
-      key: "funcionarios",
-      subItems: [
-        { text: "Cadastrar Funcionários", icon: <PersonAddIcon />, path: "/cadastro-pessoa" },
-        { text: "Visualizar Funcionários", icon: <VisibilityIcon />, path: "/funcionarios" }
       ]
     }
   ];
@@ -245,7 +207,7 @@ const Layout = ({ children }) => {
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img 
-              src="/logo_maquiagem_cia.png"
+              src="./logo_maquiagem_cia.png"
               alt="Maquiagem & Cia"
               style={{ 
                 height: 45, 
@@ -263,11 +225,11 @@ const Layout = ({ children }) => {
           
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" sx={{ color: '#666', mr: 2 }}>
-              Sistema de Gestão
+              Sistema de Vendas e Estoque
             </Typography>
             <ListItemButton
               component={Link}
-              to="/dashboard"
+              to="/dashboard-vendedor"
               sx={{
                 borderRadius: 2,
                 p: 1.5,
@@ -311,10 +273,10 @@ const Layout = ({ children }) => {
               mr: 2,
             }}
           >
-            <BusinessCenterIcon />
+            <PersonIcon />
           </Box>
           <Typography variant="h6" noWrap component="div">
-            Diretor
+            Vendedor
           </Typography>
         </LogoBox>
 
@@ -364,4 +326,4 @@ const Layout = ({ children }) => {
   );
 };
 
-export default Layout;
+export default SidebarVendedor;
