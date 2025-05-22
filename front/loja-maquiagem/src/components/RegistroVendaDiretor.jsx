@@ -47,12 +47,10 @@ const RegistroVenda = () => {
     qtdeProduto: 1
   });
 
-  const [itemEditando, setItemEditando] = useState(null);
   const [produtos, setProdutos] = useState([]);
-  const [clientes, setClientes] = useState([]);
-  const [vendedores, setVendedores] = useState([]);
   const [dialogAberto, setDialogAberto] = useState(false);
   const [dialogEdicao, setDialogEdicao] = useState(false);
+  const [itemEditando, setItemEditando] = useState(null);
   
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -62,97 +60,23 @@ const RegistroVenda = () => {
   
   const navigate = useNavigate();
 
-  // Buscar dados necessários
+  // Buscar produtos disponíveis
   useEffect(() => {
-    const buscarDados = async () => {
+    const buscarProdutos = async () => {
       try {
-        // Buscar produtos
-        const responseProdutos = await axios.get("http://localhost:8081/produtos");
-        setProdutos(responseProdutos.data);
-
-        // Buscar clientes (assumindo que existe endpoint para listar clientes)
-        try {
-          const responseClientes = await axios.get("http://localhost:8081/clientes");
-          setClientes(responseClientes.data);
-        } catch (error) {
-          console.log("Endpoint de clientes não disponível, usando validação alternativa");
-        }
-
-        // Buscar vendedores/funcionários (assumindo que existe endpoint)
-        try {
-          const responseVendedores = await axios.get("http://localhost:8081/vendedores");
-          setVendedores(responseVendedores.data);
-        } catch (error) {
-          console.log("Endpoint de vendedores não disponível, usando validação alternativa");
-        }
-
+        const response = await axios.get("http://localhost:8081/produtos");
+        setProdutos(response.data);
       } catch (error) {
-        console.error("Erro ao buscar dados:", error);
+        console.error("Erro ao buscar produtos:", error);
         setSnackbar({
           open: true,
-          message: "Erro ao carregar dados iniciais. Alguns recursos podem não funcionar corretamente.",
+          message: "Erro ao carregar lista de produtos.",
           severity: "warning"
         });
       }
     };
-    buscarDados();
+    buscarProdutos();
   }, []);
-
-  const validarCPFExiste = async (cpf, tipo) => {
-    try {
-      const cpfLimpo = cpf.replace(/\D/g, '');
-      
-      console.log(`Validando CPF ${tipo}: ${cpfLimpo}`);
-      
-      // Tentar validar CPF do cliente
-      if (tipo === 'cliente') {
-        try {
-          // CPFs de clientes válidos (conforme a imagem do banco)
-          // Considerando tanto formatado quanto sem formatação
-          const clientesValidos = [
-            '05707423079', // 057.074.230-79
-            '10440747760', // 104.407.477-60 / 10440747760
-            '11122233399', // 111.222.333-99
-            '39053344705', // 390.533.447-05
-            '61428462302'  // 614.284.623-02
-          ];
-          
-          if (!clientesValidos.includes(cpfLimpo)) {
-            console.log(`CPF do cliente ${cpfLimpo} não encontrado na lista de clientes válidos`);
-            return false;
-          }
-          return true;
-        } catch (error) {
-          console.error('Erro ao validar cliente:', error);
-          return false;
-        }
-      }
-      
-      // Tentar validar CPF do vendedor
-      if (tipo === 'vendedor') {
-        try {
-          // Vendedores válidos conforme o banco de dados
-          const vendedoresValidos = [
-            '86544302753'  // Daniel Rocha
-          ];
-          
-          if (!vendedoresValidos.includes(cpfLimpo)) {
-            console.log(`CPF do vendedor ${cpfLimpo} não encontrado na lista de vendedores válidos`);
-            return false;
-          }
-          return true;
-        } catch (error) {
-          console.error('Erro ao validar vendedor:', error);
-          return false;
-        }
-      }
-      
-      return false;
-    } catch (error) {
-      console.error(`Erro ao validar CPF ${tipo}:`, error);
-      return false;
-    }
-  };
 
   // Formatar CPF enquanto digita
   const formatCPF = (value, campo) => {
@@ -171,11 +95,6 @@ const RegistroVenda = () => {
     setVenda({ ...venda, [campo]: cpf });
   };
 
-  const handleVendaChange = (e) => {
-    const { name, value } = e.target;
-    setVenda(prev => ({ ...prev, [name]: value }));
-  };
-
   const handleItemChange = (e) => {
     const { name, value } = e.target;
     setNovoItem(prev => ({ ...prev, [name]: value }));
@@ -188,7 +107,7 @@ const RegistroVenda = () => {
 
   const obterPrecoProduto = (codigoBarra) => {
     const produto = produtos.find(p => p.codigo_barra === codigoBarra);
-    return produto ? produto.preco : 0;
+    return produto ? parseFloat(produto.preco) : 0;
   };
 
   const adicionarItem = () => {
@@ -326,7 +245,7 @@ const RegistroVenda = () => {
   };
 
   const registrarVenda = async () => {
-    // Validações
+    // Validações básicas
     if (!venda.cpfCliente || !venda.cpfVendedor) {
       setSnackbar({
         open: true,
@@ -345,121 +264,85 @@ const RegistroVenda = () => {
       return;
     }
 
-    // Validar se CPFs existem no sistema
-    const cpfClienteValido = await validarCPFExiste(venda.cpfCliente, 'cliente');
-    if (!cpfClienteValido) {
+    // Verificar se CPF está completo (formatado)
+    if (venda.cpfCliente.length !== 14 || venda.cpfVendedor.length !== 14) {
       setSnackbar({
         open: true,
-        message: "CPF do cliente não encontrado no sistema. Verifique se o cliente está cadastrado.",
-        severity: "error"
+        message: "Por favor, digite CPFs completos no formato 000.000.000-00.",
+        severity: "warning"
       });
       return;
     }
 
-    const cpfVendedorValido = await validarCPFExiste(venda.cpfVendedor, 'vendedor');
-    if (!cpfVendedorValido) {
-      setSnackbar({
-        open: true,
-        message: "CPF do vendedor não encontrado no sistema. Verifique se o vendedor está cadastrado.",
-        severity: "error"
-      });
-      return;
-    }
-
-    // Preparar dados para envio - seguindo exatamente a estrutura da entidade Venda
+    // Preparar dados EXATAMENTE como no Swagger (CPF formatado)
     const dadosVenda = {
-      cpfCliente: venda.cpfCliente.replace(/\D/g, ''),
-      cpfVendedor: venda.cpfVendedor.replace(/\D/g, ''),
+      cpfCliente: venda.cpfCliente,
+      cpfVendedor: venda.cpfVendedor,
       itens: venda.itens.map(item => ({
-        codigoBarra: item.codigoBarra,
-        loteProduto: item.loteProduto,
+        codigoBarra: String(item.codigoBarra),
+        loteProduto: String(item.loteProduto), 
         qtdeProduto: parseInt(item.qtdeProduto)
       }))
     };
 
-    console.log("Dados da venda sendo enviados:", JSON.stringify(dadosVenda, null, 2));
-
     try {
       const response = await axios.post("http://localhost:8081/vendas", dadosVenda, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
       });
       
-      console.log("Resposta da API:", response.data);
-      
       setSnackbar({
         open: true,
-        message: "Venda registrada com sucesso! ID: " + response.data.idVenda,
+        message: `Venda registrada com sucesso! ID: ${response.data.idVenda}`,
         severity: "success"
       });
 
-      // Limpar formulário
+      // Limpar formulário após sucesso
       setVenda({
         cpfCliente: "",
         cpfVendedor: "",
         itens: []
       });
 
-      // Redirecionar após sucesso (pode ser para tela de NF)
+      // Mostrar mensagem adicional e redirecionar após alguns segundos
       setTimeout(() => {
         setSnackbar({
           open: true,
-          message: "Venda ID: " + response.data.idVenda + " - Pronto para emissão de NF!",
+          message: `Venda ${response.data.idVenda} pronta para emissão de NF! Redirecionando...`,
           severity: "info"
         });
-        // navigate("/emissao-nf/" + response.data.idVenda);
+        
+        // Redirecionar para o histórico de vendas após 2 segundos
+        setTimeout(() => {
+          navigate("/historico-vendas-pelo-diretor");
+        }, 2000);
       }, 3000);
       
     } catch (error) {
-      console.error("Erro completo:", error);
-      console.error("Response data:", error.response?.data);
-      console.error("Response status:", error.response?.status);
-      
-      let errorMessage = "Erro ao registrar venda. Verifique os dados informados.";
+      console.error("Erro ao registrar venda:", error);
+
+      let errorMessage = "Erro ao registrar venda.";
       
       if (error.response) {
-        const errorData = error.response.data;
-        console.log("Erro detalhado:", errorData);
+        const status = error.response.status;
         
-        // Tratamento mais específico de erros
-        if (typeof errorData === 'string') {
-          const errorLower = errorData.toLowerCase();
-          
-          if (errorLower.includes('foreign key constraint') && errorLower.includes('cliente')) {
-            errorMessage = "CPF do cliente não está cadastrado no sistema. Cadastre o cliente primeiro.";
-          } else if (errorLower.includes('foreign key constraint') && errorLower.includes('vendedor')) {
-            errorMessage = "CPF do vendedor não está cadastrado no sistema. Cadastre o vendedor primeiro.";
-          } else if (errorLower.includes('foreign key constraint')) {
-            errorMessage = "CPF do cliente ou vendedor não encontrado no sistema. Verifique os cadastros.";
-          } else if (errorLower.includes('estoque insuficiente') || errorLower.includes('quantidade')) {
-            errorMessage = "Quantidade insuficiente em estoque para um ou mais produtos.";
-          } else if (errorLower.includes('produto não encontrado')) {
-            errorMessage = "Um ou mais produtos não foram encontrados no sistema.";
-          } else if (errorLower.includes('itens vazios')) {
-            errorMessage = "A venda deve conter pelo menos um item.";
-          }
-        }
-        
-        switch (error.response.status) {
+        switch (status) {
           case 400:
-            if (errorMessage === "Erro ao registrar venda. Verifique os dados informados.") {
-              errorMessage = "Dados inválidos. Verifique se todos os campos estão corretos.";
-            }
+            errorMessage = "Dados inválidos. Verifique todos os campos.";
             break;
           case 404:
-            if (errorMessage === "Erro ao registrar venda. Verifique os dados informados.") {
-              errorMessage = "Cliente, vendedor ou produto não encontrado no sistema.";
-            }
+            errorMessage = "Cliente, vendedor ou produto não encontrado.";
             break;
           case 500:
-            errorMessage = "Erro interno do servidor. Verifique se cliente e vendedor estão cadastrados.";
+            errorMessage = "Erro interno do servidor. Tente novamente.";
             break;
           default:
-            break;
+            errorMessage = `Erro do servidor (${status}).`;
         }
       } else if (error.request) {
-        errorMessage = "Erro de conexão. Verifique sua internet e tente novamente.";
+        errorMessage = "Erro de conexão. Verifique sua internet.";
       }
       
       setSnackbar({
@@ -472,6 +355,17 @@ const RegistroVenda = () => {
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
+  };
+
+  const fecharDialogs = () => {
+    setDialogAberto(false);
+    setDialogEdicao(false);
+    setItemEditando(null);
+    setNovoItem({
+      codigoBarra: "",
+      loteProduto: "",
+      qtdeProduto: 1
+    });
   };
 
   return (
@@ -522,7 +416,7 @@ const RegistroVenda = () => {
                 required
                 variant="outlined"
                 placeholder="000.000.000-00"
-                helperText="Clientes válidos: 057.074.230-79, 104.407.477-60, 111.222.333-99, 390.533.447-05, 614.284.623-02"
+                helperText="Digite: 390.533.447-05 ou 865.443.027-53"
                 InputProps={{
                   sx: { borderRadius: 2 }
                 }}
@@ -539,7 +433,7 @@ const RegistroVenda = () => {
                 required
                 variant="outlined"
                 placeholder="000.000.000-00"
-                helperText="Vendedor válido: 865.443.027-53 (Daniel)"
+                helperText="Digite: 865.443.027-53"
                 InputProps={{
                   sx: { borderRadius: 2 }
                 }}
@@ -666,126 +560,10 @@ const RegistroVenda = () => {
         </Paper>
       </Container>
 
-      {/* Dialog para Editar Item */}
-      <Dialog 
-        open={dialogEdicao} 
-        onClose={() => {
-          setDialogEdicao(false);
-          setItemEditando(null);
-          setNovoItem({ codigoBarra: "", loteProduto: "", qtdeProduto: 1 });
-        }}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            overflow: 'hidden'
-          }
-        }}
-      >
-        <DialogTitle sx={{ 
-          backgroundColor: '#E91E63', 
-          color: 'white',
-          textAlign: 'center',
-          py: 2,
-          fontWeight: 'bold'
-        }}>
-          Editar Item da Venda
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Box sx={{ mt: 1 }}>
-            <TextField
-              fullWidth
-              label="Código de Barras"
-              name="codigoBarra"
-              value={novoItem.codigoBarra}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o código de barras do produto"
-              helperText="Produtos disponíveis: 1001, 1002, 1003 (bases), 2001, 2002, 2003 (batons), 3001, 3002 (rimeis), 4001, 4002 (blush)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Lote do Produto"
-              name="loteProduto"
-              value={novoItem.loteProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o lote do produto"
-              helperText="Lotes disponíveis: L001, L002, L003 (conforme código do produto)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Quantidade"
-              name="qtdeProduto"
-              type="number"
-              value={novoItem.qtdeProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              inputProps={{ min: 1 }}
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, pt: 1, justifyContent: 'space-between' }}>
-          <Button 
-            onClick={() => {
-              setDialogEdicao(false);
-              setItemEditando(null);
-              setNovoItem({ codigoBarra: "", loteProduto: "", qtdeProduto: 1 });
-            }}
-            color="inherit"
-            variant="outlined"
-            sx={{ 
-              borderRadius: 2,
-              px: 3,
-              borderColor: '#ccc',
-              '&:hover': {
-                borderColor: '#999',
-                backgroundColor: '#f5f5f5'
-              }
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={salvarEdicaoItem}
-            variant="contained"
-            sx={{ 
-              backgroundColor: '#E91E63',
-              '&:hover': { backgroundColor: '#C2185B' },
-              borderRadius: 2,
-              px: 3,
-              fontWeight: 'bold'
-            }}
-          >
-            Salvar Alterações
-          </Button>
-        </DialogActions>
-      </Dialog>
-
       {/* Dialog para Adicionar Item */}
       <Dialog 
         open={dialogAberto} 
-        onClose={() => setDialogAberto(false)}
+        onClose={fecharDialogs}
         maxWidth="sm"
         fullWidth
         PaperProps={{
@@ -813,8 +591,8 @@ const RegistroVenda = () => {
               value={novoItem.codigoBarra}
               onChange={handleItemChange}
               variant="outlined"
-              placeholder="Digite o código de barras do produto"
-              helperText="Produtos disponíveis: 1001, 1002, 1003 (bases), 2001, 2002, 2003 (batons), 3001, 3002 (rimeis), 4001, 4002 (blush)"
+              placeholder="Ex: 2002"
+              helperText="Use: 2002 (Batom Vermelho)"
               sx={{ 
                 mb: 3,
                 '& .MuiOutlinedInput-root': {
@@ -830,8 +608,8 @@ const RegistroVenda = () => {
               value={novoItem.loteProduto}
               onChange={handleItemChange}
               variant="outlined"
-              placeholder="Digite o lote do produto"
-              helperText="Lotes disponíveis: L001, L002, L003 (conforme código do produto)"
+              placeholder="Ex: L002"
+              helperText="Use: L002"
               sx={{ 
                 mb: 3,
                 '& .MuiOutlinedInput-root': {
@@ -859,119 +637,7 @@ const RegistroVenda = () => {
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 1, justifyContent: 'space-between' }}>
           <Button 
-            onClick={() => {
-              setDialogEdicao(false);
-              setItemEditando(null);
-              setNovoItem({ codigoBarra: "", loteProduto: "", qtdeProduto: 1 });
-            }}
-            color="inherit"
-            variant="outlined"
-            sx={{ 
-              borderRadius: 2,
-              px: 3,
-              borderColor: '#ccc',
-              '&:hover': {
-                borderColor: '#999',
-                backgroundColor: '#f5f5f5'
-              }
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={salvarEdicaoItem}
-            variant="contained"
-            sx={{ 
-              backgroundColor: '#E91E63',
-              '&:hover': { backgroundColor: '#C2185B' },
-              borderRadius: 2,
-              px: 3,
-              fontWeight: 'bold'
-            }}
-          >
-            Salvar Alterações
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog para Adicionar Item */}
-      <Dialog 
-        open={dialogAberto} 
-        onClose={() => setDialogAberto(false)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            overflow: 'hidden'
-          }
-        }}
-      >
-        <DialogTitle sx={{ 
-          backgroundColor: '#F06292', 
-          color: 'white',
-          textAlign: 'center',
-          py: 2,
-          fontWeight: 'bold'
-        }}>
-          Adicionar Item à Venda
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Box sx={{ mt: 1 }}>
-            <TextField
-              fullWidth
-              label="Código de Barras"
-              name="codigoBarra"
-              value={novoItem.codigoBarra}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o código de barras do produto"
-              helperText="Produtos disponíveis: 1001, 1002, 1003 (bases), 2001, 2002, 2003 (batons), 3001, 3002 (rimeis), 4001, 4002 (blush)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Lote do Produto"
-              name="loteProduto"
-              value={novoItem.loteProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o lote do produto"
-              helperText="Lotes disponíveis: L001, L002, L003 (conforme código do produto)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Quantidade"
-              name="qtdeProduto"
-              type="number"
-              value={novoItem.qtdeProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              inputProps={{ min: 1 }}
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, pt: 1, justifyContent: 'space-between' }}>
-          <Button 
-            onClick={() => setDialogAberto(false)}
+            onClick={fecharDialogs}
             color="inherit"
             variant="outlined"
             sx={{ 
@@ -1002,10 +668,116 @@ const RegistroVenda = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Dialog para Editar Item */}
+      <Dialog 
+        open={dialogEdicao} 
+        onClose={fecharDialogs}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          backgroundColor: '#E91E63', 
+          color: 'white',
+          textAlign: 'center',
+          py: 2,
+          fontWeight: 'bold'
+        }}>
+          Editar Item da Venda
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <Box sx={{ mt: 1 }}>
+            <TextField
+              fullWidth
+              label="Código de Barras"
+              name="codigoBarra"
+              value={novoItem.codigoBarra}
+              onChange={handleItemChange}
+              variant="outlined"
+              placeholder="Digite o código de barras do produto"
+              sx={{ 
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2
+                }
+              }}
+            />
+            
+            <TextField
+              fullWidth
+              label="Lote do Produto"
+              name="loteProduto"
+              value={novoItem.loteProduto}
+              onChange={handleItemChange}
+              variant="outlined"
+              placeholder="Digite o lote do produto"
+              sx={{ 
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2
+                }
+              }}
+            />
+            
+            <TextField
+              fullWidth
+              label="Quantidade"
+              name="qtdeProduto"
+              type="number"
+              value={novoItem.qtdeProduto}
+              onChange={handleItemChange}
+              variant="outlined"
+              inputProps={{ min: 1 }}
+              sx={{ 
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2
+                }
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 1, justifyContent: 'space-between' }}>
+          <Button 
+            onClick={fecharDialogs}
+            color="inherit"
+            variant="outlined"
+            sx={{ 
+              borderRadius: 2,
+              px: 3,
+              borderColor: '#ccc',
+              '&:hover': {
+                borderColor: '#999',
+                backgroundColor: '#f5f5f5'
+              }
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={salvarEdicaoItem}
+            variant="contained"
+            sx={{ 
+              backgroundColor: '#E91E63',
+              '&:hover': { backgroundColor: '#C2185B' },
+              borderRadius: 2,
+              px: 3,
+              fontWeight: 'bold'
+            }}
+          >
+            Salvar Alterações
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Snackbar para mensagens */}
       <Snackbar 
         open={snackbar.open} 
-        autoHideDuration={snackbar.severity === 'warning' ? 7000 : 5000}
+        autoHideDuration={5000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
@@ -1016,8 +788,7 @@ const RegistroVenda = () => {
           sx={{ 
             width: '100%',
             '& .MuiAlert-message': {
-              fontSize: '14px',
-              fontWeight: snackbar.severity === 'warning' ? 'bold' : 'normal'
+              fontSize: '14px'
             }
           }}
         >

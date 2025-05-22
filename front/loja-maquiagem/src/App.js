@@ -21,6 +21,9 @@ import Sidebar from './pages/SideBar';
 import SidebarVendedor from './pages/SideBarVendedor';
 import CadastroFuncionarioDiretor from './components/CadastroFuncionarioDiretor';
 import EditarFuncionarioDiretor from './components/EditarFuncionarioDiretor';
+import RegistroVendaDiretor from './components/RegistroVendaDiretor';
+import HistoricoVendasDiretor from './components/HistoricoVendasDiretor';
+
 
 function AppContent() {
   const location = useLocation();
@@ -71,6 +74,8 @@ function AppContent() {
         <Route path="/cadastro-funcionario-pelo-diretor" element={<CadastroFuncionarioDiretor />} />
         <Route path="/lista-funcionario-pelo-diretor" element={<ListarFuncionariosDiretor />} />
         <Route path="/editar-funcionario-pelo-diretor/:cpf" element={<EditarFuncionarioDiretor />} />
+        <Route path="/registro-venda-pelo-diretor" element={<RegistroVendaDiretor />} />
+        <Route path="/historico-vendas-pelo-diretor" element={<HistoricoVendasDiretor />} />
       </Routes>
     </Sidebar>
   );

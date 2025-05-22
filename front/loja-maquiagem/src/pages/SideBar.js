@@ -107,9 +107,9 @@ const Layout = ({ children }) => {
       type: "submenu",
       key: "vendas",
       subItems: [
-        { text: "Registro de Venda", icon: <AddShoppingCartIcon />, path: "/registro-venda" },
+        { text: "Registro de Venda", icon: <AddShoppingCartIcon />, path: "/registro-venda-pelo-diretor" },
         { text: "Registro de Troca", icon: <SwapHorizIcon />, path: "/registro-troca" },
-        { text: "Histórico de Vendas", icon: <HistoryIcon />, path: "/historico-vendas" }
+        { text: "Histórico de Vendas", icon: <HistoryIcon />, path: "/historico-vendas-pelo-diretor" }
       ]
     },
     {
