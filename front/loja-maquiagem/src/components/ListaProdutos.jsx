@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import debounce from "lodash/debounce";
 import {
-    Container,
-    Paper,
+    Box,
     Typography,
+    Paper,
     Table,
     TableBody,
     TableCell,
@@ -13,39 +12,97 @@ import {
     TableHead,
     TableRow,
     Button,
+    IconButton,
+    TextField,
+    InputAdornment,
     CircularProgress,
     Snackbar,
     Alert,
-    TextField,
-    Stack,
     Autocomplete,
-    Box,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Chip,
 } from "@mui/material";
+import { Add, Search, Edit, Delete, Inventory } from "@mui/icons-material";
+import { Link } from "react-router-dom";
+
 
 const ListaProdutos = () => {
     const [produtos, setProdutos] = useState([]);
-    const [produtosOriginais, setProdutosOriginais] = useState([]); // Para manter dados originais
+    const [produtosOriginais, setProdutosOriginais] = useState([]);
     const [loading, setLoading] = useState(true);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [ordenacao, setOrdenacao] = useState("");
     const [opcoesBusca, setOpcoesBusca] = useState([]);
-    const [inputBusca, setInputBusca] = useState("");
 
     useEffect(() => {
-        axios.get("http://localhost:8081/produtos")
-            .then((response) => {
-                setProdutos(response.data);
-                setProdutosOriginais(response.data); // Salvar dados originais
+        const fetchData = async () => {
+            try {
+                const [produtosRes, estoqueRes] = await Promise.all([
+                    axios.get("http://localhost:8081/produtos"),
+                    axios.get("http://localhost:8081/estoque")
+                ]);
+
+                const produtosComEstoque = produtosRes.data.map(produto => {
+                    const itemEstoque = estoqueRes.data.find(
+                        est => est.codigoBarra === produto.codigo_barra &&
+                            est.loteProduto === produto.lote_produto
+                    );
+
+                    return {
+                        ...produto,
+                        quantidade_estoque: itemEstoque ? itemEstoque.qtdeProduto : 0
+                    };
+                });
+
+                setProdutos(produtosComEstoque);
+                setProdutosOriginais(produtosComEstoque);
                 setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Erro ao buscar produtos:", error);
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
                 setLoading(false);
-            });
+            }
+        };
+
+        fetchData();
     }, []);
 
-    // Buscar sugestões por nome ou código
+    // Função para ordenar produtos
+    const ordenarProdutos = (produtosParaOrdenar, tipoOrdenacao) => {
+        if (!tipoOrdenacao) return produtosParaOrdenar;
+
+        const produtosOrdenados = [...produtosParaOrdenar].sort((a, b) => {
+            switch (tipoOrdenacao) {
+                case 'validade_asc':
+                    return new Date(a.data_validade) - new Date(b.data_validade);
+                case 'validade_desc':
+                    return new Date(b.data_validade) - new Date(a.data_validade);
+                case 'estoque_asc':
+                    return a.quantidade_estoque - b.quantidade_estoque;
+                case 'estoque_desc':
+                    return b.quantidade_estoque - a.quantidade_estoque;
+                case 'nome_asc':
+                    return a.nome.localeCompare(b.nome);
+                case 'nome_desc':
+                    return b.nome.localeCompare(a.nome);
+                case 'preco_asc':
+                    return parseFloat(a.preco) - parseFloat(b.preco);
+                case 'preco_desc':
+                    return parseFloat(b.preco) - parseFloat(a.preco);
+                default:
+                    return 0;
+            }
+        });
+
+        return produtosOrdenados;
+    };
+
+    // Buscar sugestões
     const buscarSugestoes = debounce((input) => {
         if (!input || input.length < 2) {
             setOpcoesBusca([]);
@@ -53,75 +110,49 @@ const ListaProdutos = () => {
         }
 
         const inputLower = input.toLowerCase();
-
-        // Filtrar produtos localmente para sugestões rápidas
         const sugestoes = produtosOriginais
             .filter(produto =>
                 produto.nome.toLowerCase().includes(inputLower) ||
                 produto.codigo_barra.toLowerCase().includes(inputLower)
             )
-            .map(produto => ({
-                label: `${produto.nome} (${produto.codigo_barra})`,
-                value: produto.nome,
-                codigo: produto.codigo_barra
-            }))
-            .slice(0, 10); // Limitar a 10 sugestões
+            .map(produto => produto.nome)
+            .slice(0, 10);
 
         setOpcoesBusca(sugestoes);
     }, 300);
 
-    // Função de busca unificada (nome ou código)
-    const handleBuscar = (termoBusca) => {
-        if (!termoBusca || !termoBusca.trim()) {
-            // Se busca vazia, mostrar todos os produtos
-            setProdutos(produtosOriginais);
-            return;
-        }
+    // Filtrar produtos
+    const filteredProdutos = produtos.filter(produto =>
+        produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        produto.codigo_barra.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        produto.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        produto.tipo_produto.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-        setLoading(true);
-        const termo = termoBusca.trim().toLowerCase();
+    // Aplicar ordenação
+    const produtosFiltradosOrdenados = ordenacao ?
+        ordenarProdutos(filteredProdutos, ordenacao) :
+        filteredProdutos;
 
-        // Filtrar localmente por nome ou código
-        const resultados = produtosOriginais.filter(produto =>
-            produto.nome.toLowerCase().includes(termo) ||
-            produto.codigo_barra.toLowerCase().includes(termo) ||
-            produto.marca.toLowerCase().includes(termo) ||
-            produto.tipo_produto.toLowerCase().includes(termo)
-        );
-
-        setProdutos(resultados);
-        setLoading(false);
-
-        // Mostrar mensagem se não encontrou resultados
-        if (resultados.length === 0) {
-            setSnackbarMessage(`Nenhum produto encontrado para: "${termoBusca}"`);
-            setSnackbarSeverity("info");
-            setSnackbarOpen(true);
-        }
-    };
-
-    // Função para quando clica no botão buscar
-    const handleBuscarClick = () => {
-        handleBuscar(inputBusca);
-    };
-
-    // Função para quando seleciona uma opção do autocomplete
-    const handleSelecionarOpcao = (event, newValue) => {
-        if (newValue) {
-            // Se for um objeto com label (sugestão), usar o valor
-            const termo = typeof newValue === 'object' ? newValue.value : newValue;
-            handleBuscar(termo);
+    const handleExcluir = (codigoBarra) => {
+        if (window.confirm("Tem certeza que deseja excluir este produto?")) {
+            axios.delete(`http://localhost:8081/produtos/${codigoBarra}`)
+                .then(() => {
+                    const novosProdutos = produtos.filter(p => p.codigo_barra !== codigoBarra);
+                    setProdutos(novosProdutos);
+                    setProdutosOriginais(produtosOriginais.filter(p => p.codigo_barra !== codigoBarra));
+                    setSnackbarMessage("Produto excluído com sucesso!");
+                    setSnackbarSeverity("success");
+                    setSnackbarOpen(true);
+                })
+                .catch((error) => {
+                    console.error("Erro ao excluir produto:", error);
+                    setSnackbarMessage("Erro ao excluir produto.");
+                    setSnackbarSeverity("error");
+                    setSnackbarOpen(true);
+                });
         }
     };
-
-    // Função para limpar busca
-    const handleLimparBusca = () => {
-        setInputBusca("");
-        setProdutos(produtosOriginais);
-        setOpcoesBusca([]);
-    };
-
-
 
     const formatarPreco = (preco) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -134,8 +165,29 @@ const ListaProdutos = () => {
         return new Date(data).toLocaleDateString('pt-BR');
     };
 
+    const isVencendoEm30Dias = (dataValidade) => {
+        const hoje = new Date();
+        const validade = new Date(dataValidade);
+        const diasParaVencer = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
+        return diasParaVencer <= 30 && diasParaVencer > 0;
+    };
+
+    const isVencido = (dataValidade) => {
+        const hoje = new Date();
+        const validade = new Date(dataValidade);
+        return validade < hoje;
+    };
+
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" mt={4}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
     return (
-        <Container maxWidth="lg" sx={{ mt: 5 }}>
+        <Box sx={{ p: 3 }}>
             <Snackbar
                 open={snackbarOpen}
                 autoHideDuration={4000}
@@ -150,122 +202,179 @@ const ListaProdutos = () => {
                 </Alert>
             </Snackbar>
 
-            <Paper elevation={4} sx={{ p: 3, backgroundColor: '#F3F3F3' }}>
-                <Typography variant="h4" gutterBottom color="#D81B60">
-                    Lista de Produtos
-                </Typography>
+            <Paper
+                elevation={4}
+                sx={{
+                    p: 3,
+                    borderRadius: 3,
+                    backgroundColor: '#FFF',
+                    borderTop: '4px solid #F06292',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+                }}
+            >
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <Box
+                        sx={{
+                            backgroundColor: '#F06292',
+                            borderRadius: '50%',
+                            p: 1,
+                            mr: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        <Inventory sx={{ color: 'white', fontSize: 24 }} />
+                    </Box>
+                    <Typography variant="h4" color="#333" fontWeight="500">
+                        Lista de Produtos
+                    </Typography>
+                </Box>
 
-                <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-                    <Box sx={{flex: 1}}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, gap: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2, flex: 1 }}>
                         <Autocomplete
                             freeSolo
                             options={opcoesBusca}
-                            getOptionLabel={(option) =>
-                                typeof option === 'object' ? option.label : option
-                            }
-                            inputValue={inputBusca}
+                            inputValue={searchTerm}
                             onInputChange={(event, newInputValue) => {
-                                setInputBusca(newInputValue);
+                                setSearchTerm(newInputValue);
                                 buscarSugestoes(newInputValue);
                             }}
-                            onChange={handleSelecionarOpcao}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="Buscar por nome, código, marca ou tipo"
                                     variant="outlined"
-                                    fullWidth
-                                    placeholder="Digite o nome ou código do produto..."
+                                    size="small"
+                                    placeholder="Buscar produto..."
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Search />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    sx={{ width: 300 }}
                                 />
                             )}
-                            renderOption={(props, option) => (
-                                <li {...props}>
-                                    <Box>
-                                        <Typography variant="body1" component="div">
-                                            {typeof option === 'object' ? option.value : option}
-                                        </Typography>
-                                        {typeof option === 'object' && (
-                                            <Typography variant="caption" color="text.secondary">
-                                                Código: {option.codigo}
-                                            </Typography>
-                                        )}
-                                    </Box>
-                                </li>
-                            )}
-                            noOptionsText="Nenhum produto encontrado"
                         />
+
+                        <FormControl size="small" sx={{ minWidth: 200 }}>
+                            <InputLabel>Ordenar por</InputLabel>
+                            <Select
+                                value={ordenacao}
+                                label="Ordenar por"
+                                onChange={(e) => setOrdenacao(e.target.value)}
+                            >
+                                <MenuItem value="">
+                                    <em>Sem ordenação</em>
+                                </MenuItem>
+                                <MenuItem value="nome_asc">Nome (A-Z)</MenuItem>
+                                <MenuItem value="nome_desc">Nome (Z-A)</MenuItem>
+                                <MenuItem value="preco_asc">Preço (menor)</MenuItem>
+                                <MenuItem value="preco_desc">Preço (maior)</MenuItem>
+                                <MenuItem value="validade_asc">Validade (mais próxima)</MenuItem>
+                                <MenuItem value="validade_desc">Validade (mais distante)</MenuItem>
+                                <MenuItem value="estoque_asc">Estoque (menor)</MenuItem>
+                                <MenuItem value="estoque_desc">Estoque (maior)</MenuItem>
+                            </Select>
+                        </FormControl>
                     </Box>
+
                     <Button
                         variant="contained"
-                        onClick={handleBuscarClick}
-                        sx={{ backgroundColor: '#D81B60', "&:hover": { backgroundColor: '#9C4D97' } }}
-                    >
-                        Buscar
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        onClick={handleLimparBusca}
+                        startIcon={<Add />}
+                        component={Link}
+                        to="/produtos"
                         sx={{
-                            borderColor: '#D81B60',
-                            color: '#D81B60',
-                            "&:hover": { borderColor: '#9C4D97', color: '#9C4D97' }
+                            backgroundColor: '#F48FB1',
+                            '&:hover': { backgroundColor: '#F06292' },
                         }}
                     >
-                        Limpar
+                        Novo Produto
                     </Button>
-                </Stack>
+                </Box>
 
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {produtos.length === produtosOriginais.length
-                        ? `Mostrando todos os ${produtos.length} produtos`
-                        : `Mostrando ${produtos.length} de ${produtosOriginais.length} produtos`
-                    }
+                    Total: {produtosFiltradosOrdenados.length} produto(s)
                 </Typography>
 
-                {loading ? (
-                    <CircularProgress />
-                ) : (
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
+                <TableContainer component={Paper} elevation={3}>
+                    <Table>
+                        <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
+                            <TableRow>
+                                <TableCell>Nome</TableCell>
+                                <TableCell>Código</TableCell>
+                                <TableCell>Marca</TableCell>
+                                <TableCell>Tipo</TableCell>
+                                <TableCell>Preço</TableCell>
+                                <TableCell>Validade</TableCell>
+                                <TableCell>Estoque</TableCell>
+                                <TableCell align="center">Ações</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {produtosFiltradosOrdenados.length === 0 ? (
                                 <TableRow>
-                                    <TableCell>Nome</TableCell>
-                                    <TableCell>Código</TableCell>
-                                    <TableCell>Marca</TableCell>
-                                    <TableCell>Tipo</TableCell>
-                                    <TableCell>Preço</TableCell>
-                                    <TableCell>Validade</TableCell>
-                                    <TableCell>Lote</TableCell>
+                                    <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                                        <Typography variant="body1" color="text.secondary">
+                                            Nenhum produto encontrado
+                                        </Typography>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {produtos.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                                            <Typography variant="body1" color="text.secondary">
-                                                Nenhum produto encontrado
-                                            </Typography>
+                            ) : (
+                                produtosFiltradosOrdenados.map((produto) => (
+                                    <TableRow key={`${produto.codigo_barra}-${produto.lote_produto}`}>
+                                        <TableCell>{produto.nome}</TableCell>
+                                        <TableCell>{produto.codigo_barra}</TableCell>
+                                        <TableCell>{produto.marca}</TableCell>
+                                        <TableCell>{produto.tipo_produto}</TableCell>
+                                        <TableCell>{formatarPreco(produto.preco)}</TableCell>
+                                        <TableCell>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                {formatarData(produto.data_validade)}
+                                                {isVencido(produto.data_validade) && (
+                                                    <Chip label="Vencido" size="small" color="error" />
+                                                )}
+                                                {!isVencido(produto.data_validade) && isVencendoEm30Dias(produto.data_validade) && (
+                                                    <Chip label="Vencendo" size="small" color="warning" />
+                                                )}
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                {produto.quantidade_estoque}
+                                                {produto.quantidade_estoque === 0 && (
+                                                    <Chip label="Sem estoque" size="small" color="error" />
+                                                )}
+                                                {produto.quantidade_estoque > 0 && produto.quantidade_estoque <= 5 && (
+                                                    <Chip label="Baixo" size="small" color="warning" />
+                                                )}
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <IconButton
+                                                color="primary"
+                                                onClick={() => {/* Implementar edição */}}
+                                            >
+                                                <Edit />
+                                            </IconButton>
+                                            <IconButton
+                                                color="error"
+                                                onClick={() => handleExcluir(produto.codigo_barra)}
+                                            >
+                                                <Delete />
+                                            </IconButton>
                                         </TableCell>
                                     </TableRow>
-                                ) : (
-                                    produtos.map((produto) => (
-                                        <TableRow key={`${produto.codigo_barra}-${produto.lote_produto}`}>
-                                            <TableCell>{produto.nome}</TableCell>
-                                            <TableCell>{produto.codigo_barra}</TableCell>
-                                            <TableCell>{produto.marca}</TableCell>
-                                            <TableCell>{produto.tipo_produto}</TableCell>
-                                            <TableCell>{formatarPreco(produto.preco)}</TableCell>
-                                            <TableCell>{formatarData(produto.data_validade)}</TableCell>
-                                            <TableCell>{produto.lote_produto}</TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                )}
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             </Paper>
-        </Container>
+        </Box>
     );
 };
 
