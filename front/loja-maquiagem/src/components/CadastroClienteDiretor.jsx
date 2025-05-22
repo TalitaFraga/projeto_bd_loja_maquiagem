@@ -10,8 +10,7 @@ import {
   IconButton,
   Divider,
   Alert,
-  Snackbar,
-  FormHelperText
+  Snackbar
 } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -38,7 +37,6 @@ const CadastroClienteDiretor = () => {
     cep: ""
   });
 
-  // Estado para gerenciar os erros de validação
   const [erros, setErros] = useState({
     nome: "",
     cpf: "",
@@ -62,313 +60,224 @@ const CadastroClienteDiretor = () => {
   
   const navigate = useNavigate();
 
-  // Função para validar CPF (formato e dígitos verificadores)
-  const validarCPF = (cpf) => {
-    // Remove caracteres não numéricos
-    const cpfLimpo = cpf.replace(/\D/g, '');
-    
-    // Verifica se tem 11 dígitos
-    if (cpfLimpo.length !== 11) {
-      return false;
-    }
-    
-    // Verifica se todos os dígitos são iguais
-    if (/^(\d)\1+$/.test(cpfLimpo)) {
-      return false;
-    }
-    
-    // Valida os dígitos verificadores
-    let soma = 0;
-    let resto;
-    
-    // Primeiro dígito verificador
-    for (let i = 1; i <= 9; i++) {
-      soma += parseInt(cpfLimpo.substring(i-1, i)) * (11 - i);
-    }
-    
-    resto = (soma * 10) % 11;
-    if (resto === 10 || resto === 11) resto = 0;
-    if (resto !== parseInt(cpfLimpo.substring(9, 10))) return false;
-    
-    // Segundo dígito verificador
-    soma = 0;
-    for (let i = 1; i <= 10; i++) {
-      soma += parseInt(cpfLimpo.substring(i-1, i)) * (12 - i);
-    }
-    
-    resto = (soma * 10) % 11;
-    if (resto === 10 || resto === 11) resto = 0;
-    if (resto !== parseInt(cpfLimpo.substring(10, 11))) return false;
-    
-    return true;
-  };
-
   // Função para validar email
   const validarEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
 
-  // Função para validar telefone
-  const validarTelefone = (telefone) => {
-    // Remove caracteres não numéricos
-    const telefoneLimpo = telefone.replace(/\D/g, '');
-    // Verifica se tem entre 10 e 11 dígitos (com ou sem DDD)
-    return telefoneLimpo.length >= 10 && telefoneLimpo.length <= 11;
-  };
-
-  // Função para validar CEP - versão corrigida
-  const validarCEP = (cep) => {
-    // Remove caracteres não numéricos
-    const cepLimpo = cep.replace(/\D/g, '');
-    
-    // Aceita CEPs com pelo menos 5 dígitos
-    return cepLimpo.length >= 5;
-  };
-
-  // Função para validar data de nascimento
-  const validarDataNasc = (data) => {
-    if (!data) return false;
-    
-    const dataObj = new Date(data);
-    const hoje = new Date();
-    
-    // Verifica se é uma data válida
-    if (isNaN(dataObj.getTime())) return false;
-    
-    // Verifica se não é uma data futura
-    if (dataObj > hoje) return false;
-    
-    // Verifica se a pessoa tem pelo menos 16 anos (regra de negócio)
-    const idade = hoje.getFullYear() - dataObj.getFullYear();
-    const mesAtual = hoje.getMonth();
-    const diaAtual = hoje.getDate();
-    const mesNasc = dataObj.getMonth();
-    const diaNasc = dataObj.getDate();
-    
-    if (idade < 16 || (idade === 16 && (mesAtual < mesNasc || (mesAtual === mesNasc && diaAtual < diaNasc)))) {
-      return false;
-    }
-    
-    return true;
-  };
-
-  // Função para validar número inteiro
-  const validarNumeroInteiro = (numero) => {
-    return /^\d+$/.test(numero);
-  };
-
-  // Função para validar nome (apenas letras e espaços)
-  const validarNome = (nome) => {
-    // Permite letras, espaços e caracteres com acentos
-    return /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/.test(nome) && nome.trim().length >= 3;
-  };
-
-  // Função para validar RG (formato)
-  const validarRG = (rg) => {
-    // Remove caracteres não numéricos
-    const rgLimpo = rg.replace(/\D/g, '');
-    // Verifica se tem pelo menos 7 dígitos
-    return rgLimpo.length >= 7;
-  };
-
-  // Função para validar texto (não vazio)
-  const validarTexto = (texto) => {
-    return texto.trim().length >= 2;
-  };
-
-  // Função para validar o formulário inteiro
-  const validarFormulario = () => {
-    let novosErros = { ...erros };
-    let formValido = true;
-
-    // Validação de Nome
-    if (!validarNome(form.nome)) {
-      novosErros.nome = "Nome deve conter apenas letras e ter pelo menos 3 caracteres";
-      formValido = false;
-    } else {
-      novosErros.nome = "";
-    }
-
-    // Validação de CPF
-    if (!validarCPF(form.cpf)) {
-      novosErros.cpf = "CPF inválido, verifique se digitou corretamente";
-      formValido = false;
-    } else {
-      novosErros.cpf = "";
-    }
-
-    // Validação de Data de Nascimento
-    if (!validarDataNasc(form.dataNasc)) {
-      novosErros.dataNasc = "Data inválida. Você deve ter pelo menos 16 anos";
-      formValido = false;
-    } else {
-      novosErros.dataNasc = "";
-    }
-
-    // Validação de RG
-    if (!validarRG(form.rg)) {
-      novosErros.rg = "RG inválido, verifique se digitou corretamente";
-      formValido = false;
-    } else {
-      novosErros.rg = "";
-    }
-
-    // Validação de Email
-    if (!validarEmail(form.email)) {
-      novosErros.email = "Email inválido, digite no formato exemplo@dominio.com";
-      formValido = false;
-    } else {
-      novosErros.email = "";
-    }
-
-    // Validação de Telefone 1
-    if (!validarTelefone(form.telefone1)) {
-      novosErros.telefone1 = "Telefone inválido, deve conter DDD + número";
-      formValido = false;
-    } else {
-      novosErros.telefone1 = "";
-    }
-
-    // Validação de Telefone 2 (opcional)
-    if (form.telefone2 && !validarTelefone(form.telefone2)) {
-      novosErros.telefone2 = "Telefone inválido, deve conter DDD + número";
-      formValido = false;
-    } else {
-      novosErros.telefone2 = "";
-    }
-
-    // Validação de Rua
-    if (!validarTexto(form.rua)) {
-      novosErros.rua = "Informe um endereço válido";
-      formValido = false;
-    } else {
-      novosErros.rua = "";
-    }
-
-    // Validação de Número
-    if (!validarNumeroInteiro(form.numero)) {
-      novosErros.numero = "Digite apenas números";
-      formValido = false;
-    } else {
-      novosErros.numero = "";
-    }
-
-    // Validação de Bairro
-    if (!validarTexto(form.bairro)) {
-      novosErros.bairro = "Informe um bairro válido";
-      formValido = false;
-    } else {
-      novosErros.bairro = "";
-    }
-
-    // Validação de Cidade
-    if (!validarTexto(form.cidade)) {
-      novosErros.cidade = "Informe uma cidade válida";
-      formValido = false;
-    } else {
-      novosErros.cidade = "";
-    }
-
-    // Validação de CEP
-    if (!validarCEP(form.cep)) {
-      novosErros.cep = "CEP inválido, deve conter pelo menos 5 dígitos";
-      formValido = false;
-    } else {
-      novosErros.cep = "";
-    }
-
-    setErros(novosErros);
-    return formValido;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prevForm) => ({ ...prevForm, [name]: value }));
-    
-    // Limpar o erro quando o campo for alterado
-    setErros((prevErros) => ({ ...prevErros, [name]: "" }));
-  };
-
-  // Formatar CPF enquanto digita
+  // Formatar CPF enquanto digita (apenas formatação visual)
   const formatCPF = (e) => {
     let value = e.target.value.replace(/\D/g, '');
+    
     if (value.length <= 11) {
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    }
-    setForm({ ...form, cpf: value });
-    
-    // Limpar o erro quando o campo for alterado
-    setErros((prevErros) => ({ ...prevErros, cpf: "" }));
-  };
-
-  // Formatar CEP enquanto digita
-  const formatCEP = (e) => {
-    let value = e.target.value.replace(/\D/g, '');
-    
-    // Limita a 8 dígitos e formata com hífen
-    if (value.length <= 8) {
-      // Formato: 00000-000
-      if (value.length > 5) {
-        value = value.replace(/^(\d{5})(\d)/, '$1-$2');
+      if (value.length > 9) {
+        value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      } else if (value.length > 6) {
+        value = value.replace(/^(\d{3})(\d{3})(\d{3})/, '$1.$2.$3');
+      } else if (value.length > 3) {
+        value = value.replace(/^(\d{3})(\d{3})/, '$1.$2');
       }
     }
     
-    setForm({ ...form, cep: value });
-    
-    // Limpar o erro quando o campo for alterado
-    setErros((prevErros) => ({ ...prevErros, cep: "" }));
+    setForm({ ...form, cpf: value });
+    setErros(prev => ({ ...prev, cpf: "" }));
+  };
+
+  // Formatar RG enquanto digita
+  const formatRG = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 9) {
+      setForm({ ...form, rg: value });
+    }
+    setErros(prev => ({ ...prev, rg: "" }));
   };
 
   // Formatar telefone enquanto digita
   const formatTelefone = (e, campo) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length <= 11) {
-      // Formato: (XX) XXXXX-XXXX
-      value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-      value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+      if (value.length > 10) {
+        value = value.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      } else if (value.length > 6) {
+        value = value.replace(/^(\d{2})(\d{4})(\d+)/, '($1) $2-$3');
+      } else if (value.length > 2) {
+        value = value.replace(/^(\d{2})(\d+)/, '($1) $2');
+      }
     }
     setForm({ ...form, [campo]: value });
+    setErros(prev => ({ ...prev, [campo]: "" }));
+  };
+
+  // Formatar CEP enquanto digita
+  const formatCEP = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
     
-    // Limpar o erro quando o campo for alterado
-    setErros((prevErros) => ({ ...prevErros, [campo]: "" }));
+    if (value.length <= 8) {
+      if (value.length > 5) {
+        value = value.replace(/^(\d{5})(\d)/, '$1-$2');
+      }
+    }
+    
+    setForm({ ...form, cep: value });
+    setErros(prev => ({ ...prev, cep: "" }));
+  };
+
+  // Validar email em tempo real
+  const handleEmailChange = (e) => {
+    const { value } = e.target;
+    setForm(prev => ({ ...prev, email: value }));
+    
+    if (value && !validarEmail(value)) {
+      setErros(prev => ({ ...prev, email: "Email inválido" }));
+    } else {
+      setErros(prev => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+    setErros((prevErros) => ({ ...prevErros, [name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar todo o formulário antes de enviar
-    if (!validarFormulario()) {
-      setSnackbar({
-        open: true,
-        message: "Por favor, corrija os erros antes de enviar.",
-        severity: "error"
-      });
-      return;
-    }
-
-    const payload = {
-      pessoa: form,
-      isCliente: true,
-      tipoFuncionario: "DIRETOR"
+    // Limpar e formatar dados antes de enviar
+    const dadosLimpos = {
+      nome: form.nome.trim(),
+      cpf: form.cpf.replace(/\D/g, ''), // Remove pontos e hífen do CPF
+      dataNasc: form.dataNasc,
+      rg: form.rg.replace(/\D/g, ''), // Remove caracteres especiais do RG
+      email: form.email.trim().toLowerCase(),
+      telefone1: form.telefone1.replace(/\D/g, ''), // Remove formatação do telefone
+      telefone2: form.telefone2 ? form.telefone2.replace(/\D/g, '') : '', // Remove formatação se preenchido
+      rua: form.rua.trim(),
+      numero: form.numero.trim(),
+      bairro: form.bairro.trim(),
+      cidade: form.cidade.trim(),
+      cep: form.cep.replace(/\D/g, '') // Remove hífen do CEP
     };
 
+    // Payload para cadastro de cliente
+    const payload = {
+      pessoa: dadosLimpos,
+      isCliente: true,
+    };
+
+    console.log("Payload enviado:", JSON.stringify(payload, null, 2));
+
     try {
-      await axios.post("http://localhost:8081/cadastro-pessoa", payload);
+      const response = await axios.post("http://localhost:8081/cadastro-pessoa", payload);
+      
+      console.log("Resposta completa:", response);
+      
       setSnackbar({
         open: true,
         message: "Cliente cadastrado com sucesso!",
         severity: "success"
       });
-      setTimeout(() => navigate("/lista"), 2000);
+      
+      // Limpar formulário após sucesso
+      setForm({
+        nome: "",
+        cpf: "",
+        dataNasc: "",
+        rg: "",
+        email: "",
+        telefone1: "",
+        telefone2: "",
+        rua: "",
+        numero: "",
+        bairro: "",
+        cidade: "",
+        cep: ""
+      });
+      
+      setTimeout(() => navigate("/lista-clientes-pelo-diretor"), 2000);
+      
     } catch (error) {
       console.error("Erro no cadastro:", error);
+      
+      let errorMessage = "Erro ao cadastrar cliente. Verifique os dados informados.";
+      let severity = "error";
+      
+      if (error.response) {
+        const errorText = error.response.data;
+        
+        // DETECTAR ERROS COMUNS POR KEYWORDS NA MENSAGEM DE ERRO
+        if (typeof errorText === 'string') {
+          const errorLower = errorText.toLowerCase();
+          
+          // CPF duplicado
+          if (errorLower.includes('cpf') || 
+              errorLower.includes('duplicate entry') && errorLower.includes('cpf') ||
+              errorLower.includes('unique constraint') && errorLower.includes('cpf') ||
+              errorLower.includes('primary key')) {
+            errorMessage = "Este CPF já está cadastrado no sistema. Verifique se o cliente não foi cadastrado anteriormente.";
+            severity = "warning";
+          }
+          // RG duplicado  
+          else if (errorLower.includes('rg') || 
+                   errorLower.includes('duplicate entry') && errorLower.includes('rg')) {
+            errorMessage = "Este RG já está cadastrado no sistema.";
+            severity = "warning";
+          }
+          // Email duplicado
+          else if (errorLower.includes('email') || 
+                   errorLower.includes('duplicate entry') && errorLower.includes('email')) {
+            errorMessage = "Este email já está cadastrado no sistema.";
+            severity = "warning";
+          }
+          // Erro de constraint/validação genérico
+          else if (errorLower.includes('constraint') || 
+                   errorLower.includes('duplicate') ||
+                   errorLower.includes('unique')) {
+            errorMessage = "Dados duplicados detectados. Verifique CPF, RG ou Email.";
+            severity = "warning";
+          }
+          // Erro de conexão com banco
+          else if (errorLower.includes('connection') || 
+                   errorLower.includes('timeout') ||
+                   errorLower.includes('database')) {
+            errorMessage = "Erro de conexão com o servidor. Tente novamente em alguns instantes.";
+            severity = "error";
+          }
+        }
+        
+        // STATUS HTTP
+        switch (error.response.status) {
+          case 409: // Conflict
+            if (severity === "error") { // Se não detectou tipo específico acima
+              errorMessage = "Dados conflitantes. CPF, RG ou Email já cadastrado.";
+              severity = "warning";
+            }
+            break;
+          case 400: // Bad Request
+            if (severity === "error") {
+              errorMessage = "Dados inválidos. Verifique se todos os campos estão preenchidos corretamente.";
+            }
+            break;
+          case 500: // Internal Server Error
+            if (severity === "error") {
+              errorMessage = "Erro interno do servidor. Tente novamente mais tarde.";
+            }
+            break;
+        }
+        
+      } else if (error.request) {
+        errorMessage = "Sem resposta do servidor. Verifique sua conexão com a internet.";
+        severity = "error";
+      } else {
+        errorMessage = "Erro na preparação da requisição. Tente recarregar a página.";
+        severity = "error";
+      }
+      
       setSnackbar({
         open: true,
-        message: "Erro ao cadastrar cliente. Verifique os dados informados.",
-        severity: "error"
+        message: errorMessage,
+        severity: severity
       });
     }
   };
@@ -408,7 +317,7 @@ const CadastroClienteDiretor = () => {
           
           <Divider sx={{ mb: 4 }} />
 
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit} autoComplete="on">
             <Typography variant="h6" color="#555" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
               <BadgeIcon sx={{ mr: 1, color: '#F06292' }} />
               Informações Pessoais
@@ -426,6 +335,7 @@ const CadastroClienteDiretor = () => {
                   variant="outlined"
                   error={!!erros.nome}
                   helperText={erros.nome}
+                  autoComplete="name"
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -475,11 +385,11 @@ const CadastroClienteDiretor = () => {
                   label="RG"
                   name="rg"
                   value={form.rg}
-                  onChange={handleChange}
+                  onChange={formatRG}
                   required
                   variant="outlined"
                   error={!!erros.rg}
-                  helperText={erros.rg}
+                  helperText={erros.rg || "Apenas números"}
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -500,11 +410,12 @@ const CadastroClienteDiretor = () => {
                   name="email"
                   type="email"
                   value={form.email}
-                  onChange={handleChange}
+                  onChange={handleEmailChange}
                   required
                   variant="outlined"
                   error={!!erros.email}
                   helperText={erros.email}
+                  autoComplete="email"
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -523,6 +434,7 @@ const CadastroClienteDiretor = () => {
                   placeholder="(00) 00000-0000"
                   error={!!erros.telefone1}
                   helperText={erros.telefone1}
+                  autoComplete="tel"
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -539,7 +451,8 @@ const CadastroClienteDiretor = () => {
                   variant="outlined"
                   placeholder="(00) 00000-0000"
                   error={!!erros.telefone2}
-                  helperText={erros.telefone2}
+                  helperText={erros.telefone2 || "Opcional"}
+                  autoComplete="tel"
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -564,6 +477,7 @@ const CadastroClienteDiretor = () => {
                   variant="outlined"
                   error={!!erros.rua}
                   helperText={erros.rua}
+                  autoComplete="street-address"
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -598,6 +512,7 @@ const CadastroClienteDiretor = () => {
                   variant="outlined"
                   error={!!erros.bairro}
                   helperText={erros.bairro}
+                  autoComplete="address-level3"
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -615,6 +530,7 @@ const CadastroClienteDiretor = () => {
                   variant="outlined"
                   error={!!erros.cidade}
                   helperText={erros.cidade}
+                  autoComplete="address-level2"
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -632,7 +548,8 @@ const CadastroClienteDiretor = () => {
                   variant="outlined"
                   placeholder="00000-000"
                   error={!!erros.cep}
-                  helperText={erros.cep || "Digite apenas números. A formatação será aplicada automaticamente."}
+                  helperText={erros.cep || "Digite apenas números"}
+                  autoComplete="postal-code"
                   InputProps={{
                     sx: { borderRadius: 2 }
                   }}
@@ -666,7 +583,7 @@ const CadastroClienteDiretor = () => {
 
       <Snackbar 
         open={snackbar.open} 
-        autoHideDuration={5000} 
+        autoHideDuration={snackbar.severity === 'warning' ? 7000 : 5000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
@@ -674,7 +591,13 @@ const CadastroClienteDiretor = () => {
           onClose={handleCloseSnackbar} 
           severity={snackbar.severity}
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ 
+            width: '100%',
+            '& .MuiAlert-message': {
+              fontSize: '14px',
+              fontWeight: snackbar.severity === 'warning' ? 'bold' : 'normal'
+            }
+          }}
         >
           {snackbar.message}
         </Alert>
