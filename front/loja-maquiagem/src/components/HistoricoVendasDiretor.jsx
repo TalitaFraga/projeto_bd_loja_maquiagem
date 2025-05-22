@@ -252,7 +252,7 @@ const HistoricoVendasPeloDiretor = () => {
             </head>
             <body>
                 <div class="header">
-                    <div class="company">🏪 LOJA COSMÉTICA DELUXE</div>
+                    <div class="company">🏪 LOJA MAQUIAGEM & CIA</div>
                     <div>CNPJ: 12.345.678/0001-90 | IE: 123.456.789</div>
                     <div>Rua das Flores, 123 - Centro - São Paulo/SP</div>
                     <div class="nf-number">NOTA FISCAL ELETRÔNICA Nº ${numeroNF}</div>
@@ -270,8 +270,8 @@ const HistoricoVendasPeloDiretor = () => {
                 <div class="section">
                     <div class="section-title">👨‍💼 DADOS DO VENDEDOR</div>
                     <div class="info-grid">
-                        <div><strong>Nome:</strong> ${venda.nomeVendedor}</div>
-                        <div><strong>CPF:</strong> ${formatarCPF(venda.cpfVendedor)}</div>
+                        <div><strong>Nome: </strong>Maquiagem e Cia Ltda</div>
+                        <div><strong>CNPJ: </strong>12.345.678-0001-90</div>
                     </div>
                 </div>
 
