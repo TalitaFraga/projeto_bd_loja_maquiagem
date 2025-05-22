@@ -150,8 +150,8 @@ const Layout = ({ children }) => {
       type: "submenu",
       key: "funcionarios",
       subItems: [
-        { text: "Cadastrar Funcionários", icon: <PersonAddIcon />, path: "/cadastro-pessoa" },
-        { text: "Visualizar Funcionários", icon: <VisibilityIcon />, path: "/funcionarios" }
+        { text: "Cadastrar Funcionários", icon: <PersonAddIcon />, path: "/cadastro-funcionario-pelo-diretor" },
+        { text: "Visualizar Funcionários", icon: <VisibilityIcon />, path: "/lista-funcionario-pelo-diretor" }
       ]
     }
   ];
