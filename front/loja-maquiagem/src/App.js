@@ -14,6 +14,7 @@ import ListarClientes from './components/ListarClientes';
 import ListarFuncionarios from './components/ListarFuncionarios';
 import ListaFornecedores from './components/ListaFornecedores';
 import EditarFornecedor from './components/EditarFornecedor';
+import CadastroClienteDiretor from './components/CadastroClienteDiretor';
 import Sidebar from '../src/pages/SideBar';
 
 
@@ -41,6 +42,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/dashboard-vendedor" element={<DashboardVendedor/>}/>
+        <Route path="/cadastro-cliente" element={<CadastroClienteDiretor />} />
 
       </Routes>
     </Router>
