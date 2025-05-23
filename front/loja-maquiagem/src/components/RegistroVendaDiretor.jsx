@@ -416,7 +416,6 @@ const RegistroVenda = () => {
                 required
                 variant="outlined"
                 placeholder="000.000.000-00"
-                helperText="Digite: 390.533.447-05 ou 865.443.027-53"
                 InputProps={{
                   sx: { borderRadius: 2 }
                 }}
@@ -433,7 +432,6 @@ const RegistroVenda = () => {
                 required
                 variant="outlined"
                 placeholder="000.000.000-00"
-                helperText="Digite: 865.443.027-53"
                 InputProps={{
                   sx: { borderRadius: 2 }
                 }}

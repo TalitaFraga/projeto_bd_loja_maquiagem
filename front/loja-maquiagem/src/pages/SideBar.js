@@ -108,7 +108,7 @@ const Layout = ({ children }) => {
       key: "vendas",
       subItems: [
         { text: "Registro de Venda", icon: <AddShoppingCartIcon />, path: "/registro-venda-pelo-diretor" },
-        { text: "Registro de Troca", icon: <SwapHorizIcon />, path: "/registro-troca" },
+        { text: "Registro de Troca", icon: <SwapHorizIcon />, path: "/troca-pedido-pelo-diretor" },
         { text: "Histórico de Vendas", icon: <HistoryIcon />, path: "/historico-vendas-pelo-diretor" }
       ]
     },

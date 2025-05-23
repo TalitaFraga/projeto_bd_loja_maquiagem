@@ -23,7 +23,7 @@ import CadastroFuncionarioDiretor from './components/CadastroFuncionarioDiretor'
 import EditarFuncionarioDiretor from './components/EditarFuncionarioDiretor';
 import RegistroVendaDiretor from './components/RegistroVendaDiretor';
 import HistoricoVendasDiretor from './components/HistoricoVendasDiretor';
-
+import TrocaPedidoDiretor from './components/TrocaPedidoDiretor';
 
 function AppContent() {
   const location = useLocation();
@@ -76,6 +76,8 @@ function AppContent() {
         <Route path="/editar-funcionario-pelo-diretor/:cpf" element={<EditarFuncionarioDiretor />} />
         <Route path="/registro-venda-pelo-diretor" element={<RegistroVendaDiretor />} />
         <Route path="/historico-vendas-pelo-diretor" element={<HistoricoVendasDiretor />} />
+        <Route path="/troca-pedido-pelo-diretor" element={<TrocaPedidoDiretor />} />
+
       </Routes>
     </Sidebar>
   );

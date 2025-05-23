@@ -23,9 +23,15 @@ import {
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle
+    DialogTitle,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
+    Grid,
+    Card,
+    CardContent
 } from '@mui/material';
-import { Add, Search, Visibility, Receipt } from '@mui/icons-material';
+import { Add, Search, Visibility, Receipt, ExpandMore, SwapHoriz, CompareArrows } from '@mui/icons-material';
 import HomeIcon from '@mui/icons-material/Home';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Link, useNavigate } from 'react-router-dom';
@@ -128,14 +134,108 @@ const HistoricoVendasPeloDiretor = () => {
                     dataHoraCompleta: dataOriginal, // Para ordenação
                     valorTotal: valorTotal,
                     status: venda.status || 'CONCLUÍDA',
-                    itens: venda.itens || []
+                    itens: venda.itens || [],
+                    // 🆕 Verificar se é uma troca
+                    tipoOperacao: venda.tipoOperacao || 'VENDA',
+                    vendaOriginalId: venda.vendaOriginalId || null,
+                    trocaId: venda.trocaId || null,
+                    valorAdicional: venda.valorAdicional || 0
                 };
             }));
             
-            // Ordenar por data/hora mais recente primeiro
-            vendasProcessadas.sort((a, b) => b.dataHoraCompleta - a.dataHoraCompleta);
+            // Inicializar com vendas processadas
+            let vendasComTrocas = [...vendasProcessadas];
             
-            setVendas(vendasProcessadas);
+            // Buscar dados de trocas do banco de dados
+            try {
+                const trocasResponse = await axios.get('http://localhost:8081/trocas');
+                const trocasBD = trocasResponse.data;
+                
+                // Processar trocas do banco de dados
+                trocasBD.forEach(troca => {
+                    if (troca.status === 'CONCLUIDA' && troca.novaVendaId) {
+                        const vendaExistente = vendasComTrocas.find(v => v.id === troca.novaVendaId);
+                        if (!vendaExistente) {
+                            // Adicionar nova venda de troca do BD
+                            vendasComTrocas.push({
+                                id: troca.novaVendaId,
+                                cpfCliente: troca.cpfCliente || 'N/A',
+                                nomeCliente: troca.nomeCliente || 'Cliente não identificado',
+                                cpfVendedor: troca.cpfVendedor || 'N/A',
+                                nomeVendedor: troca.nomeVendedor || 'Diretor',
+                                dataVenda: new Date(troca.dataHoraTroca).toLocaleDateString('pt-BR'),
+                                horaVenda: new Date(troca.dataHoraTroca).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                                dataHoraCompleta: new Date(troca.dataHoraTroca),
+                                valorTotal: troca.valorTotalNovo || 0,
+                                status: 'TROCA CONCLUÍDA',
+                                itens: troca.itensNovos || [],
+                                tipoOperacao: 'TROCA',
+                                vendaOriginalId: troca.vendaOriginalId,
+                                trocaId: troca.idTroca,
+                                valorAdicional: troca.valorAdicional || 0,
+                                dadosTroca: troca
+                            });
+                        } else {
+                            // Atualizar venda existente com informações de troca do BD
+                            vendaExistente.tipoOperacao = 'TROCA';
+                            vendaExistente.vendaOriginalId = troca.vendaOriginalId;
+                            vendaExistente.trocaId = troca.idTroca;
+                            vendaExistente.valorAdicional = troca.valorAdicional || 0;
+                            vendaExistente.dadosTroca = troca;
+                            vendaExistente.status = 'TROCA CONCLUÍDA';
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao buscar trocas do BD:', error);
+                // Fallback para localStorage se houver erro na API
+                try {
+                    const trocasLocalStorage = JSON.parse(localStorage.getItem('historico_trocas') || '[]');
+                    
+                    // Processar trocas do localStorage como fallback
+                    trocasLocalStorage.forEach(troca => {
+                        if (troca.status === 'CONCLUIDA' && troca.vendaNova && troca.vendaNova.id) {
+                            const vendaExistente = vendasComTrocas.find(v => v.id === troca.vendaNova.id);
+                            if (!vendaExistente) {
+                                // Adicionar nova venda de troca do localStorage
+                                vendasComTrocas.push({
+                                    id: troca.vendaNova.id,
+                                    cpfCliente: troca.vendaOriginal?.cpfCliente || 'N/A',
+                                    nomeCliente: troca.vendaOriginal?.nomeCliente || 'Cliente não identificado',
+                                    cpfVendedor: 'DIRETOR',
+                                    nomeVendedor: 'Diretor',
+                                    dataVenda: new Date(troca.dataHora).toLocaleDateString('pt-BR'),
+                                    horaVenda: new Date(troca.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                                    dataHoraCompleta: new Date(troca.dataHora),
+                                    valorTotal: troca.vendaNova.valorTotal || 0,
+                                    status: 'TROCA CONCLUÍDA',
+                                    itens: troca.vendaNova.itens || [],
+                                    tipoOperacao: 'TROCA',
+                                    vendaOriginalId: troca.vendaOriginal?.id,
+                                    trocaId: troca.id,
+                                    valorAdicional: troca.financeiro?.valorAdicional || 0,
+                                    dadosTroca: troca
+                                });
+                            } else {
+                                // Atualizar venda existente com informações de troca do localStorage
+                                vendaExistente.tipoOperacao = 'TROCA';
+                                vendaExistente.vendaOriginalId = troca.vendaOriginal?.id;
+                                vendaExistente.trocaId = troca.id;
+                                vendaExistente.valorAdicional = troca.financeiro?.valorAdicional || 0;
+                                vendaExistente.dadosTroca = troca;
+                                vendaExistente.status = 'TROCA CONCLUÍDA';
+                            }
+                        }
+                    });
+                } catch (localStorageError) {
+                    console.error('Erro ao acessar localStorage:', localStorageError);
+                }
+            }
+                        
+            // Ordenar por data/hora mais recente primeiro
+            vendasComTrocas.sort((a, b) => b.dataHoraCompleta - a.dataHoraCompleta);
+            
+            setVendas(vendasComTrocas);
             setError(null);
         } catch (err) {
             console.error('Erro ao buscar vendas:', err);
@@ -162,8 +262,8 @@ const HistoricoVendasPeloDiretor = () => {
                     const produto = produtos.find(p => p.codigo_barra === item.codigoBarra);
                     return {
                         ...item,
-                        nomeProduto: produto?.nome || 'Produto não encontrado',
-                        valorUnitario: produto ? parseFloat(produto.preco) : 0
+                        nomeProduto: produto?.nome || item.nomeProduto || 'Produto não encontrado',
+                        valorUnitario: produto ? parseFloat(produto.preco) : (item.valorUnitario || 0)
                     };
                 });
                 
@@ -228,6 +328,16 @@ const HistoricoVendasPeloDiretor = () => {
     };
 
     const gerarPDFNF = (venda, numeroNF) => {
+        // 🆕 Título específico para trocas
+        const tipoDocumento = venda.tipoOperacao === 'TROCA' ? 'NOTA FISCAL DE TROCA' : 'NOTA FISCAL ELETRÔNICA';
+        const infoTroca = venda.tipoOperacao === 'TROCA' ? `
+            <div style="background: #E3F2FD; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                <strong>🔄 OPERAÇÃO DE TROCA</strong><br/>
+                Venda Original: #${venda.vendaOriginalId}<br/>
+                ${venda.valorAdicional > 0 ? `Valor Adicional Pago: ${formatarValor(venda.valorAdicional)}` : 'Troca Equivalente'}
+            </div>
+        ` : '';
+        
         // Criar conteúdo HTML da NF
         const htmlContent = `
             <!DOCTYPE html>
@@ -248,16 +358,19 @@ const HistoricoVendasPeloDiretor = () => {
                     th { background-color: #FCE4EC; }
                     .total { background: #E8F5E8; font-weight: bold; text-align: right; }
                     .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
+                    .troca-info { background: #E3F2FD; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3; }
                 </style>
             </head>
             <body>
                 <div class="header">
                     <div class="company">🏪 LOJA MAQUIAGEM & CIA</div>
                     <div>CNPJ: 12.345.678/0001-90 | IE: 123.456.789</div>
-                    <div>Rua das Flores, 123 - Centro - São Paulo/SP</div>
-                    <div class="nf-number">NOTA FISCAL ELETRÔNICA Nº ${numeroNF}</div>
+                    <div>Rua das Flores, 123 - Centro -  Sumaré/SP</div>
+                    <div class="nf-number">${tipoDocumento} Nº ${numeroNF}</div>
                     <div>Data de Emissão: ${new Date().toLocaleString('pt-BR')}</div>
                 </div>
+                
+                ${infoTroca}
                 
                 <div class="section">
                     <div class="section-title">👤 DADOS DO CLIENTE</div>
@@ -311,6 +424,8 @@ const HistoricoVendasPeloDiretor = () => {
                         <tr><td>Base de Cálculo ICMS</td><td class="total">${formatarValor(venda.valorTotal)}</td></tr>
                         <tr><td>Valor do ICMS</td><td class="total">${formatarValor(venda.valorTotal * 0.18)}</td></tr>
                         <tr><td>Valor Total dos Produtos</td><td class="total">${formatarValor(venda.valorTotal)}</td></tr>
+                        ${venda.tipoOperacao === 'TROCA' && venda.valorAdicional > 0 ? 
+                            `<tr><td>Valor Adicional da Troca</td><td class="total">${formatarValor(venda.valorAdicional)}</td></tr>` : ''}
                         <tr class="total"><td><strong>VALOR TOTAL DA NF</strong></td><td><strong>${formatarValor(venda.valorTotal)}</strong></td></tr>
                     </table>
                 </div>
@@ -319,6 +434,7 @@ const HistoricoVendasPeloDiretor = () => {
                     <p>📋 Esta é uma simulação de Nota Fiscal Eletrônica gerada pelo sistema.</p>
                     <p>🔐 Chave de Acesso: ${generateRandomKey()}</p>
                     <p>⚡ Gerado em ${new Date().toLocaleString('pt-BR')}</p>
+                    ${venda.tipoOperacao === 'TROCA' ? '<p>🔄 Documento referente à operação de troca de mercadoria.</p>' : ''}
                 </div>
             </body>
             </html>
@@ -364,6 +480,168 @@ const HistoricoVendasPeloDiretor = () => {
             style: 'currency',
             currency: 'BRL'
         }).format(valor);
+    };
+
+    // 🆕 Componente para renderizar detalhes de troca
+    const DetalhesTroca = ({ venda }) => {
+        if (venda.tipoOperacao !== 'TROCA') return null;
+
+        // Verificações de segurança para evitar erros
+        const dadosTroca = venda.dadosTroca || {};
+        const financeiro = dadosTroca.financeiro || {};
+        const vendaOriginal = dadosTroca.vendaOriginal || {};
+        const vendaNova = dadosTroca.vendaNova || {};
+        const itensOriginais = vendaOriginal.itens || [];
+        const itensNovos = vendaNova.itens || [];
+        
+        return (
+            <Box sx={{ mt: 3 }}>
+                <Typography variant="h6" gutterBottom color="#F06292" sx={{ display: 'flex', alignItems: 'center' }}>
+                    <SwapHoriz sx={{ mr: 1 }} />
+                    Informações da Troca
+                </Typography>
+                
+                <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
+                    <Typography variant="body2">
+                        <strong>🔄 Esta é uma venda resultante de uma troca de produtos.</strong>
+                    </Typography>
+                </Alert>
+
+                {venda.dadosTroca ? (
+                    <>
+                        <Grid container spacing={2} sx={{ mb: 3 }}>
+                            <Grid item xs={12} sm={6}>
+                                <Card variant="outlined" sx={{ p: 2, borderColor: '#F06292' }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" color="#F06292" gutterBottom>
+                                        Venda Original
+                                    </Typography>
+                                    <Typography variant="body2"><strong>ID:</strong> #{vendaOriginal.id || 'N/A'}</Typography>
+                                    <Typography variant="body2"><strong>Valor:</strong> {formatarValor(financeiro.valorOriginal || 0)}</Typography>
+                                    <Typography variant="body2"><strong>Itens:</strong> {itensOriginais.length} produto(s)</Typography>
+                                </Card>
+                            </Grid>
+                            
+                            <Grid item xs={12} sm={6}>
+                                <Card variant="outlined" sx={{ p: 2, borderColor: '#4CAF50' }}>
+                                    <Typography variant="subtitle1" fontWeight="bold" color="#4CAF50" gutterBottom>
+                                        Nova Venda (Atual)
+                                    </Typography>
+                                    <Typography variant="body2"><strong>ID:</strong> #{vendaNova.id || venda.id}</Typography>
+                                    <Typography variant="body2"><strong>Valor:</strong> {formatarValor(financeiro.valorNovo || venda.valorTotal)}</Typography>
+                                    <Typography variant="body2"><strong>Itens:</strong> {itensNovos.length || venda.itens?.length || 0} produto(s)</Typography>
+                                </Card>
+                            </Grid>
+                        </Grid>
+
+                        <Box sx={{ mb: 3, p: 2, backgroundColor: (financeiro.valorAdicional || 0) > 0 ? '#E8F5E8' : '#F0F0F0', borderRadius: 2 }}>
+                            <Typography variant="h6" fontWeight="bold" color={(financeiro.valorAdicional || 0) > 0 ? '#4CAF50' : '#666'}>
+                                💰 Diferença Financeira: {formatarValor(financeiro.diferenca || 0)}
+                            </Typography>
+                            {(financeiro.valorAdicional || 0) > 0 && (
+                                <Typography variant="body2" color="#4CAF50">
+                                    ✅ Cliente pagou valor adicional de {formatarValor(financeiro.valorAdicional)}
+                                </Typography>
+                            )}
+                            {(financeiro.diferenca || 0) === 0 && (
+                                <Typography variant="body2" color="#666">
+                                    ⚖️ Troca equivalente - sem diferença de valor
+                                </Typography>
+                            )}
+                        </Box>
+
+                        {(itensOriginais.length > 0 || itensNovos.length > 0) && (
+                            <Accordion sx={{ mt: 2 }}>
+                                <AccordionSummary expandIcon={<ExpandMore />}>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        <CompareArrows sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                        Comparação de Produtos
+                                    </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} md={6}>
+                                            <Typography variant="subtitle2" fontWeight="bold" color="#F06292" gutterBottom>
+                                                Produtos Originais (Devolvidos)
+                                            </Typography>
+                                            {itensOriginais.length > 0 ? (
+                                                <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 300 }}>
+                                                    <Table size="small">
+                                                        <TableHead>
+                                                            <TableRow sx={{ backgroundColor: '#FCE4EC' }}>
+                                                                <TableCell><strong>Produto</strong></TableCell>
+                                                                <TableCell><strong>Qtd</strong></TableCell>
+                                                                <TableCell><strong>Valor</strong></TableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {itensOriginais.map((item, index) => (
+                                                                <TableRow key={index}>
+                                                                    <TableCell>{item.nomeProduto || 'Produto'}</TableCell>
+                                                                    <TableCell>{item.qtdeProduto || 0}</TableCell>
+                                                                    <TableCell>{formatarValor((item.valorUnitario || 0) * (item.qtdeProduto || 0))}</TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </TableContainer>
+                                            ) : (
+                                                <Typography variant="body2" color="textSecondary" sx={{ p: 2, textAlign: 'center', backgroundColor: '#F8F9FA', borderRadius: 1 }}>
+                                                    Nenhum item original disponível
+                                                </Typography>
+                                            )}
+                                        </Grid>
+                                        
+                                        <Grid item xs={12} md={6}>
+                                            <Typography variant="subtitle2" fontWeight="bold" color="#4CAF50" gutterBottom>
+                                                Produtos Novos (Entregues)
+                                            </Typography>
+                                            {itensNovos.length > 0 ? (
+                                                <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 300 }}>
+                                                    <Table size="small">
+                                                        <TableHead>
+                                                            <TableRow sx={{ backgroundColor: '#E8F5E8' }}>
+                                                                <TableCell><strong>Produto</strong></TableCell>
+                                                                <TableCell><strong>Qtd</strong></TableCell>
+                                                                <TableCell><strong>Valor</strong></TableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {itensNovos.map((item, index) => (
+                                                                <TableRow key={index}>
+                                                                    <TableCell>{item.nomeProduto || 'Produto'}</TableCell>
+                                                                    <TableCell>{item.qtdeProduto || 0}</TableCell>
+                                                                    <TableCell>{formatarValor((item.valorUnitario || 0) * (item.qtdeProduto || 0))}</TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </TableContainer>
+                                            ) : (
+                                                <Typography variant="body2" color="textSecondary" sx={{ p: 2, textAlign: 'center', backgroundColor: '#F8F9FA', borderRadius: 1 }}>
+                                                    Itens atuais da venda serão exibidos na seção principal
+                                                </Typography>
+                                            )}
+                                        </Grid>
+                                    </Grid>
+                                </AccordionDetails>
+                            </Accordion>
+                        )}
+                    </>
+                ) : (
+                    <Box sx={{ p: 2, backgroundColor: '#FFF3E0', borderRadius: 2, textAlign: 'center' }}>
+                        <Typography variant="body2" color="textSecondary">
+                            ℹ️ Informações detalhadas da troca não disponíveis. 
+                            Esta venda foi identificada como troca através do ID da venda original: #{venda.vendaOriginalId}
+                        </Typography>
+                        {venda.valorAdicional > 0 && (
+                            <Typography variant="body2" color="#4CAF50" sx={{ mt: 1 }}>
+                                💰 Valor adicional pago: {formatarValor(venda.valorAdicional)}
+                            </Typography>
+                        )}
+                    </Box>
+                )}
+            </Box>
+        );
     };
 
     return (
@@ -474,7 +752,23 @@ const HistoricoVendasPeloDiretor = () => {
                                             {filteredVendas.map((venda, index) => (
                                                 <TableRow key={venda.id || index} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: '#FAFAFA' } }}>
                                                     <TableCell sx={{ fontWeight: 'bold', color: '#F06292' }}>
-                                                        #{venda.id}
+                                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                            #{venda.id}
+                                                            {venda.tipoOperacao === 'TROCA' && (
+                                                                <Chip 
+                                                                    label="TROCA" 
+                                                                    size="small" 
+                                                                    icon={<SwapHoriz />}
+                                                                    sx={{ 
+                                                                        ml: 1,
+                                                                        backgroundColor: '#E3F2FD',
+                                                                        color: '#1976D2',
+                                                                        fontWeight: 'bold',
+                                                                        fontSize: '10px'
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </Box>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Box>
@@ -507,15 +801,23 @@ const HistoricoVendasPeloDiretor = () => {
                                                         </Box>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Typography variant="body2" fontWeight="bold" color="#2E7D32">
-                                                            {formatarValor(venda.valorTotal)}
-                                                        </Typography>
+                                                        <Box>
+                                                            <Typography variant="body2" fontWeight="bold" color="#2E7D32">
+                                                                {formatarValor(venda.valorTotal)}
+                                                            </Typography>
+                                                            {venda.tipoOperacao === 'TROCA' && venda.valorAdicional > 0 && (
+                                                                <Typography variant="caption" color="#4CAF50">
+                                                                    +{formatarValor(venda.valorAdicional)} adicional
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Chip
                                                             label={venda.status}
                                                             sx={{ 
-                                                                bgcolor: venda.status === 'CONCLUÍDA' ? '#4CAF50' : '#F06292', 
+                                                                bgcolor: venda.status === 'CONCLUÍDA' ? '#4CAF50' : 
+                                                                         venda.status === 'TROCA CONCLUÍDA' ? '#2196F3' : '#F06292', 
                                                                 color: 'white', 
                                                                 fontWeight: 'bold',
                                                                 fontSize: '11px'
@@ -566,29 +868,45 @@ const HistoricoVendasPeloDiretor = () => {
                 fullWidth
             >
                 <DialogTitle sx={{ 
-                    backgroundColor: '#F06292', 
+                    backgroundColor: detailsDialog.venda?.tipoOperacao === 'TROCA' ? '#2196F3' : '#F06292', 
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center'
                 }}>
-                    <Receipt sx={{ mr: 1 }} />
-                    Detalhes da Venda #{detailsDialog.venda?.id}
+                    {detailsDialog.venda?.tipoOperacao === 'TROCA' ? (
+                        <SwapHoriz sx={{ mr: 1 }} />
+                    ) : (
+                        <Receipt sx={{ mr: 1 }} />
+                    )}
+                    {detailsDialog.venda?.tipoOperacao === 'TROCA' ? 'Detalhes da Troca' : 'Detalhes da Venda'} #{detailsDialog.venda?.id}
                 </DialogTitle>
                 <DialogContent sx={{ p: 3 }}>
                     {detailsDialog.venda && (
                         <Box>
                             <Typography variant="h6" gutterBottom color="#333">
-                                Informações da Venda
+                                Informações da {detailsDialog.venda.tipoOperacao === 'TROCA' ? 'Troca' : 'Venda'}
                             </Typography>
                             <Box sx={{ mb: 3, p: 2, backgroundColor: '#F8F9FA', borderRadius: 2 }}>
                                 <Typography><strong>Data:</strong> {detailsDialog.venda.dataVenda} às {detailsDialog.venda.horaVenda}</Typography>
                                 <Typography><strong>Cliente:</strong> {detailsDialog.venda.nomeCliente} ({formatarCPF(detailsDialog.venda.cpfCliente)})</Typography>
                                 <Typography><strong>Vendedor:</strong> {detailsDialog.venda.nomeVendedor} ({formatarCPF(detailsDialog.venda.cpfVendedor)})</Typography>
                                 <Typography><strong>Status:</strong> {detailsDialog.venda.status}</Typography>
+                                {detailsDialog.venda.tipoOperacao === 'TROCA' && (
+                                    <>
+                                        <Typography><strong>Venda Original:</strong> #{detailsDialog.venda.vendaOriginalId}</Typography>
+                                        <Typography><strong>ID da Troca:</strong> {detailsDialog.venda.trocaId}</Typography>
+                                        {detailsDialog.venda.valorAdicional > 0 && (
+                                            <Typography><strong>Valor Adicional:</strong> {formatarValor(detailsDialog.venda.valorAdicional)}</Typography>
+                                        )}
+                                    </>
+                                )}
                             </Box>
 
+                            {/* 🆕 Seção específica para trocas */}
+                            <DetalhesTroca venda={detailsDialog.venda} />
+
                             <Typography variant="h6" gutterBottom color="#333">
-                                Itens da Venda
+                                Itens da {detailsDialog.venda.tipoOperacao === 'TROCA' ? 'Nova Venda' : 'Venda'}
                             </Typography>
                             {detailsDialog.venda.itens && detailsDialog.venda.itens.length > 0 ? (
                                 <TableContainer component={Paper} elevation={0} sx={{ mb: 2 }}>
@@ -627,6 +945,11 @@ const HistoricoVendasPeloDiretor = () => {
                                 <Typography variant="h6" fontWeight="bold" color="#2E7D32">
                                     Total: {formatarValor(detailsDialog.venda.valorTotal)}
                                 </Typography>
+                                {detailsDialog.venda.tipoOperacao === 'TROCA' && detailsDialog.venda.valorAdicional > 0 && (
+                                    <Typography variant="body2" color="#4CAF50">
+                                        (Inclui {formatarValor(detailsDialog.venda.valorAdicional)} adicional da troca)
+                                    </Typography>
+                                )}
                             </Box>
                         </Box>
                     )}
@@ -684,6 +1007,17 @@ const HistoricoVendasPeloDiretor = () => {
                                 {nfDialog.numeroNF}
                             </Typography>
                         )}
+                        {nfDialog.venda?.tipoOperacao === 'TROCA' && (
+                            <Chip 
+                                label="NOTA FISCAL DE TROCA" 
+                                sx={{ 
+                                    mt: 1, 
+                                    backgroundColor: 'rgba(255,255,255,0.2)', 
+                                    color: 'white',
+                                    fontWeight: 'bold'
+                                }} 
+                            />
+                        )}
                     </Box>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3, textAlign: 'center' }}>
@@ -725,6 +1059,15 @@ const HistoricoVendasPeloDiretor = () => {
                                     <Typography><strong>Cliente:</strong> {nfDialog.venda.nomeCliente}</Typography>
                                     <Typography><strong>Valor:</strong> {formatarValor(nfDialog.venda.valorTotal)}</Typography>
                                     <Typography><strong>Itens:</strong> {nfDialog.venda.itens?.length || 0} produto(s)</Typography>
+                                    {nfDialog.venda.tipoOperacao === 'TROCA' && (
+                                        <>
+                                            <Typography><strong>Tipo:</strong> Nota Fiscal de Troca</Typography>
+                                            <Typography><strong>Venda Original:</strong> #{nfDialog.venda.vendaOriginalId}</Typography>
+                                            {nfDialog.venda.valorAdicional > 0 && (
+                                                <Typography><strong>Valor Adicional:</strong> {formatarValor(nfDialog.venda.valorAdicional)}</Typography>
+                                            )}
+                                        </>
+                                    )}
                                 </Box>
                             )}
                             <Typography variant="body2" sx={{ opacity: 0.9, fontStyle: 'italic' }}>
