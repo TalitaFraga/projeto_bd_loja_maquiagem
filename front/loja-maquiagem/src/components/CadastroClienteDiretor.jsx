@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -11,49 +11,49 @@ import {
   Divider,
   Alert,
   Snackbar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Fab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
+  FormHelperText
 } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import PersonIcon from '@mui/icons-material/Person';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import ReceiptIcon from '@mui/icons-material/Receipt';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import BadgeIcon from '@mui/icons-material/Badge';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const RegistroVenda = () => {
-  const [venda, setVenda] = useState({
-    cpfCliente: "",
-    cpfVendedor: "",
-    itens: []
+const CadastroClienteDiretor = () => {
+  const [form, setForm] = useState({
+    nome: "",
+    cpf: "",
+    dataNasc: "",
+    rg: "",
+    email: "",
+    telefone1: "",
+    telefone2: "",
+    rua: "",
+    numero: "",
+    bairro: "",
+    cidade: "",
+    cep: ""
   });
 
-  const [novoItem, setNovoItem] = useState({
-    codigoBarra: "",
-    loteProduto: "",
-    qtdeProduto: 1
+  // Estado para gerenciar os erros de validação
+  const [erros, setErros] = useState({
+    nome: "",
+    cpf: "",
+    dataNasc: "",
+    rg: "",
+    email: "",
+    telefone1: "",
+    telefone2: "",
+    rua: "",
+    numero: "",
+    bairro: "",
+    cidade: "",
+    cep: ""
   });
 
-  const [itemEditando, setItemEditando] = useState(null);
-  const [produtos, setProdutos] = useState([]);
-  const [clientes, setClientes] = useState([]);
-  const [vendedores, setVendedores] = useState([]);
-  const [dialogAberto, setDialogAberto] = useState(false);
-  const [dialogEdicao, setDialogEdicao] = useState(false);
-  
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -62,409 +62,312 @@ const RegistroVenda = () => {
   
   const navigate = useNavigate();
 
-  // Buscar dados necessários
-  useEffect(() => {
-    const buscarDados = async () => {
-      try {
-        // Buscar produtos
-        const responseProdutos = await axios.get("http://localhost:8081/produtos");
-        setProdutos(responseProdutos.data);
-
-        // Buscar clientes (assumindo que existe endpoint para listar clientes)
-        try {
-          const responseClientes = await axios.get("http://localhost:8081/clientes");
-          setClientes(responseClientes.data);
-        } catch (error) {
-          console.log("Endpoint de clientes não disponível, usando validação alternativa");
-        }
-
-        // Buscar vendedores/funcionários (assumindo que existe endpoint)
-        try {
-          const responseVendedores = await axios.get("http://localhost:8081/vendedores");
-          setVendedores(responseVendedores.data);
-        } catch (error) {
-          console.log("Endpoint de vendedores não disponível, usando validação alternativa");
-        }
-
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-        setSnackbar({
-          open: true,
-          message: "Erro ao carregar dados iniciais. Alguns recursos podem não funcionar corretamente.",
-          severity: "warning"
-        });
-      }
-    };
-    buscarDados();
-  }, []);
-
-  const validarCPFExiste = async (cpf, tipo) => {
-    try {
-      const cpfLimpo = cpf.replace(/\D/g, '');
-      
-      console.log(`Validando CPF ${tipo}: ${cpfLimpo}`);
-      
-      // Tentar validar CPF do cliente
-      if (tipo === 'cliente') {
-        try {
-          // CPFs de clientes válidos (conforme a imagem do banco)
-          // Considerando tanto formatado quanto sem formatação
-          const clientesValidos = [
-            '05707423079', // 057.074.230-79
-            '10440747760', // 104.407.477-60 / 10440747760
-            '11122233399', // 111.222.333-99
-            '39053344705', // 390.533.447-05
-            '61428462302'  // 614.284.623-02
-          ];
-          
-          if (!clientesValidos.includes(cpfLimpo)) {
-            console.log(`CPF do cliente ${cpfLimpo} não encontrado na lista de clientes válidos`);
-            return false;
-          }
-          return true;
-        } catch (error) {
-          console.error('Erro ao validar cliente:', error);
-          return false;
-        }
-      }
-      
-      // Tentar validar CPF do vendedor
-      if (tipo === 'vendedor') {
-        try {
-          // Vendedores válidos conforme o banco de dados
-          const vendedoresValidos = [
-            '86544302753'  // Daniel Rocha
-          ];
-          
-          if (!vendedoresValidos.includes(cpfLimpo)) {
-            console.log(`CPF do vendedor ${cpfLimpo} não encontrado na lista de vendedores válidos`);
-            return false;
-          }
-          return true;
-        } catch (error) {
-          console.error('Erro ao validar vendedor:', error);
-          return false;
-        }
-      }
-      
-      return false;
-    } catch (error) {
-      console.error(`Erro ao validar CPF ${tipo}:`, error);
+  // Função para validar CPF (formato e dígitos verificadores)
+  const validarCPF = (cpf) => {
+    // Remove caracteres não numéricos
+    const cpfLimpo = cpf.replace(/\D/g, '');
+    
+    // Verifica se tem 11 dígitos
+    if (cpfLimpo.length !== 11) {
       return false;
     }
+    
+    // Verifica se todos os dígitos são iguais
+    if (/^(\d)\1+$/.test(cpfLimpo)) {
+      return false;
+    }
+    
+    // Valida os dígitos verificadores
+    let soma = 0;
+    let resto;
+    
+    // Primeiro dígito verificador
+    for (let i = 1; i <= 9; i++) {
+      soma += parseInt(cpfLimpo.substring(i-1, i)) * (11 - i);
+    }
+    
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpfLimpo.substring(9, 10))) return false;
+    
+    // Segundo dígito verificador
+    soma = 0;
+    for (let i = 1; i <= 10; i++) {
+      soma += parseInt(cpfLimpo.substring(i-1, i)) * (12 - i);
+    }
+    
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpfLimpo.substring(10, 11))) return false;
+    
+    return true;
+  };
+
+  // Função para validar email
+  const validarEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  // Função para validar telefone
+  const validarTelefone = (telefone) => {
+    // Remove caracteres não numéricos
+    const telefoneLimpo = telefone.replace(/\D/g, '');
+    // Verifica se tem entre 10 e 11 dígitos (com ou sem DDD)
+    return telefoneLimpo.length >= 10 && telefoneLimpo.length <= 11;
+  };
+
+  // Função para validar CEP - versão corrigida
+  const validarCEP = (cep) => {
+    // Remove caracteres não numéricos
+    const cepLimpo = cep.replace(/\D/g, '');
+    
+    // Aceita CEPs com pelo menos 5 dígitos
+    return cepLimpo.length >= 5;
+  };
+
+  // Função para validar data de nascimento
+  const validarDataNasc = (data) => {
+    if (!data) return false;
+    
+    const dataObj = new Date(data);
+    const hoje = new Date();
+    
+    // Verifica se é uma data válida
+    if (isNaN(dataObj.getTime())) return false;
+    
+    // Verifica se não é uma data futura
+    if (dataObj > hoje) return false;
+    
+    // Verifica se a pessoa tem pelo menos 16 anos (regra de negócio)
+    const idade = hoje.getFullYear() - dataObj.getFullYear();
+    const mesAtual = hoje.getMonth();
+    const diaAtual = hoje.getDate();
+    const mesNasc = dataObj.getMonth();
+    const diaNasc = dataObj.getDate();
+    
+    if (idade < 16 || (idade === 16 && (mesAtual < mesNasc || (mesAtual === mesNasc && diaAtual < diaNasc)))) {
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Função para validar número inteiro
+  const validarNumeroInteiro = (numero) => {
+    return /^\d+$/.test(numero);
+  };
+
+  // Função para validar nome (apenas letras e espaços)
+  const validarNome = (nome) => {
+    // Permite letras, espaços e caracteres com acentos
+    return /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/.test(nome) && nome.trim().length >= 3;
+  };
+
+  // Função para validar RG (formato)
+  const validarRG = (rg) => {
+    // Remove caracteres não numéricos
+    const rgLimpo = rg.replace(/\D/g, '');
+    // Verifica se tem pelo menos 7 dígitos
+    return rgLimpo.length >= 7;
+  };
+
+  // Função para validar texto (não vazio)
+  const validarTexto = (texto) => {
+    return texto.trim().length >= 2;
+  };
+
+  // Função para validar o formulário inteiro
+  const validarFormulario = () => {
+    let novosErros = { ...erros };
+    let formValido = true;
+
+    // Validação de Nome
+    if (!validarNome(form.nome)) {
+      novosErros.nome = "Nome deve conter apenas letras e ter pelo menos 3 caracteres";
+      formValido = false;
+    } else {
+      novosErros.nome = "";
+    }
+
+    // Validação de CPF
+    if (!validarCPF(form.cpf)) {
+      novosErros.cpf = "CPF inválido, verifique se digitou corretamente";
+      formValido = false;
+    } else {
+      novosErros.cpf = "";
+    }
+
+    // Validação de Data de Nascimento
+    if (!validarDataNasc(form.dataNasc)) {
+      novosErros.dataNasc = "Data inválida. Você deve ter pelo menos 16 anos";
+      formValido = false;
+    } else {
+      novosErros.dataNasc = "";
+    }
+
+    // Validação de RG
+    if (!validarRG(form.rg)) {
+      novosErros.rg = "RG inválido, verifique se digitou corretamente";
+      formValido = false;
+    } else {
+      novosErros.rg = "";
+    }
+
+    // Validação de Email
+    if (!validarEmail(form.email)) {
+      novosErros.email = "Email inválido, digite no formato exemplo@dominio.com";
+      formValido = false;
+    } else {
+      novosErros.email = "";
+    }
+
+    // Validação de Telefone 1
+    if (!validarTelefone(form.telefone1)) {
+      novosErros.telefone1 = "Telefone inválido, deve conter DDD + número";
+      formValido = false;
+    } else {
+      novosErros.telefone1 = "";
+    }
+
+    // Validação de Telefone 2 (opcional)
+    if (form.telefone2 && !validarTelefone(form.telefone2)) {
+      novosErros.telefone2 = "Telefone inválido, deve conter DDD + número";
+      formValido = false;
+    } else {
+      novosErros.telefone2 = "";
+    }
+
+    // Validação de Rua
+    if (!validarTexto(form.rua)) {
+      novosErros.rua = "Informe um endereço válido";
+      formValido = false;
+    } else {
+      novosErros.rua = "";
+    }
+
+    // Validação de Número
+    if (!validarNumeroInteiro(form.numero)) {
+      novosErros.numero = "Digite apenas números";
+      formValido = false;
+    } else {
+      novosErros.numero = "";
+    }
+
+    // Validação de Bairro
+    if (!validarTexto(form.bairro)) {
+      novosErros.bairro = "Informe um bairro válido";
+      formValido = false;
+    } else {
+      novosErros.bairro = "";
+    }
+
+    // Validação de Cidade
+    if (!validarTexto(form.cidade)) {
+      novosErros.cidade = "Informe uma cidade válida";
+      formValido = false;
+    } else {
+      novosErros.cidade = "";
+    }
+
+    // Validação de CEP
+    if (!validarCEP(form.cep)) {
+      novosErros.cep = "CEP inválido, deve conter pelo menos 5 dígitos";
+      formValido = false;
+    } else {
+      novosErros.cep = "";
+    }
+
+    setErros(novosErros);
+    return formValido;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+    
+    // Limpar o erro quando o campo for alterado
+    setErros((prevErros) => ({ ...prevErros, [name]: "" }));
   };
 
   // Formatar CPF enquanto digita
-  const formatCPF = (value, campo) => {
-    let cpf = value.replace(/\D/g, '');
+  const formatCPF = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    }
+    setForm({ ...form, cpf: value });
     
-    if (cpf.length <= 11) {
-      if (cpf.length > 9) {
-        cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-      } else if (cpf.length > 6) {
-        cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})/, '$1.$2.$3');
-      } else if (cpf.length > 3) {
-        cpf = cpf.replace(/^(\d{3})(\d{3})/, '$1.$2');
+    // Limpar o erro quando o campo for alterado
+    setErros((prevErros) => ({ ...prevErros, cpf: "" }));
+  };
+
+  // Formatar CEP enquanto digita
+  const formatCEP = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    
+    // Limita a 8 dígitos e formata com hífen
+    if (value.length <= 8) {
+      // Formato: 00000-000
+      if (value.length > 5) {
+        value = value.replace(/^(\d{5})(\d)/, '$1-$2');
       }
     }
     
-    setVenda({ ...venda, [campo]: cpf });
-  };
-
-  const handleVendaChange = (e) => {
-    const { name, value } = e.target;
-    setVenda(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleItemChange = (e) => {
-    const { name, value } = e.target;
-    setNovoItem(prev => ({ ...prev, [name]: value }));
-  };
-
-  const obterNomeProduto = (codigoBarra) => {
-    const produto = produtos.find(p => p.codigo_barra === codigoBarra);
-    return produto ? produto.nome : "Produto não encontrado";
-  };
-
-  const obterPrecoProduto = (codigoBarra) => {
-    const produto = produtos.find(p => p.codigo_barra === codigoBarra);
-    return produto ? produto.preco : 0;
-  };
-
-  const adicionarItem = () => {
-    if (!novoItem.codigoBarra || !novoItem.loteProduto || novoItem.qtdeProduto <= 0) {
-      setSnackbar({
-        open: true,
-        message: "Por favor, preencha todos os campos do item corretamente.",
-        severity: "warning"
-      });
-      return;
-    }
-
-    // Verificar se o produto existe
-    const produtoExiste = produtos.some(p => p.codigo_barra === novoItem.codigoBarra);
-    if (!produtoExiste) {
-      setSnackbar({
-        open: true,
-        message: "Código de barras não encontrado.",
-        severity: "error"
-      });
-      return;
-    }
-
-    // Verificar se o item já existe na lista
-    const itemExistente = venda.itens.find(item => 
-      item.codigoBarra === novoItem.codigoBarra && 
-      item.loteProduto === novoItem.loteProduto
-    );
-
-    if (itemExistente) {
-      // Atualizar quantidade do item existente
-      const itensAtualizados = venda.itens.map(item =>
-        item.codigoBarra === novoItem.codigoBarra && item.loteProduto === novoItem.loteProduto
-          ? { ...item, qtdeProduto: item.qtdeProduto + parseInt(novoItem.qtdeProduto) }
-          : item
-      );
-      setVenda({ ...venda, itens: itensAtualizados });
-    } else {
-      // Adicionar novo item
-      setVenda({
-        ...venda,
-        itens: [...venda.itens, { ...novoItem, qtdeProduto: parseInt(novoItem.qtdeProduto) }]
-      });
-    }
-
-    // Limpar formulário do item
-    setNovoItem({
-      codigoBarra: "",
-      loteProduto: "",
-      qtdeProduto: 1
-    });
-
-    setDialogAberto(false);
-
-    setSnackbar({
-      open: true,
-      message: "Item adicionado com sucesso!",
-      severity: "success"
-    });
-  };
-
-  const editarItem = (index) => {
-    const item = venda.itens[index];
-    setItemEditando({ ...item, index });
-    setNovoItem({
-      codigoBarra: item.codigoBarra,
-      loteProduto: item.loteProduto,
-      qtdeProduto: item.qtdeProduto
-    });
-    setDialogEdicao(true);
-  };
-
-  const salvarEdicaoItem = () => {
-    if (!novoItem.codigoBarra || !novoItem.loteProduto || novoItem.qtdeProduto <= 0) {
-      setSnackbar({
-        open: true,
-        message: "Por favor, preencha todos os campos do item corretamente.",
-        severity: "warning"
-      });
-      return;
-    }
-
-    // Verificar se o produto existe
-    const produtoExiste = produtos.some(p => p.codigo_barra === novoItem.codigoBarra);
-    if (!produtoExiste) {
-      setSnackbar({
-        open: true,
-        message: "Código de barras não encontrado.",
-        severity: "error"
-      });
-      return;
-    }
-
-    // Atualizar o item na lista
-    const itensAtualizados = venda.itens.map((item, index) =>
-      index === itemEditando.index
-        ? { ...novoItem, qtdeProduto: parseInt(novoItem.qtdeProduto) }
-        : item
-    );
-
-    setVenda({ ...venda, itens: itensAtualizados });
-
-    // Limpar estados
-    setNovoItem({
-      codigoBarra: "",
-      loteProduto: "",
-      qtdeProduto: 1
-    });
-    setItemEditando(null);
-    setDialogEdicao(false);
-
-    setSnackbar({
-      open: true,
-      message: "Item atualizado com sucesso!",
-      severity: "success"
-    });
-  };
-
-  const removerItem = (index) => {
-    const novosItens = venda.itens.filter((_, i) => i !== index);
-    setVenda({ ...venda, itens: novosItens });
+    setForm({ ...form, cep: value });
     
-    setSnackbar({
-      open: true,
-      message: "Item removido com sucesso!",
-      severity: "info"
-    });
+    // Limpar o erro quando o campo for alterado
+    setErros((prevErros) => ({ ...prevErros, cep: "" }));
   };
 
-  const calcularTotal = () => {
-    return venda.itens.reduce((total, item) => {
-      const preco = obterPrecoProduto(item.codigoBarra);
-      return total + (preco * item.qtdeProduto);
-    }, 0);
+  // Formatar telefone enquanto digita
+  const formatTelefone = (e, campo) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+      // Formato: (XX) XXXXX-XXXX
+      value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+      value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+    }
+    setForm({ ...form, [campo]: value });
+    
+    // Limpar o erro quando o campo for alterado
+    setErros((prevErros) => ({ ...prevErros, [campo]: "" }));
   };
 
-  const registrarVenda = async () => {
-    // Validações
-    if (!venda.cpfCliente || !venda.cpfVendedor) {
-      setSnackbar({
-        open: true,
-        message: "Por favor, preencha os CPFs do cliente e vendedor.",
-        severity: "warning"
-      });
-      return;
-    }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    if (venda.itens.length === 0) {
+    // Validar todo o formulário antes de enviar
+    if (!validarFormulario()) {
       setSnackbar({
         open: true,
-        message: "Por favor, adicione pelo menos um item à venda.",
-        severity: "warning"
-      });
-      return;
-    }
-
-    // Validar se CPFs existem no sistema
-    const cpfClienteValido = await validarCPFExiste(venda.cpfCliente, 'cliente');
-    if (!cpfClienteValido) {
-      setSnackbar({
-        open: true,
-        message: "CPF do cliente não encontrado no sistema. Verifique se o cliente está cadastrado.",
+        message: "Por favor, corrija os erros antes de enviar.",
         severity: "error"
       });
       return;
     }
 
-    const cpfVendedorValido = await validarCPFExiste(venda.cpfVendedor, 'vendedor');
-    if (!cpfVendedorValido) {
-      setSnackbar({
-        open: true,
-        message: "CPF do vendedor não encontrado no sistema. Verifique se o vendedor está cadastrado.",
-        severity: "error"
-      });
-      return;
-    }
-
-    // Preparar dados para envio - seguindo exatamente a estrutura da entidade Venda
-    const dadosVenda = {
-      cpfCliente: venda.cpfCliente.replace(/\D/g, ''),
-      cpfVendedor: venda.cpfVendedor.replace(/\D/g, ''),
-      itens: venda.itens.map(item => ({
-        codigoBarra: item.codigoBarra,
-        loteProduto: item.loteProduto,
-        qtdeProduto: parseInt(item.qtdeProduto)
-      }))
+    const payload = {
+      pessoa: form,
+      isCliente: true,
+      tipoFuncionario: "DIRETOR"
     };
 
-    console.log("Dados da venda sendo enviados:", JSON.stringify(dadosVenda, null, 2));
-
     try {
-      const response = await axios.post("http://localhost:8081/vendas", dadosVenda, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log("Resposta da API:", response.data);
-      
+      await axios.post("http://localhost:8081/cadastro-pessoa", payload);
       setSnackbar({
         open: true,
-        message: "Venda registrada com sucesso! ID: " + response.data.idVenda,
+        message: "Cliente cadastrado com sucesso!",
         severity: "success"
       });
-
-      // Limpar formulário
-      setVenda({
-        cpfCliente: "",
-        cpfVendedor: "",
-        itens: []
-      });
-
-      // Redirecionar após sucesso (pode ser para tela de NF)
-      setTimeout(() => {
-        setSnackbar({
-          open: true,
-          message: "Venda ID: " + response.data.idVenda + " - Pronto para emissão de NF!",
-          severity: "info"
-        });
-        // navigate("/emissao-nf/" + response.data.idVenda);
-      }, 3000);
-      
+      setTimeout(() => navigate("/lista-clientes-pelo-diretor"), 2000);
     } catch (error) {
-      console.error("Erro completo:", error);
-      console.error("Response data:", error.response?.data);
-      console.error("Response status:", error.response?.status);
-      
-      let errorMessage = "Erro ao registrar venda. Verifique os dados informados.";
-      
-      if (error.response) {
-        const errorData = error.response.data;
-        console.log("Erro detalhado:", errorData);
-        
-        // Tratamento mais específico de erros
-        if (typeof errorData === 'string') {
-          const errorLower = errorData.toLowerCase();
-          
-          if (errorLower.includes('foreign key constraint') && errorLower.includes('cliente')) {
-            errorMessage = "CPF do cliente não está cadastrado no sistema. Cadastre o cliente primeiro.";
-          } else if (errorLower.includes('foreign key constraint') && errorLower.includes('vendedor')) {
-            errorMessage = "CPF do vendedor não está cadastrado no sistema. Cadastre o vendedor primeiro.";
-          } else if (errorLower.includes('foreign key constraint')) {
-            errorMessage = "CPF do cliente ou vendedor não encontrado no sistema. Verifique os cadastros.";
-          } else if (errorLower.includes('estoque insuficiente') || errorLower.includes('quantidade')) {
-            errorMessage = "Quantidade insuficiente em estoque para um ou mais produtos.";
-          } else if (errorLower.includes('produto não encontrado')) {
-            errorMessage = "Um ou mais produtos não foram encontrados no sistema.";
-          } else if (errorLower.includes('itens vazios')) {
-            errorMessage = "A venda deve conter pelo menos um item.";
-          }
-        }
-        
-        switch (error.response.status) {
-          case 400:
-            if (errorMessage === "Erro ao registrar venda. Verifique os dados informados.") {
-              errorMessage = "Dados inválidos. Verifique se todos os campos estão corretos.";
-            }
-            break;
-          case 404:
-            if (errorMessage === "Erro ao registrar venda. Verifique os dados informados.") {
-              errorMessage = "Cliente, vendedor ou produto não encontrado no sistema.";
-            }
-            break;
-          case 500:
-            errorMessage = "Erro interno do servidor. Verifique se cliente e vendedor estão cadastrados.";
-            break;
-          default:
-            break;
-        }
-      } else if (error.request) {
-        errorMessage = "Erro de conexão. Verifique sua internet e tente novamente.";
-      }
-      
+      console.error("Erro no cadastro:", error);
       setSnackbar({
         open: true,
-        message: errorMessage,
+        message: "Erro ao cadastrar cliente. Verifique os dados informados.",
         severity: "error"
       });
     }
@@ -484,7 +387,7 @@ const RegistroVenda = () => {
         </Link>
       </Box>
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="md" sx={{ py: 4 }}>
         <Paper 
           elevation={4} 
           sx={{ 
@@ -497,515 +400,273 @@ const RegistroVenda = () => {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <ShoppingCartIcon sx={{ fontSize: 36, color: '#F06292', mr: 2 }} />
+            <PersonAddIcon sx={{ fontSize: 36, color: '#F06292', mr: 2 }} />
             <Typography variant="h4" color="#333" fontWeight="500">
-              Registro de Venda
+              Cadastro de Cliente
             </Typography>
           </Box>
           
           <Divider sx={{ mb: 4 }} />
 
-          {/* Informações da Venda */}
-          <Typography variant="h6" color="#555" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-            <PersonIcon sx={{ mr: 1, color: '#F06292' }} />
-            Informações da Venda
-          </Typography>
-          
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="CPF do Cliente"
-                name="cpfCliente"
-                value={venda.cpfCliente}
-                onChange={(e) => formatCPF(e.target.value, 'cpfCliente')}
-                required
-                variant="outlined"
-                placeholder="000.000.000-00"
-                helperText="Clientes válidos: 057.074.230-79, 104.407.477-60, 111.222.333-99, 390.533.447-05, 614.284.623-02"
-                InputProps={{
-                  sx: { borderRadius: 2 }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="CPF do Vendedor"
-                name="cpfVendedor"
-                value={venda.cpfVendedor}
-                onChange={(e) => formatCPF(e.target.value, 'cpfVendedor')}
-                required
-                variant="outlined"
-                placeholder="000.000.000-00"
-                helperText="Vendedor válido: 865.443.027-53 (Daniel)"
-                InputProps={{
-                  sx: { borderRadius: 2 }
-                }}
-              />
-            </Grid>
-          </Grid>
-
-          {/* Itens da Venda */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" color="#555" sx={{ display: 'flex', alignItems: 'center' }}>
-              <InventoryIcon sx={{ mr: 1, color: '#F06292' }} />
-              Itens da Venda
+          <Box component="form" onSubmit={handleSubmit}>
+            <Typography variant="h6" color="#555" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <BadgeIcon sx={{ mr: 1, color: '#F06292' }} />
+              Informações Pessoais
             </Typography>
             
-            <Fab
-              color="primary"
-              size="small"
-              onClick={() => setDialogAberto(true)}
-              sx={{ 
-                backgroundColor: '#F06292',
-                '&:hover': { backgroundColor: '#E91E63' }
-              }}
-            >
-              <AddIcon />
-            </Fab>
-          </Box>
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Nome Completo"
+                  name="nome"
+                  value={form.nome}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  error={!!erros.nome}
+                  helperText={erros.nome}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="CPF"
+                  name="cpf"
+                  value={form.cpf}
+                  onChange={formatCPF}
+                  required
+                  variant="outlined"
+                  placeholder="000.000.000-00"
+                  error={!!erros.cpf}
+                  helperText={erros.cpf}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  label="Data de Nascimento"
+                  name="dataNasc"
+                  value={form.dataNasc}
+                  onChange={handleChange}
+                  required
+                  InputLabelProps={{ shrink: true }}
+                  variant="outlined"
+                  error={!!erros.dataNasc}
+                  helperText={erros.dataNasc}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="RG"
+                  name="rg"
+                  value={form.rg}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  error={!!erros.rg}
+                  helperText={erros.rg}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+            </Grid>
 
-          {/* Tabela de Itens */}
-          {venda.itens.length > 0 ? (
-            <TableContainer component={Paper} sx={{ mb: 3, boxShadow: 2 }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: '#F8F9FA' }}>
-                    <TableCell><strong>Código de Barras</strong></TableCell>
-                    <TableCell><strong>Produto</strong></TableCell>
-                    <TableCell><strong>Lote</strong></TableCell>
-                    <TableCell align="center"><strong>Quantidade</strong></TableCell>
-                    <TableCell align="right"><strong>Preço Unit.</strong></TableCell>
-                    <TableCell align="right"><strong>Subtotal</strong></TableCell>
-                    <TableCell align="center"><strong>Ações</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {venda.itens.map((item, index) => {
-                    const preco = obterPrecoProduto(item.codigoBarra);
-                    const subtotal = preco * item.qtdeProduto;
-                    
-                    return (
-                      <TableRow key={index} hover>
-                        <TableCell>{item.codigoBarra}</TableCell>
-                        <TableCell>{obterNomeProduto(item.codigoBarra)}</TableCell>
-                        <TableCell>{item.loteProduto}</TableCell>
-                        <TableCell align="center">{item.qtdeProduto}</TableCell>
-                        <TableCell align="right">R$ {preco.toFixed(2)}</TableCell>
-                        <TableCell align="right">R$ {subtotal.toFixed(2)}</TableCell>
-                        <TableCell align="center">
-                          <IconButton 
-                            color="primary" 
-                            onClick={() => editarItem(index)}
-                            size="small"
-                            sx={{ mr: 1 }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton 
-                            color="error" 
-                            onClick={() => removerItem(index)}
-                            size="small"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  <TableRow sx={{ backgroundColor: '#F8F9FA' }}>
-                    <TableCell colSpan={5} align="right">
-                      <Typography variant="h6" fontWeight="bold">
-                        Total da Venda:
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography variant="h6" fontWeight="bold" color="#F06292">
-                        R$ {calcularTotal().toFixed(2)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Box sx={{ textAlign: 'center', py: 4, backgroundColor: '#F8F9FA', borderRadius: 2, mb: 3 }}>
-              <Typography color="textSecondary">
-                Nenhum item adicionado à venda. Clique no botão + para adicionar produtos.
-              </Typography>
+            <Typography variant="h6" color="#555" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <PhoneIcon sx={{ mr: 1, color: '#F06292' }} />
+              Contato
+            </Typography>
+            
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  error={!!erros.email}
+                  helperText={erros.email}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  fullWidth
+                  label="Telefone Principal"
+                  name="telefone1"
+                  value={form.telefone1}
+                  onChange={(e) => formatTelefone(e, 'telefone1')}
+                  required
+                  variant="outlined"
+                  placeholder="(00) 00000-0000"
+                  error={!!erros.telefone1}
+                  helperText={erros.telefone1}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  fullWidth
+                  label="Telefone Secundário"
+                  name="telefone2"
+                  value={form.telefone2}
+                  onChange={(e) => formatTelefone(e, 'telefone2')}
+                  variant="outlined"
+                  placeholder="(00) 00000-0000"
+                  error={!!erros.telefone2}
+                  helperText={erros.telefone2}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            <Typography variant="h6" color="#555" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <LocationOnIcon sx={{ mr: 1, color: '#F06292' }} />
+              Endereço
+            </Typography>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Rua"
+                  name="rua"
+                  value={form.rua}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  error={!!erros.rua}
+                  helperText={erros.rua}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={2}>
+                <TextField
+                  fullWidth
+                  label="Número"
+                  name="numero"
+                  value={form.numero}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  error={!!erros.numero}
+                  helperText={erros.numero}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="Bairro"
+                  name="bairro"
+                  value={form.bairro}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  error={!!erros.bairro}
+                  helperText={erros.bairro}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Cidade"
+                  name="cidade"
+                  value={form.cidade}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  error={!!erros.cidade}
+                  helperText={erros.cidade}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="CEP"
+                  name="cep"
+                  value={form.cep}
+                  onChange={formatCEP}
+                  required
+                  variant="outlined"
+                  placeholder="00000-000"
+                  error={!!erros.cep}
+                  helperText={erros.cep || "Digite apenas números. A formatação será aplicada automaticamente."}
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            <Box sx={{ mt: 5, display: 'flex', justifyContent: 'center' }}>
+              <Button
+                variant="contained"
+                type="submit"
+                size="large"
+                sx={{
+                  px: 6,
+                  py: 1.5,
+                  borderRadius: 2,
+                  backgroundColor: "#F06292",
+                  "&:hover": { backgroundColor: "#E91E63" },
+                  transition: "transform 0.2s",
+                  "&:active": { transform: "scale(0.98)" },
+                  boxShadow: '0 4px 10px rgba(240, 98, 146, 0.3)',
+                  fontWeight: "bold"
+                }}
+              >
+                Cadastrar Cliente
+              </Button>
             </Box>
-          )}
-
-          {/* Botão de Registrar Venda */}
-          <Box sx={{ mt: 5, display: 'flex', justifyContent: 'center' }}>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={registrarVenda}
-              disabled={venda.itens.length === 0}
-              sx={{
-                px: 6,
-                py: 1.5,
-                borderRadius: 2,
-                backgroundColor: "#F06292",
-                "&:hover": { backgroundColor: "#E91E63" },
-                "&:disabled": { backgroundColor: "#CCCCCC" },
-                transition: "transform 0.2s",
-                "&:active": { transform: "scale(0.98)" },
-                boxShadow: '0 4px 10px rgba(240, 98, 146, 0.3)',
-                fontWeight: "bold"
-              }}
-              startIcon={<ReceiptIcon />}
-            >
-              Registrar Venda para Emissão de NF
-            </Button>
           </Box>
         </Paper>
       </Container>
 
-      {/* Dialog para Editar Item */}
-      <Dialog 
-        open={dialogEdicao} 
-        onClose={() => {
-          setDialogEdicao(false);
-          setItemEditando(null);
-          setNovoItem({ codigoBarra: "", loteProduto: "", qtdeProduto: 1 });
-        }}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            overflow: 'hidden'
-          }
-        }}
-      >
-        <DialogTitle sx={{ 
-          backgroundColor: '#E91E63', 
-          color: 'white',
-          textAlign: 'center',
-          py: 2,
-          fontWeight: 'bold'
-        }}>
-          Editar Item da Venda
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Box sx={{ mt: 1 }}>
-            <TextField
-              fullWidth
-              label="Código de Barras"
-              name="codigoBarra"
-              value={novoItem.codigoBarra}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o código de barras do produto"
-              helperText="Produtos disponíveis: 1001, 1002, 1003 (bases), 2001, 2002, 2003 (batons), 3001, 3002 (rimeis), 4001, 4002 (blush)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Lote do Produto"
-              name="loteProduto"
-              value={novoItem.loteProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o lote do produto"
-              helperText="Lotes disponíveis: L001, L002, L003 (conforme código do produto)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Quantidade"
-              name="qtdeProduto"
-              type="number"
-              value={novoItem.qtdeProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              inputProps={{ min: 1 }}
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, pt: 1, justifyContent: 'space-between' }}>
-          <Button 
-            onClick={() => {
-              setDialogEdicao(false);
-              setItemEditando(null);
-              setNovoItem({ codigoBarra: "", loteProduto: "", qtdeProduto: 1 });
-            }}
-            color="inherit"
-            variant="outlined"
-            sx={{ 
-              borderRadius: 2,
-              px: 3,
-              borderColor: '#ccc',
-              '&:hover': {
-                borderColor: '#999',
-                backgroundColor: '#f5f5f5'
-              }
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={salvarEdicaoItem}
-            variant="contained"
-            sx={{ 
-              backgroundColor: '#E91E63',
-              '&:hover': { backgroundColor: '#C2185B' },
-              borderRadius: 2,
-              px: 3,
-              fontWeight: 'bold'
-            }}
-          >
-            Salvar Alterações
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog para Adicionar Item */}
-      <Dialog 
-        open={dialogAberto} 
-        onClose={() => setDialogAberto(false)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            overflow: 'hidden'
-          }
-        }}
-      >
-        <DialogTitle sx={{ 
-          backgroundColor: '#F06292', 
-          color: 'white',
-          textAlign: 'center',
-          py: 2,
-          fontWeight: 'bold'
-        }}>
-          Adicionar Item à Venda
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Box sx={{ mt: 1 }}>
-            <TextField
-              fullWidth
-              label="Código de Barras"
-              name="codigoBarra"
-              value={novoItem.codigoBarra}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o código de barras do produto"
-              helperText="Produtos disponíveis: 1001, 1002, 1003 (bases), 2001, 2002, 2003 (batons), 3001, 3002 (rimeis), 4001, 4002 (blush)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Lote do Produto"
-              name="loteProduto"
-              value={novoItem.loteProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o lote do produto"
-              helperText="Lotes disponíveis: L001, L002, L003 (conforme código do produto)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Quantidade"
-              name="qtdeProduto"
-              type="number"
-              value={novoItem.qtdeProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              inputProps={{ min: 1 }}
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, pt: 1, justifyContent: 'space-between' }}>
-          <Button 
-            onClick={() => {
-              setDialogEdicao(false);
-              setItemEditando(null);
-              setNovoItem({ codigoBarra: "", loteProduto: "", qtdeProduto: 1 });
-            }}
-            color="inherit"
-            variant="outlined"
-            sx={{ 
-              borderRadius: 2,
-              px: 3,
-              borderColor: '#ccc',
-              '&:hover': {
-                borderColor: '#999',
-                backgroundColor: '#f5f5f5'
-              }
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={salvarEdicaoItem}
-            variant="contained"
-            sx={{ 
-              backgroundColor: '#E91E63',
-              '&:hover': { backgroundColor: '#C2185B' },
-              borderRadius: 2,
-              px: 3,
-              fontWeight: 'bold'
-            }}
-          >
-            Salvar Alterações
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog para Adicionar Item */}
-      <Dialog 
-        open={dialogAberto} 
-        onClose={() => setDialogAberto(false)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            overflow: 'hidden'
-          }
-        }}
-      >
-        <DialogTitle sx={{ 
-          backgroundColor: '#F06292', 
-          color: 'white',
-          textAlign: 'center',
-          py: 2,
-          fontWeight: 'bold'
-        }}>
-          Adicionar Item à Venda
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Box sx={{ mt: 1 }}>
-            <TextField
-              fullWidth
-              label="Código de Barras"
-              name="codigoBarra"
-              value={novoItem.codigoBarra}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o código de barras do produto"
-              helperText="Produtos disponíveis: 1001, 1002, 1003 (bases), 2001, 2002, 2003 (batons), 3001, 3002 (rimeis), 4001, 4002 (blush)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Lote do Produto"
-              name="loteProduto"
-              value={novoItem.loteProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              placeholder="Digite o lote do produto"
-              helperText="Lotes disponíveis: L001, L002, L003 (conforme código do produto)"
-              sx={{ 
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Quantidade"
-              name="qtdeProduto"
-              type="number"
-              value={novoItem.qtdeProduto}
-              onChange={handleItemChange}
-              variant="outlined"
-              inputProps={{ min: 1 }}
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2
-                }
-              }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, pt: 1, justifyContent: 'space-between' }}>
-          <Button 
-            onClick={() => setDialogAberto(false)}
-            color="inherit"
-            variant="outlined"
-            sx={{ 
-              borderRadius: 2,
-              px: 3,
-              borderColor: '#ccc',
-              '&:hover': {
-                borderColor: '#999',
-                backgroundColor: '#f5f5f5'
-              }
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={adicionarItem}
-            variant="contained"
-            sx={{ 
-              backgroundColor: '#F06292',
-              '&:hover': { backgroundColor: '#E91E63' },
-              borderRadius: 2,
-              px: 3,
-              fontWeight: 'bold'
-            }}
-          >
-            Adicionar Item
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Snackbar para mensagens */}
       <Snackbar 
         open={snackbar.open} 
-        autoHideDuration={snackbar.severity === 'warning' ? 7000 : 5000}
+        autoHideDuration={5000} 
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
@@ -1013,13 +674,7 @@ const RegistroVenda = () => {
           onClose={handleCloseSnackbar} 
           severity={snackbar.severity}
           variant="filled"
-          sx={{ 
-            width: '100%',
-            '& .MuiAlert-message': {
-              fontSize: '14px',
-              fontWeight: snackbar.severity === 'warning' ? 'bold' : 'normal'
-            }
-          }}
+          sx={{ width: '100%' }}
         >
           {snackbar.message}
         </Alert>
@@ -1028,4 +683,4 @@ const RegistroVenda = () => {
   );
 };
 
-export default RegistroVenda;
+export default CadastroClienteDiretor;
