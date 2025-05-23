@@ -123,6 +123,17 @@ CREATE TABLE Pede_produto (
     FOREIGN KEY (fk_Diretor_fk_Funcionario_fk_Pessoa_cpf) REFERENCES Diretor(fk_Funcionario_fk_Pessoa_cpf)
 );
 
+CREATE TABLE Troca (
+    id_troca VARCHAR(36) PRIMARY KEY NOT NULL,            -- ID da troca (uuid ou código)
+    fk_Venda_id_venda_antiga VARCHAR(36) NOT NULL,       -- Venda antiga (que será devolvida)
+    fk_Venda_id_venda_nova VARCHAR(36) NOT NULL,         -- Nova venda (com produtos que o cliente leva)
+    datahora_troca DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Data da troca
+
+    FOREIGN KEY (fk_Venda_id_venda_antiga) REFERENCES Venda(id_venda),
+    FOREIGN KEY (fk_Venda_id_venda_nova) REFERENCES Venda(id_venda)
+);
+
+
 -- Populando o banco
 
 INSERT INTO Pessoa VALUES
@@ -180,15 +191,20 @@ DELIMITER ;
 
 INSERT INTO Venda VALUES
 ('V001', '390.533.447-05', '865.443.027-53', NOW()),
-('V002', '104.407.477-60', '865.443.027-53', NOW());
+('V002', '104.407.477-60', '865.443.027-53', NOW()),
+('V003', '390.533.447-05', '865.443.027-53', NOW());
 
 INSERT INTO Item_venda VALUES
 ('V001', '1001', 'L001', 2),
 ('V001', '3001', 'L001', 1),
-('V002', '2002', 'L002', 1);
+('V002', '2002', 'L002', 1),
+('V003', '3001', 'L001', 1);
 
 -- Inserindo pedidos com IDs
 INSERT INTO Pede_produto VALUES
 ('PED001', '1001', '11.222.333/0001-44', '078.379.601-90', 'L001', 50),
 ('PED002', '2001', '11.222.333/0001-44', '078.379.601-90', 'L001', 30),
 ('PED003', '3001', '11.222.333/0001-44', '078.379.601-90', 'L001', 25);
+
+INSERT INTO Troca (id_troca, fk_Venda_id_venda_antiga, fk_Venda_id_venda_nova) VALUES
+('T001', 'V001', 'V003');

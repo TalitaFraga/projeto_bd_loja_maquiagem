@@ -37,4 +37,12 @@ public class EstoqueService {
     public void deletar(String codigoBarra, String loteProduto) {
         estoqueRepository.delete(codigoBarra, loteProduto);
     }
+
+    public void adicionarAoEstoque(String codigoBarra, String loteProduto, int quantidade) {
+        estoqueRepository.restaurarEstoque(codigoBarra, loteProduto, quantidade);
+    }
+
+    public void diminuirEstoque(String codigoBarra, String loteProduto, int quantidade) {
+        estoqueRepository.diminuirEstoque(codigoBarra, loteProduto, quantidade);
+    }
 }
