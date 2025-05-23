@@ -107,9 +107,9 @@ const Layout = ({ children }) => {
       type: "submenu",
       key: "vendas",
       subItems: [
-        { text: "Registro de Venda", icon: <AddShoppingCartIcon />, path: "/registro-venda" },
+        { text: "Registro de Venda", icon: <AddShoppingCartIcon />, path: "/registro-venda-pelo-diretor" },
         { text: "Registro de Troca", icon: <SwapHorizIcon />, path: "/registro-troca" },
-        { text: "Histórico de Vendas", icon: <HistoryIcon />, path: "/historico-vendas" }
+        { text: "Histórico de Vendas", icon: <HistoryIcon />, path: "/historico-vendas-pelo-diretor" }
       ]
     },
     {
@@ -150,8 +150,8 @@ const Layout = ({ children }) => {
       type: "submenu",
       key: "funcionarios",
       subItems: [
-        { text: "Cadastrar Funcionários", icon: <PersonAddIcon />, path: "/cadastro-pessoa" },
-        { text: "Visualizar Funcionários", icon: <VisibilityIcon />, path: "/funcionarios" }
+        { text: "Cadastrar Funcionários", icon: <PersonAddIcon />, path: "/cadastro-funcionario-pelo-diretor" },
+        { text: "Visualizar Funcionários", icon: <VisibilityIcon />, path: "/lista-funcionario-pelo-diretor" }
       ]
     }
   ];

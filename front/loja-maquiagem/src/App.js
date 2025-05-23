@@ -11,7 +11,7 @@ import Dashboard from './components/dashboard/Dashboard';
 import DashboardVendedor from './components/dashboard-vendedor/DashboardVendedor';
 import EditarPessoa from './components/EditarPessoa';
 import ListarClientesDiretor from './components/ListaClientesDiretor';
-import ListarFuncionarios from './components/ListarFuncionarios';
+import ListarFuncionariosDiretor from './components/ListarFuncionariosDiretor';
 import ListaFornecedores from './components/ListaFornecedores';
 import ListaProdutos from './components/ListaProdutos';
 import EditarFornecedor from './components/EditarFornecedor';
@@ -19,6 +19,11 @@ import CadastroClienteDiretor from './components/CadastroClienteDiretor';
 import EditarClienteDiretor from './components/EditarClienteDiretor';
 import Sidebar from './pages/SideBar';
 import SidebarVendedor from './pages/SideBarVendedor';
+import CadastroFuncionarioDiretor from './components/CadastroFuncionarioDiretor';
+import EditarFuncionarioDiretor from './components/EditarFuncionarioDiretor';
+import RegistroVendaDiretor from './components/RegistroVendaDiretor';
+import HistoricoVendasDiretor from './components/HistoricoVendasDiretor';
+
 
 function AppContent() {
   const location = useLocation();
@@ -60,12 +65,17 @@ function AppContent() {
         <Route path="/fornecedor" element={<CadastrarFornecedor />} />
         <Route path="/pessoas/:cpf" element={<EditarPessoa />} />
         <Route path="/clientes-pelo-diretor" element={<ListarClientesDiretor />} />
-        <Route path="/funcionarios" element={<ListarFuncionarios />} />
+        <Route path="/lista-funcionario-pelo-diretor" element={<ListarFuncionariosDiretor />} />
         <Route path="/lista-fornecedores" element={<ListaFornecedores />} />
         <Route path="/editar-fornecedor/:cnpj" element={<EditarFornecedor />} />
         <Route path="/cadastro-cliente-pelo-diretor" element={<CadastroClienteDiretor />} />
         <Route path="/editar-cliente-pelo-diretor/:cpf" element={<EditarClienteDiretor />} />
         <Route path="/lista-clientes-pelo-diretor" element={<ListarClientesDiretor />} />
+        <Route path="/cadastro-funcionario-pelo-diretor" element={<CadastroFuncionarioDiretor />} />
+        <Route path="/lista-funcionario-pelo-diretor" element={<ListarFuncionariosDiretor />} />
+        <Route path="/editar-funcionario-pelo-diretor/:cpf" element={<EditarFuncionarioDiretor />} />
+        <Route path="/registro-venda-pelo-diretor" element={<RegistroVendaDiretor />} />
+        <Route path="/historico-vendas-pelo-diretor" element={<HistoricoVendasDiretor />} />
       </Routes>
     </Sidebar>
   );
