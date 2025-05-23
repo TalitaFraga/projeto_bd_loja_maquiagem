@@ -95,8 +95,11 @@ const Login = () => {
       
       if (responseVendedor.status === 200) {
         // É um vendedor, redireciona para dashboard-vendedor
-        window.location.href = '/dashboard-vendedor';
-        return;
+          if (responseVendedor.status === 200) {
+              localStorage.setItem('cpfVendedor', form.cpf);
+              window.location.href = '/dashboard-vendedor';
+              return;
+          }
       }
       
       // Se chegou até aqui, nenhum dos perfis foi encontrado

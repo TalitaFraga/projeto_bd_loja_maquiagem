@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import axios from "axios"
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Table,
   TableBody,
@@ -10,63 +10,72 @@ import {
   Box,
   Chip,
   LinearProgress,
-} from "@mui/material"
+  Paper,
+} from "@mui/material";
 
 export default function TopSellingProductsTable() {
-  const [produtosMaisVendidos, setProdutosMaisVendidos] = useState([])
+  const [produtosMaisVendidos, setProdutosMaisVendidos] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [resItens, resProdutos] = await Promise.all([
-          axios.get("http://localhost:8081/itens-venda"),
-          axios.get("http://localhost:8081/produtos"),
-        ])
+        const cpfVendedor = localStorage.getItem("cpfVendedor");
 
-        const itens = resItens.data || []
-        const produtos = resProdutos.data || []
+        const [resVendas, resProdutos] = await Promise.all([
+          axios.get("http://localhost:8081/vendas"),
+          axios.get("http://localhost:8081/produtos"),
+        ]);
+
+        const vendas = resVendas.data || [];
+        const produtos = resProdutos.data || [];
+
+        const vendasDoVendedor = vendas.filter(
+            (venda) => venda.cpfVendedor === cpfVendedor
+        );
+
+        const itens = vendasDoVendedor.flatMap((venda) => venda.itens || []);
 
         const mapaNomes = produtos.reduce((mapa, produto) => {
-          mapa[produto.codigo_barra] = produto.nome
-          return mapa
-        }, {})
+          mapa[produto.codigo_barra] = produto.nome;
+          return mapa;
+        }, {});
 
-        const vendasPorProduto = {}
+        const vendasPorProduto = {};
 
         itens.forEach((item) => {
-          const id = item.codigoBarra || "semId"
+          const id = item.codigoBarra || "semId";
           if (!vendasPorProduto[id]) {
             vendasPorProduto[id] = {
               id,
               name: mapaNomes[id] || `Produto ${id}`,
               quantity: 0,
-            }
+            };
           }
-          vendasPorProduto[id].quantity += item.qtdeProduto || 0
-        })
+          vendasPorProduto[id].quantity += item.qtdeProduto || 0;
+        });
 
         const produtosOrdenados = Object.values(vendasPorProduto)
             .sort((a, b) => b.quantity - a.quantity)
-            .slice(0, 5)
+            .slice(0, 5);
 
-        const maiorQuantidade = produtosOrdenados[0]?.quantity || 1
+        const maiorQuantidade = produtosOrdenados[0]?.quantity || 1;
 
         const produtosComProgresso = produtosOrdenados.map((produto) => ({
           ...produto,
           progress: Math.round((produto.quantity / maiorQuantidade) * 100),
-        }))
+        }));
 
-        setProdutosMaisVendidos(produtosComProgresso)
+        setProdutosMaisVendidos(produtosComProgresso);
       } catch (error) {
-        console.error("Erro ao buscar itens vendidos ou produtos:", error)
+        console.error("Erro ao buscar dados:", error);
       }
     }
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   return (
-      <TableContainer sx={{ width: "100%" }}>
+      <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -82,8 +91,8 @@ export default function TopSellingProductsTable() {
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                      <Box sx={{ width: "100%", mr: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Box sx={{ flexGrow: 1, mr: 1 }}>
                         <LinearProgress
                             variant="determinate"
                             value={row.progress}
@@ -107,5 +116,5 @@ export default function TopSellingProductsTable() {
           </TableBody>
         </Table>
       </TableContainer>
-  )
+  );
 }

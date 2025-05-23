@@ -1,118 +1,150 @@
-import { useEffect, useState } from "react"
-import axios from "axios"
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
     BarChart,
     Bar,
     XAxis,
+    Legend,
     YAxis,
     CartesianGrid,
-    ResponsiveContainer,
-    Legend,
-} from "recharts"
-import Box from "@mui/material/Box"
+    ResponsiveContainer
+} from "recharts";
+import Box from "@mui/material/Box";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Typography from "@mui/material/Typography";
 
-const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+const meses = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-export default function WeeklySalesChart() {
-    const [dadosGrafico, setDadosGrafico] = useState([])
-    const [cores, setCores] = useState({})
-    const [legendas, setLegendas] = useState([])
+export default function VendasChart({ sx }) {
+    const [dadosGrafico, setDadosGrafico] = useState([]);
+    const [periodo, setPeriodo] = useState('semanal');
+
+    const handlePeriodoChange = (_, newPeriodo) => {
+        if (newPeriodo !== null) {
+            setPeriodo(newPeriodo);
+        }
+    };
 
     useEffect(() => {
         async function fetchData() {
+            const cpfFormatado = localStorage.getItem("cpfVendedor");
+            if (!cpfFormatado) return;
+
             try {
-                const [resVendas, resVendedores] = await Promise.all([
-                    axios.get("http://localhost:8081/vendas"),
-                    axios.get("http://localhost:8081/vendedores"),
-                ])
+                const resVendas = await axios.get("http://localhost:8081/vendas");
+                const vendas = resVendas.data || [];
 
-                const vendas = resVendas.data || []
-                const vendedores = resVendedores.data || []
+                let dados = [];
 
-                const mapaCpfParaNome = {}
-                vendedores.forEach(v => {
-                    mapaCpfParaNome[v.cpf] = v.nome
-                })
+                if (periodo === 'semanal') {
+                    const vendasPorDiaVendedor = {};
+                    const vendasPorDiaTotal = {};
 
-                // Agrupa as vendas por dia da semana e vendedor
-                const vendasPorDia = {}
+                    vendas.forEach(venda => {
+                        const dia = new Date(venda.dataHoraVenda).getDay();
+                        const nomeDia = diasSemana[dia];
+                        const quantidadeVendida = (venda.itens || []).reduce((acc, item) => acc + (item.qtdeProduto || 0), 0);
 
-                vendas.forEach(venda => {
-                    const dia = new Date(venda.dataHoraVenda).getDay()
-                    const nomeDia = diasSemana[dia]
-                    const vendedorCpf = venda.cpfVendedor
-                    const nomeVendedor = mapaCpfParaNome[vendedorCpf] || vendedorCpf
+                        vendasPorDiaTotal[nomeDia] = (vendasPorDiaTotal[nomeDia] || 0) + quantidadeVendida;
 
-                    if (!vendasPorDia[nomeDia]) vendasPorDia[nomeDia] = {}
-                    if (!vendasPorDia[nomeDia][nomeVendedor]) vendasPorDia[nomeDia][nomeVendedor] = 0
+                        if (venda.cpfVendedor === cpfFormatado) {
+                            vendasPorDiaVendedor[nomeDia] = (vendasPorDiaVendedor[nomeDia] || 0) + quantidadeVendida;
+                        }
+                    });
 
-                    const quantidadeVendida = (venda.itens || []).reduce(
-                        (acc, item) => acc + (item.qtdeProduto || 0),
-                        0
-                    )
+                    dados = diasSemana.map(dia => ({
+                        name: dia,
+                        vendedor: vendasPorDiaVendedor[dia] || 0,
+                        total: vendasPorDiaTotal[dia] || 0
+                    }));
 
-                    vendasPorDia[nomeDia][nomeVendedor] += quantidadeVendida
-                })
+                } else if (periodo === 'mensal') {
+                    const vendasPorMesVendedor = {};
+                    const vendasPorMesTotal = {};
 
-                // Define cores únicas por vendedor
-                const nomesVendedores = new Set()
-                Object.values(vendasPorDia).forEach(v => {
-                    Object.keys(v).forEach(nome => nomesVendedores.add(nome))
-                })
+                    vendas.forEach(venda => {
+                        const mes = new Date(venda.dataHoraVenda).getMonth();
+                        const quantidadeVendida = (venda.itens || []).reduce((acc, item) => acc + (item.qtdeProduto || 0), 0);
 
-                const corBase = ["#2196F3", "#00E676", "#FF9800", "#9C27B0", "#EF5350"]
-                const coresPorVendedor = {}
-                Array.from(nomesVendedores).forEach((nome, idx) => {
-                    coresPorVendedor[nome] = corBase[idx % corBase.length]
-                })
+                        vendasPorMesTotal[mes] = (vendasPorMesTotal[mes] || 0) + quantidadeVendida;
 
-                // Monta dados no formato do Recharts
-                const dados = diasSemana.map(dia => {
-                    const linha = { name: dia }
-                    const vendasDoDia = vendasPorDia[dia] || {}
-                    Object.keys(vendasDoDia).forEach(nomeVendedor => {
-                        linha[nomeVendedor] = vendasDoDia[nomeVendedor]
-                    })
-                    return linha
-                })
+                        if (venda.cpfVendedor === cpfFormatado) {
+                            vendasPorMesVendedor[mes] = (vendasPorMesVendedor[mes] || 0) + quantidadeVendida;
+                        }
+                    });
 
-                setDadosGrafico(dados)
-                setCores(coresPorVendedor)
-                setLegendas(Object.entries(coresPorVendedor).map(([nome, cor]) => ({
-                    value: nome,
-                    type: "circle",
-                    color: cor,
-                })))
+                    dados = meses.map((mesNome, index) => ({
+                        name: mesNome,
+                        vendedor: vendasPorMesVendedor[index] || 0,
+                        total: vendasPorMesTotal[index] || 0
+                    }));
+
+                } else if (periodo === 'trimestral') {
+                    const vendasPorTriVendedor = {};
+                    const vendasPorTriTotal = {};
+
+                    vendas.forEach(venda => {
+                        const mes = new Date(venda.dataHoraVenda).getMonth();
+                        const trimestre = Math.floor(mes / 3) + 1;
+                        const nomeTri = `T${trimestre}`;
+                        const quantidadeVendida = (venda.itens || []).reduce((acc, item) => acc + (item.qtdeProduto || 0), 0);
+
+                        vendasPorTriTotal[nomeTri] = (vendasPorTriTotal[nomeTri] || 0) + quantidadeVendida;
+
+                        if (venda.cpfVendedor === cpfFormatado) {
+                            vendasPorTriVendedor[nomeTri] = (vendasPorTriVendedor[nomeTri] || 0) + quantidadeVendida;
+                        }
+                    });
+
+                    dados = ["T1", "T2", "T3", "T4"].map(tri => ({
+                        name: tri,
+                        vendedor: vendasPorTriVendedor[tri] || 0,
+                        total: vendasPorTriTotal[tri] || 0
+                    }));
+                }
+
+                setDadosGrafico(dados);
             } catch (error) {
-                console.error("Erro ao buscar dados para gráfico de vendas semanais:", error)
+                console.error("Erro ao buscar dados para gráfico:", error);
             }
         }
 
-        fetchData()
-    }, [])
+        fetchData();
+    }, [periodo]);
 
     return (
-        <Box sx={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
+        <Box sx={{ width: "100%", ...sx }}>  {/* Adicione sx aqui */}
+            <Typography variant="h6" sx={{ mb: 2 }}>
+                Vendas - {periodo.charAt(0).toUpperCase() + periodo.slice(1)}
+            </Typography>
+
+            <ToggleButtonGroup
+                value={periodo}
+                exclusive
+                onChange={handlePeriodoChange}
+                aria-label="Período"
+                sx={{ mb: 3 }}
+            >
+                <ToggleButton value="semanal">Semanal</ToggleButton>
+                <ToggleButton value="mensal">Mensal</ToggleButton>
+                <ToggleButton value="trimestral">Trimestral</ToggleButton>
+            </ToggleButtonGroup>
+
+            <ResponsiveContainer width="100%" height={400}>  {/* Aumente a altura para 400 */}
                 <BarChart
                     data={dadosGrafico}
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                    <YAxis axisLine={false} tickLine={false} />
-                    {Object.entries(cores).map(([vendedor, cor]) => (
-                        <Bar
-                            key={vendedor}
-                            dataKey={vendedor}
-                            fill={cor}
-                            radius={[4, 4, 0, 0]}
-                            barSize={20}
-                        />
-                    ))}
-                    <Legend iconType="circle" payload={legendas} />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Bar dataKey="vendedor" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={20} />
+                    <Bar dataKey="total" fill="#FF9800" radius={[4, 4, 0, 0]} barSize={20} />
+                    <Legend />
                 </BarChart>
             </ResponsiveContainer>
         </Box>
-    )
+    );
 }

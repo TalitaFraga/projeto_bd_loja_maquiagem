@@ -43,7 +43,6 @@ export default function OverviewCards() {
 
   const totalClientes = clientes.length
 
-  // Exemplo fixo de novos clientes (você pode ajustar com base na data de cadastro, se tiver)
   const novosClientes = clientes.slice(-8).length
 
   const cardData = [
