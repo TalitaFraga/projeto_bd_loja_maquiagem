@@ -131,14 +131,23 @@ const HistoricoVendasPeloDiretor = () => {
 
                 // Calcular valor da venda original
                 let valorOriginal = 0;
-                if (vendaOriginal && vendaOriginal.itens && vendaOriginal.itens.length > 0) {
+
+                // 🎯 PRIORIDADE: Usar valor calculado pelo backend
+                if (trocaDetalhada.valorVendaOriginal !== undefined && trocaDetalhada.valorVendaOriginal !== null) {
+                    valorOriginal = trocaDetalhada.valorVendaOriginal;
+                    console.log('💰 Usando valor original do backend:', valorOriginal);
+                } else if (vendaOriginal && vendaOriginal.itens && vendaOriginal.itens.length > 0) {
+                    // 🔄 Fallback: Calcular no frontend apenas se backend não trouxer
+                    console.log('⚠️ Backend não retornou valor original, calculando no frontend...');
                     valorOriginal = vendaOriginal.itens.reduce((total, item) => {
                         const produto = produtos.find(p => p.codigo_barra === item.codigoBarra);
                         const preco = produto ? parseFloat(produto.preco) : 0;
+                        console.log(`🔍 Item: ${item.codigoBarra} - Preço: ${preco} x Qtd: ${item.qtdeProduto}`);
                         return total + (preco * parseInt(item.qtdeProduto));
                     }, 0);
+                    console.log('💰 Valor original calculado no frontend:', valorOriginal);
                 } else {
-                    valorOriginal = trocaDetalhada.valorVendaOriginal || 0;
+                    console.log('❌ Não foi possível calcular valor original');
                 }
 
                 // 🆕 Buscar nome do cliente para trocas
@@ -348,7 +357,34 @@ const HistoricoVendasPeloDiretor = () => {
         }, 1000);
     };
 
-    const gerarPDFNF = (venda, numeroNF) => {
+    // 🔧 SUBSTITUA a função gerarPDFNF (linha ~354) pela versão corrigida:
+    const gerarPDFNF = async (venda, numeroNF) => {
+        // 🆕 BUSCAR PRODUTOS PARA CALCULAR VALORES UNITÁRIOS
+        let itensComValores = venda.itens;
+        
+        try {
+            const produtosResponse = await fetch('http://localhost:8081/produtos');
+            const produtos = await produtosResponse.json();
+            
+            // 🔧 CORRIGIR valores unitários dos itens
+            itensComValores = venda.itens.map(item => {
+                const produto = produtos.find(p => p.codigo_barra === item.codigoBarra);
+                const valorUnitario = produto ? parseFloat(produto.preco) : (item.valorUnitario || 0);
+                
+                return {
+                    ...item,
+                    nomeProduto: produto?.nome || item.nomeProduto || 'Produto',
+                    valorUnitario: valorUnitario
+                };
+            });
+            
+            console.log('🧾 Itens com valores corrigidos para NF:', itensComValores);
+            
+        } catch (error) {
+            console.error('⚠️ Erro ao buscar produtos para NF:', error);
+            // Se der erro, usar os valores que já existem
+        }
+
         const tipoDocumento = venda.tipoOperacao === 'TROCA' ? 'NOTA FISCAL DE TROCA' : 'NOTA FISCAL ELETRÔNICA';
         const infoTroca = venda.tipoOperacao === 'TROCA' ? `
             <div style="background: #E3F2FD; padding: 10px; margin: 10px 0; border-radius: 5px;">
@@ -412,7 +448,7 @@ const HistoricoVendasPeloDiretor = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            ${venda.itens.map(item => `
+                            ${itensComValores.map(item => `
                                 <tr>
                                     <td>${item.nomeProduto || 'Produto'}</td>
                                     <td>${item.codigoBarra}</td>
@@ -480,6 +516,30 @@ const HistoricoVendasPeloDiretor = () => {
         }).format(valor);
     };
 
+    const calcularValorTotalCorreto = (vendas) => {
+        // Identificar IDs de vendas originais que foram trocadas
+        const vendasOriginaisTrocadas = new Set();
+        
+        vendas.forEach(venda => {
+            if (venda.tipoOperacao === 'TROCA' && venda.vendaOriginalId) {
+                vendasOriginaisTrocadas.add(venda.vendaOriginalId);
+            }
+        });
+        
+        // Somar apenas vendas que NÃO foram trocadas + as novas vendas de troca
+        return vendas.reduce((total, venda) => {
+            // Se é uma venda normal que foi trocada, não somar
+            if (venda.tipoOperacao === 'VENDA' && vendasOriginaisTrocadas.has(venda.id)) {
+                console.log(`📊 Excluindo venda original trocada: ${venda.id} - R$ ${venda.valorTotal}`);
+                return total;
+            }
+            
+            // Somar todas as outras (vendas não trocadas + vendas de troca)
+            console.log(`📊 Incluindo no total: ${venda.id} (${venda.tipoOperacao}) - R$ ${venda.valorTotal}`);
+            return total + venda.valorTotal;
+        }, 0);
+    };
+
     // Componente para renderizar detalhes de troca do BD
     const DetalhesTrocaBD = ({ venda }) => {
         if (venda.tipoOperacao !== 'TROCA' || !venda.dadosTrocaBD) return null;
@@ -519,7 +579,7 @@ const HistoricoVendasPeloDiretor = () => {
                         <h4 style={{ color: '#F06292', marginTop: 0 }}>Venda Original</h4>
                         <p><strong>ID:</strong> #{vendaOriginal.idVenda || 'N/A'}</p>
                         <p><strong>Data:</strong> {vendaOriginal.dataHoraVenda ? new Date(vendaOriginal.dataHoraVenda).toLocaleString('pt-BR') : 'N/A'}</p>
-                        <p><strong>Valor:</strong> {formatarValor(dadosTroca.valorOriginal || 0)}</p>
+                        <p><strong>Valor:</strong> {formatarValor(venda.dadosTrocaBD?.valorVendaOriginal || 0)}</p>
                         <p><strong>Itens:</strong> {itensOriginais.length} produto(s)</p>
                     </div>
                     
@@ -990,20 +1050,20 @@ const HistoricoVendasPeloDiretor = () => {
 
                                     {/* Resumo final */}
                                     <div style={{ 
-                                        display: 'flex', 
-                                        justifyContent: 'space-between', 
-                                        alignItems: 'center',
-                                        padding: '16px',
-                                        backgroundColor: '#F8F9FA',
-                                        borderRadius: '8px'
-                                    }}>
-                                        <span style={{ fontSize: '14px', color: '#666' }}>
-                                            Total: {filteredVendas.length} venda(s)
-                                        </span>
-                                        <span style={{ fontSize: '14px', color: '#666', fontWeight: 'bold' }}>
-                                            Valor Total: {formatarValor(filteredVendas.reduce((total, venda) => total + venda.valorTotal, 0))}
-                                        </span>
-                                    </div>
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    alignItems: 'center',
+                                    padding: '16px',
+                                    backgroundColor: '#F8F9FA',
+                                    borderRadius: '8px'
+                                }}>
+                                    <span style={{ fontSize: '14px', color: '#666' }}>
+                                        Total: {filteredVendas.length} venda(s)
+                                    </span>
+                                    <span style={{ fontSize: '14px', color: '#666', fontWeight: 'bold' }}>
+                                        Valor Total: {formatarValor(calcularValorTotalCorreto(filteredVendas))}
+                                    </span>
+                                </div>
                                 </>
                             )}
                         </>
