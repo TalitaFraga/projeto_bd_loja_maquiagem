@@ -55,7 +55,7 @@ const ClientesMaisCompram = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h5" gutterBottom>
         Clientes que Mais Compram
       </Typography>
       <Paper sx={{ mt: 2 }}>

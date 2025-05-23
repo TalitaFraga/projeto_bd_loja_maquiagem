@@ -20,6 +20,8 @@ import ClientesMaisCompram from "./ClientesMaisCompram";
 import VendedoresMelhorDesempenho from "./VendedoresMelhorDesempenho";
 import VendasEstoque from "./VendasEstoque";
 import ProdutosVencendo from "./ProdutosVencendo";
+import AnnualSalesChart from "../AnnualSalesChart"
+import OverviewCards from "../OverviewCards";
 
 import axios from "axios";
 
@@ -91,6 +93,14 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  const totalVendas = vendas.reduce((acc, venda) => {
+    const totalVenda = (venda.itens || []).reduce((sum, item) => sum + (item.qtdeProduto || 0), 0)
+    return acc + totalVenda
+  }, 0)
+
+  const totalEstoque = estoque.reduce((acc, item) => acc + (item.qtdeProduto || 0), 0)
+
+
   if (loading) {
     return (
       <Box
@@ -107,22 +117,8 @@ const Dashboard = () => {
   }
 
   return (
-    // <SideBar>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <CssBaseline />
-
-        <AppBar
-          position="fixed"
-          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, 
-            backgroundColor: "#F06292", 
-           }}
-        >
-          <Toolbar>
-            <Typography variant="h6" noWrap component="div">
-              Maquiagem & Cia
-            </Typography>
-          </Toolbar>
-        </AppBar>
 
         <Box
           component="main"
@@ -137,35 +133,49 @@ const Dashboard = () => {
             width: "100%",          
           }}
         >
-          <Grid container spacing={3} mb={4}>
-            <Grid item xs={12} sm={6} md={3}>
-              <SummaryCard
-                title="Clientes"
-                value={clientes.length}
-                icon={<PeopleIcon />}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <SummaryCard
-                title="Funcionários"
-                value={funcionarios.length}
-                icon={<PeopleIcon />}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <SummaryCard
-                title="Produtos"
-                value={produtos.length}
-                icon={<StoreIcon />}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <SummaryCard
-                title="Vendas"
-                value={vendas.length}
-                icon={<ShoppingCartIcon />}
-              />
-            </Grid>
+        <Grid container spacing={3} mb={4} wrap="nowrap">
+          <Grid item>
+            <SummaryCard
+              title="Clientes"
+              value={clientes.length}
+              icon={<PeopleIcon />}
+            />
+          </Grid>
+          <Grid item>
+            <SummaryCard
+              title="Funcionários"
+              value={funcionarios.length}
+              icon={<PeopleIcon />}
+            />
+          </Grid>
+          <Grid item>
+            <SummaryCard
+              title="Produtos"
+              value={produtos.length}
+              icon={<StoreIcon />}
+            />
+          </Grid>
+          <Grid item>
+            <SummaryCard
+              title="Estoque"
+              value={totalEstoque}
+              icon={<StoreIcon />}
+            />
+          </Grid>
+          <Grid item>
+            <SummaryCard
+              title="Vendas"
+              value={vendas.length}
+              icon={<ShoppingCartIcon />}
+            />
+          </Grid>
+          <Grid item>
+            <SummaryCard
+              title="Produtos vendidos"
+              value={totalVendas}
+              icon={<StoreIcon />}
+            />
+          </Grid>
           </Grid>
 
           <Grid container spacing={4}>
@@ -174,13 +184,13 @@ const Dashboard = () => {
                 sx={{
                   p: 3,
                   borderRadius: 2,
-                  height: "100%",
+                  height: 250,
                   display: "flex",
                   flexDirection: "column",
                 }}
                 elevation={3}
               >
-                <Typography variant="h6" mb={2} fontWeight="medium">
+                <Typography variant="h5" mb={2} fontWeight="medium">
                   Vendas e Estoque
                 </Typography>
                 <Box sx={{ flexGrow: 1, minHeight: 300 }}>
@@ -198,13 +208,13 @@ const Dashboard = () => {
                 sx={{
                   p: 3,
                   borderRadius: 2,
-                  height: "100%",
+                  height: 250,
                   display: "flex",
                   flexDirection: "column",
                 }}
                 elevation={3}
               >
-                <Typography variant="h6" mb={2} fontWeight="medium">
+                <Typography variant="h5" mb={2} fontWeight="medium">
                   Produtos Vencendo
                 </Typography>
                 <Box sx={{ flexGrow: 1, minHeight: 300 }}>
@@ -218,13 +228,13 @@ const Dashboard = () => {
                 sx={{
                   p: 3,
                   borderRadius: 2,
-                  height: "100%",
+                  height: 250,
                   display: "flex",
                   flexDirection: "column",
                 }}
                 elevation={3}
               >
-                <Typography variant="h6" mb={2} fontWeight="medium">
+                <Typography variant="h5" mb={2} fontWeight="medium">
                   Vendas por Semana
                 </Typography>
                 <Box sx={{ flexGrow: 1, minHeight: 300 }}>
@@ -238,17 +248,28 @@ const Dashboard = () => {
                 sx={{
                   p: 3,
                   borderRadius: 2,
-                  height: "100%",
+                  height: 400,
                   display: "flex",
                   flexDirection: "column",
                 }}
                 elevation={3}
               >
-                <Typography variant="h6" mb={2} fontWeight="medium">
-                  Clientes que Mais Compram
-                </Typography>
+                {/* <Typography variant="h6" mb={2} fontWeight="medium"> */}
+                  {/* Clientes que Mais Compram */}
+                {/* </Typography> */}
                 <Box sx={{ flexGrow: 1, minHeight: 300 }}>
                   <ClientesMaisCompram clientes={clientes} vendas={vendas} />
+                </Box>
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Paper sx={{ p: 2, minHeight: 400, display: "flex", flexDirection: "column", width: 610 }}>
+                <Typography variant="h6" gutterBottom>
+                  Vendas - Frequência Anual
+                </Typography>
+                <Box sx={{ flexGrow: 1 }}>
+                  <AnnualSalesChart />
                 </Box>
               </Paper>
             </Grid>
@@ -259,13 +280,13 @@ const Dashboard = () => {
                   p: 3,
                   borderRadius: 2,
                   display: "flex",
-                  flexDirection: "column",
+                  // flexDirection: "column",
                 }}
                 elevation={3}
               >
-                <Typography variant="h6" mb={2} fontWeight="medium">
-                  Vendedores com Melhor Desempenho
-                </Typography>
+                {/* <Typography variant="h6" mb={2} fontWeight="medium"> */}
+                  {/* Vendedores com Melhor Desempenho */}
+                {/* </Typography> */}
                 <Box sx={{ flexGrow: 1 }}>
                   <VendedoresMelhorDesempenho
                     funcionarios={funcionarios}
@@ -277,7 +298,6 @@ const Dashboard = () => {
           </Grid>
         </Box>
       </Box>
-    // </SideBar>
   )
 };
 

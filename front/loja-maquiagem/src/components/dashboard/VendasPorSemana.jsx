@@ -140,9 +140,9 @@ const VendasPorSemana = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
+      {/* <Typography variant="h5" gutterBottom>
         Vendas da Semana
-      </Typography>
+      </Typography> */}
 
       <Button
         variant="contained"

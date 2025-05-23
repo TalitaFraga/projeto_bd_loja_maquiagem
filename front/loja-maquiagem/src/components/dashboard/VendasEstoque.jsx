@@ -62,20 +62,23 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
   });
 
   return (
-    <>
+    <Box>
+      {/* <Typography variant="h5" gutterBottom sx={{textAlign: 'center'}}>
+        Vendas e estoque
+      </Typography> */}
       <Box textAlign="center" sx={{ my: 3 }}>
         <Button
           variant="contained"
           color="primary"
           startIcon={<BarChartIcon />}
           onClick={() => setGraficoAberto(true)}
-            sx={{
+          sx={{
             backgroundColor: '#F48FB1',
             color: '#fff',
             '&:hover': {
               backgroundColor: '#F06292',
-    },
-  }}
+            },
+          }}
         >
           Vendas e Estoque
         </Button>
@@ -84,10 +87,16 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
       <Dialog
         open={graficoAberto}
         onClose={() => setGraficoAberto(false)}
-        maxWidth="lg"
+        maxWidth="md"
         fullWidth
       >
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}
+        >
           Vendas e Estoque
           <IconButton onClick={() => setGraficoAberto(false)}>
             <CloseIcon />
@@ -96,7 +105,10 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
         <DialogContent>
           <Box sx={{ height: 500 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={vendasPorProduto} margin={{ top: 20, right: 30, bottom: 80, left: 20 }}>
+              <BarChart
+                data={vendasPorProduto}
+                margin={{ top: 20, right: 30, bottom: 120, left: 20 }}
+              >
                 <XAxis
                   dataKey="nome"
                   interval={0}
@@ -109,13 +121,13 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
                 <Bar dataKey="vendas" fill="#F48FB1" />
+                <Bar dataKey="estoque" fill="#81D4FA" />
               </BarChart>
             </ResponsiveContainer>
           </Box>
         </DialogContent>
       </Dialog>
-    </>
+    </Box>
   );
 };
-
 export default VendasEstoque;

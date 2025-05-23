@@ -23,7 +23,7 @@ import axios from "axios";
 
 const ProdutosVencendo = () => {
   const [produtosVencendo, setProdutosVencendo] = useState([]);
-  const [mesVencimento, setMesVencimento] = useState(new Date().getMonth() + 1);
+  const [mesVencimento, setMesVencimento] = useState(new Date().getMonth()+1);
   const [anoVencimento, setAnoVencimento] = useState(new Date().getFullYear());
   const [loadingVencimento, setLoadingVencimento] = useState(false);
   const [errorVencimento, setErrorVencimento] = useState(null);
@@ -52,7 +52,7 @@ const ProdutosVencendo = () => {
         ...produto,
         quantidade_estoque: estoqueProduto ? estoqueProduto.qtdeProduto : 0,
       };
-    });
+    }).filter((produto) => produto.quantidade_estoque > 0);
 
     setProdutosVencendo(produtosComEstoque);
     setOpenModal(true);
@@ -72,9 +72,9 @@ const ProdutosVencendo = () => {
 
   return (
     <Box sx={{ mt: 5 }}>
-      <Typography variant="h5" gutterBottom>
+      {/* <Typography variant="h5" gutterBottom>
         Produtos vencendo
-      </Typography>
+      </Typography> */}
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
@@ -157,7 +157,7 @@ const ProdutosVencendo = () => {
                   <TableRow key={index}>
                     <TableCell>{produto.nome}</TableCell>
                     <TableCell>
-                      {new Date(produto.data_validade).toLocaleDateString()}
+                      {new Date(produto.data_validade + 'T00:00:00').toLocaleDateString('pt-BR')}
                     </TableCell>
                     <TableCell>{produto.quantidade_estoque ?? '-'}</TableCell>
                   </TableRow>
