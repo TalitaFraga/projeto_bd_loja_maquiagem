@@ -68,6 +68,26 @@ public class TrocaController {
         }
     }
 
+    // 🆕 NOVO ENDPOINT: Buscar troca com detalhes completos
+    @GetMapping("/{idTroca}/detalhada")
+    public ResponseEntity<?> buscarTrocaDetalhada(@PathVariable String idTroca) {
+        try {
+            Optional<TrocaService.TrocaDetalhada> trocaDetalhada = trocaService.buscarTrocaDetalhadaPorId(idTroca);
+
+            if (trocaDetalhada.isPresent()) {
+                return ResponseEntity.ok(trocaDetalhada.get());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Troca não encontrada: " + idTroca);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar troca detalhada: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao buscar troca detalhada: " + e.getMessage());
+        }
+    }
+
     // Listar todas as trocas
     @GetMapping
     public ResponseEntity<?> listarTodas() {
@@ -79,6 +99,20 @@ public class TrocaController {
             System.err.println("Erro ao listar trocas: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao listar trocas: " + e.getMessage());
+        }
+    }
+
+    // 🆕 NOVO ENDPOINT: Listar todas as trocas com detalhes completos
+    @GetMapping("/detalhadas")
+    public ResponseEntity<?> listarTrocasDetalhadas() {
+        try {
+            List<TrocaService.TrocaDetalhada> trocasDetalhadas = trocaService.buscarTrocasDetalhadas();
+            return ResponseEntity.ok(trocasDetalhadas);
+
+        } catch (Exception e) {
+            System.err.println("Erro ao listar trocas detalhadas: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao listar trocas detalhadas: " + e.getMessage());
         }
     }
 
