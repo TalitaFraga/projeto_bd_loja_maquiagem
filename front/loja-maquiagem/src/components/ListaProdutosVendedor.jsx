@@ -11,7 +11,6 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Button,
     IconButton,
     TextField,
     InputAdornment,
@@ -24,12 +23,14 @@ import {
     Select,
     MenuItem,
     Chip,
+    Container,
+    Divider,
 } from "@mui/material";
-import { Add, Search, Edit, Delete, Inventory } from "@mui/icons-material";
+import { Search, Visibility, Inventory } from "@mui/icons-material";
+import HomeIcon from '@mui/icons-material/Home';
 import { Link } from "react-router-dom";
 
-
-const ListaProdutos = () => {
+const ListaProdutosVendedor = () => {
     const [produtos, setProdutos] = useState([]);
     const [produtosOriginais, setProdutosOriginais] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -65,6 +66,9 @@ const ListaProdutos = () => {
                 setLoading(false);
             } catch (error) {
                 console.error("Erro ao buscar dados:", error);
+                setSnackbarMessage("Erro ao carregar produtos.");
+                setSnackbarSeverity("error");
+                setSnackbarOpen(true);
                 setLoading(false);
             }
         };
@@ -134,26 +138,6 @@ const ListaProdutos = () => {
         ordenarProdutos(filteredProdutos, ordenacao) :
         filteredProdutos;
 
-    const handleExcluir = (codigoBarra) => {
-        if (window.confirm("Tem certeza que deseja excluir este produto?")) {
-            axios.delete(`http://localhost:8081/produtos/${codigoBarra}`)
-                .then(() => {
-                    const novosProdutos = produtos.filter(p => p.codigo_barra !== codigoBarra);
-                    setProdutos(novosProdutos);
-                    setProdutosOriginais(produtosOriginais.filter(p => p.codigo_barra !== codigoBarra));
-                    setSnackbarMessage("Produto excluído com sucesso!");
-                    setSnackbarSeverity("success");
-                    setSnackbarOpen(true);
-                })
-                .catch((error) => {
-                    console.error("Erro ao excluir produto:", error);
-                    setSnackbarMessage("Erro ao excluir produto.");
-                    setSnackbarSeverity("error");
-                    setSnackbarOpen(true);
-                });
-        }
-    };
-
     const formatarPreco = (preco) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
@@ -178,61 +162,66 @@ const ListaProdutos = () => {
         return validade < hoje;
     };
 
+    const handleViewDetails = (produto) => {
+        setSnackbarMessage(`Consultando: ${produto.nome} - Código: ${produto.codigo_barra}`);
+        setSnackbarSeverity("info");
+        setSnackbarOpen(true);
+    };
+
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" mt={4}>
-                <CircularProgress />
-            </Box>
+            <Container maxWidth="lg" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+                <CircularProgress sx={{ color: '#F06292' }} />
+            </Container>
         );
     }
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={4000}
-                onClose={() => setSnackbarOpen(false)}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-                <Alert
+        <>
+            <Box sx={{ position: 'absolute', top: 16, left: 16 }}>
+                <Link to="/dashboard-vendedor">
+                    <IconButton>
+                        <HomeIcon sx={{ fontSize: 30, color: '#F06292' }} />
+                    </IconButton>
+                </Link>
+            </Box>
+
+            <Container maxWidth="lg" sx={{ py: 4 }}>
+                <Snackbar
+                    open={snackbarOpen}
+                    autoHideDuration={4000}
                     onClose={() => setSnackbarOpen(false)}
-                    severity={snackbarSeverity}
-                    variant="filled"
-                    sx={{ width: '100%' }}>
-                    {snackbarMessage}
-                </Alert>
-            </Snackbar>
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+                    <Alert
+                        onClose={() => setSnackbarOpen(false)}
+                        severity={snackbarSeverity}
+                        variant="filled"
+                        sx={{ width: '100%' }}>
+                        {snackbarMessage}
+                    </Alert>
+                </Snackbar>
 
-            <Paper
-                elevation={4}
-                sx={{
-                    p: 3,
-                    borderRadius: 3,
-                    backgroundColor: '#FFF',
-                    borderTop: '4px solid #F06292',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
-                }}
-            >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Box
-                        sx={{
-                            backgroundColor: '#F06292',
-                            borderRadius: '50%',
-                            p: 1,
-                            mr: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}
-                    >
-                        <Inventory sx={{ color: 'white', fontSize: 24 }} />
+                <Paper
+                    elevation={4}
+                    sx={{
+                        p: 4,
+                        borderRadius: 3,
+                        mt: 3,
+                        backgroundColor: '#FFF',
+                        borderTop: '4px solid #F06292',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                        <Inventory sx={{ fontSize: 36, color: '#F06292', mr: 2 }} />
+                        <Typography variant="h4" color="#333" fontWeight="500">
+                            Consulta de Produtos
+                        </Typography>
                     </Box>
-                    <Typography variant="h4" color="#333" fontWeight="500">
-                        Lista de Produtos
-                    </Typography>
-                </Box>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, gap: 2 }}>
-                    <Box sx={{ display: 'flex', gap: 2, flex: 1 }}>
+                    <Divider sx={{ mb: 4 }} />
+
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 3, gap: 2 }}>
                         <Autocomplete
                             freeSolo
                             options={opcoesBusca}
@@ -282,100 +271,82 @@ const ListaProdutos = () => {
                         </FormControl>
                     </Box>
 
-                    <Button
-                        variant="contained"
-                        startIcon={<Add />}
-                        component={Link}
-                        to="/produtos"
-                        sx={{
-                            backgroundColor: '#F48FB1',
-                            '&:hover': { backgroundColor: '#F06292' },
-                        }}
-                    >
-                        Novo Produto
-                    </Button>
-                </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        Total: {produtosFiltradosOrdenados.length} produto(s) encontrado(s)
+                    </Typography>
 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Total: {produtosFiltradosOrdenados.length} produto(s)
-                </Typography>
-
-                <TableContainer component={Paper} elevation={3}>
-                    <Table>
-                        <TableHead sx={{ backgroundColor: '#F5F5F5' }}>
-                            <TableRow>
-                                <TableCell>Nome</TableCell>
-                                <TableCell>Código</TableCell>
-                                <TableCell>Marca</TableCell>
-                                <TableCell>Tipo</TableCell>
-                                <TableCell>Preço</TableCell>
-                                <TableCell>Validade</TableCell>
-                                <TableCell>Estoque</TableCell>
-                                <TableCell align="center">Ações</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {produtosFiltradosOrdenados.length === 0 ? (
+                    <TableContainer component={Paper} elevation={3}>
+                        <Table>
+                            <TableHead sx={{ backgroundColor: '#FCE4EC' }}>
                                 <TableRow>
-                                    <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
-                                        <Typography variant="body1" color="text.secondary">
-                                            Nenhum produto encontrado
-                                        </Typography>
-                                    </TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Nome</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Código</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Marca</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Tipo</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Preço</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Validade</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Estoque</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>Ações</TableCell>
                                 </TableRow>
-                            ) : (
-                                produtosFiltradosOrdenados.map((produto) => (
-                                    <TableRow key={`${produto.codigo_barra}-${produto.lote_produto}`}>
-                                        <TableCell>{produto.nome}</TableCell>
-                                        <TableCell>{produto.codigo_barra}</TableCell>
-                                        <TableCell>{produto.marca}</TableCell>
-                                        <TableCell>{produto.tipo_produto}</TableCell>
-                                        <TableCell>{formatarPreco(produto.preco)}</TableCell>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                {formatarData(produto.data_validade)}
-                                                {isVencido(produto.data_validade) && (
-                                                    <Chip label="Vencido" size="small" color="error" />
-                                                )}
-                                                {!isVencido(produto.data_validade) && isVencendoEm30Dias(produto.data_validade) && (
-                                                    <Chip label="Vencendo" size="small" color="warning" />
-                                                )}
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                {produto.quantidade_estoque}
-                                                {produto.quantidade_estoque === 0 && (
-                                                    <Chip label="Sem estoque" size="small" color="error" />
-                                                )}
-                                                {produto.quantidade_estoque > 0 && produto.quantidade_estoque <= 5 && (
-                                                    <Chip label="Baixo" size="small" color="warning" />
-                                                )}
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <IconButton
-                                                color="primary"
-                                                onClick={() => {/* Implementar edição */}}
-                                            >
-                                                <Edit />
-                                            </IconButton>
-                                            <IconButton
-                                                color="error"
-                                                onClick={() => handleExcluir(produto.codigo_barra)}
-                                            >
-                                                <Delete />
-                                            </IconButton>
+                            </TableHead>
+                            <TableBody>
+                                {produtosFiltradosOrdenados.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                                            <Typography variant="body1" color="text.secondary">
+                                                {searchTerm ? "Nenhum produto encontrado para esta busca" : "Nenhum produto disponível"}
+                                            </Typography>
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Paper>
-        </Box>
+                                ) : (
+                                    produtosFiltradosOrdenados.map((produto) => (
+                                        <TableRow key={`${produto.codigo_barra}-${produto.lote_produto}`} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: '#FAFAFA' } }}>
+                                            <TableCell>{produto.nome}</TableCell>
+                                            <TableCell>{produto.codigo_barra}</TableCell>
+                                            <TableCell>{produto.marca}</TableCell>
+                                            <TableCell>{produto.tipo_produto}</TableCell>
+                                            <TableCell>{formatarPreco(produto.preco)}</TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    {formatarData(produto.data_validade)}
+                                                    {isVencido(produto.data_validade) && (
+                                                        <Chip label="Vencido" size="small" color="error" />
+                                                    )}
+                                                    {!isVencido(produto.data_validade) && isVencendoEm30Dias(produto.data_validade) && (
+                                                        <Chip label="Vencendo" size="small" color="warning" />
+                                                    )}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    {produto.quantidade_estoque}
+                                                    {produto.quantidade_estoque === 0 && (
+                                                        <Chip label="Sem estoque" size="small" color="error" />
+                                                    )}
+                                                    {produto.quantidade_estoque > 0 && produto.quantidade_estoque <= 5 && (
+                                                        <Chip label="Baixo" size="small" color="warning" />
+                                                    )}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <IconButton
+                                                    sx={{ color: '#1976D2' }}
+                                                    onClick={() => handleViewDetails(produto)}
+                                                    title="Ver detalhes do produto"
+                                                >
+                                                    <Visibility />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Paper>
+            </Container>
+        </>
     );
 };
 
-export default ListaProdutos;
+export default ListaProdutosVendedor;
