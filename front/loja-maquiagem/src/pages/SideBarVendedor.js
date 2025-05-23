@@ -113,7 +113,7 @@ const SidebarVendedor = ({ children }) => {
       key: "estoque",
       subItems: [
         { text: "Cadastro de Produtos", icon: <StoreIcon />, path: "/produtos" },
-        { text: "Visualizar Produtos", icon: <VisibilityIcon />, path: "/visualizar-produtos" }
+        { text: "Visualizar Produtos", icon: <VisibilityIcon />, path: "/produtos-vendedor" }
       ]
     }
   ];

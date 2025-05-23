@@ -13,7 +13,8 @@ import EditarPessoa from './components/EditarPessoa';
 import ListarClientesDiretor from './components/ListaClientesDiretor';
 import ListarFuncionariosDiretor from './components/ListarFuncionariosDiretor';
 import ListaFornecedores from './components/ListaFornecedores';
-import ListaProdutos from './components/ListaProdutos';
+import ListaProdutosDiretor from './components/ListaProdutosDiretor';
+import ListaProdutosVendedor from './components/ListaProdutosVendedor';
 import EditarFornecedor from './components/EditarFornecedor';
 import CadastroClienteDiretor from './components/CadastroClienteDiretor';
 import EditarClienteDiretor from './components/EditarClienteDiretor';
@@ -61,7 +62,8 @@ function AppContent() {
         <Route path="/cadastro-pessoa" element={<CadastrarPessoa />} />
         <Route path="/vincular" element={<VincularPessoa />} />
         <Route path="/produtos" element={<CadastrarProduto />} />
-        <Route path="/lista-produtos" element={<ListaProdutos />} />
+        <Route path="/lista-produtos" element={<ListaProdutosDiretor />} />
+        <Route path="/produtos-vendedor" element={<ListaProdutosVendedor />} />
         <Route path="/fornecedor" element={<CadastrarFornecedor />} />
         <Route path="/pessoas/:cpf" element={<EditarPessoa />} />
         <Route path="/clientes-pelo-diretor" element={<ListarClientesDiretor />} />
