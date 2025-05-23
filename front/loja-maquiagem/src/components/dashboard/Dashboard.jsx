@@ -27,15 +27,15 @@ import axios from "axios";
 
 const SummaryCard = ({ title, value, icon }) => (
   <Paper
-    elevation={4}
+    elevation={10}
     sx={{
       p: 3,
       display: "flex",
-      alignItems: "center",
+      alignItems: "flex-start",
       gap: 2,
       borderRadius: 2,
       bgcolor: "background.paper",
-      minHeight: 120,
+      minHeight: 10,
       flexDirection: "row",
     }}
   >
@@ -117,6 +117,7 @@ const Dashboard = () => {
   }
 
   return (
+    
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <CssBaseline />
 
@@ -133,7 +134,7 @@ const Dashboard = () => {
             width: "100%",          
           }}
         >
-        <Grid container spacing={3} mb={4} wrap="nowrap">
+        <Grid container spacing={3} mb={4} wrap="nowrap" justifyContent="center" alignItems="center">
           <Grid item>
             <SummaryCard
               title="Clientes"
@@ -178,8 +179,8 @@ const Dashboard = () => {
           </Grid>
           </Grid>
 
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={6}>
+          <Grid container spacing={4} justifyContent="center" alignItems="center">
+            <Grid item xs={12} md={6} >
               <Paper
                 sx={{
                   p: 3,
@@ -243,6 +244,17 @@ const Dashboard = () => {
               </Paper>
             </Grid>
 
+            <Grid item xs={12} md={50}>
+              <Paper sx={{ p: 2, minHeight: 400, display: "flex", flexDirection: "column", width: 1055 }} elevation={3}>
+                <Typography variant="h5" gutterBottom>
+                  Vendas - Frequência
+                </Typography>
+                <Box sx={{ flexGrow: 1 }}>
+                  <AnnualSalesChart />
+                </Box>
+              </Paper>
+            </Grid>
+            
             <Grid item xs={12} md={6}>
               <Paper
                 sx={{
@@ -263,24 +275,14 @@ const Dashboard = () => {
               </Paper>
             </Grid>
 
-            <Grid item xs={12}>
-              <Paper sx={{ p: 2, minHeight: 400, display: "flex", flexDirection: "column", width: 610 }}>
-                <Typography variant="h6" gutterBottom>
-                  Vendas - Frequência Anual
-                </Typography>
-                <Box sx={{ flexGrow: 1 }}>
-                  <AnnualSalesChart />
-                </Box>
-              </Paper>
-            </Grid>
-
-            <Grid item xs={12}>
+            <Grid item xs={12} >
               <Paper
                 sx={{
                   p: 3,
                   borderRadius: 2,
+                  // height:'flex',
                   display: "flex",
-                  // flexDirection: "column",
+                  flexDirection: "column",
                 }}
                 elevation={3}
               >
@@ -295,6 +297,8 @@ const Dashboard = () => {
                 </Box>
               </Paper>
             </Grid>
+            
+
           </Grid>
         </Box>
       </Box>

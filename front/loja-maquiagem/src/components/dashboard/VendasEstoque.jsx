@@ -66,7 +66,7 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
       {/* <Typography variant="h5" gutterBottom sx={{textAlign: 'center'}}>
         Vendas e estoque
       </Typography> */}
-      <Box textAlign="center" sx={{ my: 3 }}>
+      <Box textAlign="center" sx={{ my: 2 }}>
         <Button
           variant="contained"
           color="primary"

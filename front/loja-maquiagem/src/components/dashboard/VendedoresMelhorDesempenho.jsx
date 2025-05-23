@@ -75,34 +75,35 @@ const VendedoresMelhorDesempenho = () => {
         Vendedores com Melhor Desempenho
       </Typography>
 
-      <Paper sx={{ mt: 3 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><strong>Nome</strong></TableCell>
-              <TableCell><strong>CPF</strong></TableCell>
-              <TableCell><strong>Vendas Realizadas</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {vendedoresVendas.length > 0 ? (
-              vendedoresVendas.map((vendedor, index) => (
-                <TableRow key={index}>
-                  <TableCell>{vendedor.nome}</TableCell>
-                  <TableCell>{vendedor.cpf}</TableCell>
-                  <TableCell>{vendedor.vendasRealizadas}</TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={3} align="center">
-                  Nenhuma venda encontrada para esse período.
-                </TableCell>
+      <Paper sx={{ mt: 3, maxHeight: 400, overflow: "auto" }}>
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell><strong>Nome</strong></TableCell>
+            <TableCell><strong>CPF</strong></TableCell>
+            <TableCell><strong>Vendas Realizadas</strong></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {vendedoresVendas.length > 0 ? (
+            vendedoresVendas.map((vendedor, index) => (
+              <TableRow key={index}>
+                <TableCell>{vendedor.nome}</TableCell>
+                <TableCell>{vendedor.cpf}</TableCell>
+                <TableCell>{vendedor.vendasRealizadas}</TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={3} align="center">
+                Nenhuma venda encontrada para esse período.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
       </Paper>
+
 
 
       <Paper
@@ -110,8 +111,8 @@ const VendedoresMelhorDesempenho = () => {
           mt: 2,
           p: 2,
           display: "flex",
-          alignItems: "center",
-          gap: 2,
+          alignItems: "flex",
+          gap: 5,
           flexWrap: "wrap",
         }}
         >
@@ -121,7 +122,7 @@ const VendedoresMelhorDesempenho = () => {
           value={mes}
           onChange={(e) => setMes(e.target.value)}
           inputProps={{ min: 0, max: 12 }}
-          sx={{ width: 150 }}
+          sx={{ width: 100 }}
           helperText="0 = ano todo"
         />
         <TextField
@@ -130,7 +131,7 @@ const VendedoresMelhorDesempenho = () => {
           value={ano}
           onChange={(e) => setAno(e.target.value)}
           inputProps={{ min: 1900, max: 2100 }}
-          sx={{ width: 150 }}
+          sx={{ width: 220 }}
         />
         <Box sx={{ height: '100%' }}>
           <Button

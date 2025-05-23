@@ -71,12 +71,12 @@ const ProdutosVencendo = () => {
   };
 
   return (
-    <Box sx={{ mt: 5 }}>
+    <Box sx={{ mt: 2 }}>
       {/* <Typography variant="h5" gutterBottom>
         Produtos vencendo
       </Typography> */}
 
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={{ p: 1, mb: 5 }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={6} sm={3}>
             <TextField
@@ -100,7 +100,7 @@ const ProdutosVencendo = () => {
             />
           </Grid>
 
-          <Grid item xs={12} sm={3}>
+          <Grid item xs={12} sm={5}>
             <Button
               variant="contained"
               onClick={buscarProdutosVencendo}
