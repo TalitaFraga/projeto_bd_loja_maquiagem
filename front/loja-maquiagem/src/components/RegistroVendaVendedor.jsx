@@ -34,7 +34,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const RegistroVendaDiretor = () => {
+const RegistroVendaVendedor = () => {
   const [venda, setVenda] = useState({
     cpfCliente: "",
     cpfVendedor: "",
@@ -316,7 +316,7 @@ const RegistroVendaDiretor = () => {
         
         // Redirecionar para o histórico de vendas após 2 segundos
         setTimeout(() => {
-          navigate("/historico-vendas-pelo-diretor");
+          navigate("/historico-vendas-pelo-vendedor");
         }, 2000);
       }, 3000);
       
@@ -797,4 +797,4 @@ const RegistroVendaDiretor = () => {
   );
 };
 
-export default RegistroVendaDiretor;
+export default RegistroVendaVendedor;

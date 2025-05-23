@@ -18,9 +18,10 @@ import {
 import { styled } from "@mui/material/styles";
 import { Link, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
-import StoreIcon from "@mui/icons-material/Store";
+import PersonIcon from '@mui/icons-material/Person';
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import InventoryIcon from '@mui/icons-material/Inventory';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
@@ -28,7 +29,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import PersonIcon from "@mui/icons-material/Person";
+import BadgeIcon from '@mui/icons-material/Badge';  
 
 const drawerWidth = 280;
 
@@ -101,9 +102,9 @@ const SidebarVendedor = ({ children }) => {
       type: "submenu",
       key: "vendas",
       subItems: [
-        { text: "Registro de Venda", icon: <AddShoppingCartIcon />, path: "/registro-venda" },
-        { text: "Registro de Troca", icon: <SwapHorizIcon />, path: "/registro-troca" },
-        { text: "Histórico de Vendas", icon: <HistoryIcon />, path: "/historico-vendas" }
+        { text: "Registro de Venda", icon: <AddShoppingCartIcon />, path: "/registro-venda-pelo-vendedor" },
+        { text: "Registro de Troca", icon: <SwapHorizIcon />, path: "/troca-pedido-pelo-vendedor" },
+        { text: "Histórico de Vendas", icon: <HistoryIcon />, path: "/historico-vendas-pelo-vendedor" }
       ]
     },
     {
@@ -112,8 +113,17 @@ const SidebarVendedor = ({ children }) => {
       type: "submenu",
       key: "estoque",
       subItems: [
-        { text: "Cadastro de Produtos", icon: <StoreIcon />, path: "/produtos" },
-        { text: "Visualizar Produtos", icon: <VisibilityIcon />, path: "/produtos-vendedor" }
+        { text: "Visualizar Produtos", icon: <VisibilityIcon />, path: "/lista-produtos" }
+      ]
+    },
+    {
+      text: "Clientes",
+      icon: <PersonIcon />,
+      type: "submenu",
+      key: "clientes",
+      subItems: [
+        { text: "Cadastrar Clientes", icon: <PersonAddIcon />, path: "/cadastro-cliente-pelo-diretor" },
+        { text: "Visualizar Clientes", icon: <VisibilityIcon />, path: "/lista-clientes-pelo-diretor" }
       ]
     }
   ];
@@ -273,7 +283,7 @@ const SidebarVendedor = ({ children }) => {
               mr: 2,
             }}
           >
-            <PersonIcon />
+            <BadgeIcon />
           </Box>
           <Typography variant="h6" noWrap component="div">
             Vendedor
