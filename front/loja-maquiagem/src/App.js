@@ -69,7 +69,7 @@ function AppContent() {
         <Route path="/clientes-pelo-diretor" element={<ListarClientesDiretor />} />
         <Route path="/lista-funcionario-pelo-diretor" element={<ListarFuncionariosDiretor />} />
         <Route path="/lista-fornecedores" element={<ListaFornecedores />} />
-        <Route path="/editar-fornecedor/:cnpj" element={<EditarFornecedor />} />
+        <Route path="/editar-fornecedor" element={<EditarFornecedor />} />
         <Route path="/cadastro-cliente-pelo-diretor" element={<CadastroClienteDiretor />} />
         <Route path="/editar-cliente-pelo-diretor/:cpf" element={<EditarClienteDiretor />} />
         <Route path="/lista-clientes-pelo-diretor" element={<ListarClientesDiretor />} />
