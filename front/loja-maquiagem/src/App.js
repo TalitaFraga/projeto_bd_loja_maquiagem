@@ -10,6 +10,7 @@ import CadastrarFornecedor from './components/CadastroFornecedor';
 import Dashboard from './components/dashboard/Dashboard';
 import DashboardVendedor from './components/dashboard-vendedor/DashboardVendedor';
 import EditarPessoa from './components/EditarPessoa';
+import ListarClientesDiretor from './components/ListaClientesDiretor';
 import ListarFuncionariosDiretor from './components/ListarFuncionariosDiretor';
 import ListaFornecedores from './components/ListaFornecedores';
 import ListaProdutosDiretor from './components/ListaProdutosDiretor';
@@ -17,7 +18,6 @@ import ListaProdutosVendedor from './components/ListaProdutosVendedor';
 import EditarFornecedor from './components/EditarFornecedor';
 import CadastroClienteDiretor from './components/CadastroClienteDiretor';
 import EditarClienteDiretor from './components/EditarClienteDiretor';
-import ListarClientesDiretor from './components/ListaClientesDiretor';
 import Sidebar from './pages/SideBar';
 import SidebarVendedor from './pages/SideBarVendedor';
 import CadastroFuncionarioDiretor from './components/CadastroFuncionarioDiretor';
@@ -25,14 +25,8 @@ import EditarFuncionarioDiretor from './components/EditarFuncionarioDiretor';
 import RegistroVendaDiretor from './components/RegistroVendaDiretor';
 import HistoricoVendasDiretor from './components/HistoricoVendasDiretor';
 import TrocaPedidoDiretor from './components/TrocaPedidoDiretor';
-import RegistroVendaVendedor from './components/RegistroVendaVendedor';
-import HistoricoVendasVendedor from './components/HistoricoVendasVendedor';
-import TrocaPedidoVendedor from './components/TrocaPedidoVendedor';
-import CadastroClienteVendedor from './components/CadastroClienteVendedor';
-import EditarClienteVendedor from './components/EditarClienteVendedor';
-import ListarClientesVendedor from './components/ListaClientesVendedor';
-
-// 🔧 SUBSTITUA a função AppContent completa no App.js:
+import RegistroReabastecimento from './components/RegistroReabastecimento';
+import HistoricoReabastecimento from './components/HistoricoReabastecimento';
 
 function AppContent() {
   const location = useLocation();
@@ -51,40 +45,18 @@ function AppContent() {
     );
   }
 
-  // 🎯 DEFINIR ROTAS DO VENDEDOR (TODAS):
-  const rotasVendedor = [
-    '/dashboard-vendedor',
-    '/registro-venda-pelo-vendedor', 
-    '/historico-vendas-pelo-vendedor',
-    '/troca-pedido-pelo-vendedor',
-    '/lista-produtos'  // ✅ Adicionar rotas que vendedor acessa
-  ];
-
-  // ✅ VERIFICAR SE É ROTA DO VENDEDOR:
-  const isRotaVendedor = rotasVendedor.some(rota => 
-    location.pathname.startsWith(rota)
-  );
-
   // Rotas do VENDEDOR com SidebarVendedor
-  if (isRotaVendedor) {
+  if (location.pathname === '/dashboard-vendedor') {
     return (
       <SidebarVendedor>
         <Routes>
           <Route path="/dashboard-vendedor" element={<DashboardVendedor />} />
-          <Route path="/registro-venda-pelo-vendedor" element={<RegistroVendaVendedor />} />
-          <Route path="/historico-vendas-pelo-vendedor" element={<HistoricoVendasVendedor />} />
-          <Route path="/troca-pedido-pelo-vendedor" element={<TrocaPedidoVendedor />} />
-          <Route path="/lista-produtos" element={<ListaProdutosVendedor />} />
-          <Route path="/cadastro-cliente-pelo-vendedor" element={<CadastroClienteVendedor />} />
-          <Route path="/editar-cliente-pelo-vendedor/:cpf" element={<EditarClienteVendedor />} />
-          <Route path="/lista-clientes-pelo-vendedor" element={<ListarClientesVendedor />} />
-          {/* ✅ Adicionar outras rotas do vendedor aqui */}
         </Routes>
       </SidebarVendedor>
     );
   }
 
-  // Rotas PADRÃO com Sidebar normal (Diretor)
+  // Rotas PADRÃO com Sidebar normal
   return (
     <Sidebar>
       <Routes>
@@ -109,6 +81,10 @@ function AppContent() {
         <Route path="/registro-venda-pelo-diretor" element={<RegistroVendaDiretor />} />
         <Route path="/historico-vendas-pelo-diretor" element={<HistoricoVendasDiretor />} />
         <Route path="/troca-pedido-pelo-diretor" element={<TrocaPedidoDiretor />} />
+        <Route path="/registro-reabastecimento" element={<RegistroReabastecimento />} />
+        <Route path="/historico-reabastecimento" element={<HistoricoReabastecimento />} />
+
+
       </Routes>
     </Sidebar>
   );
