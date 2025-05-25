@@ -22,7 +22,7 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
-const EditarClienteDiretor = () => {
+const EditarClienteVendedor = () => {
   const { cpf } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -271,7 +271,7 @@ const EditarClienteDiretor = () => {
         severity: "success"
       });
       
-      setTimeout(() => navigate("/lista-clientes-pelo-diretor"), 2000);
+      setTimeout(() => navigate("/lista-clientes-pelo-vendedor"), 2000);
     } catch (error) {
       console.error("Erro ao atualizar cliente:", error);
       
@@ -386,7 +386,7 @@ const EditarClienteDiretor = () => {
           <Button 
             variant="contained" 
             component={Link} 
-            to="/lista-clientes-pelo-diretor"
+            to="/lista-clientes-pelo-vendedor"
             sx={{ 
               mt: 3, 
               bgcolor: '#F06292', 
@@ -671,7 +671,7 @@ const EditarClienteDiretor = () => {
               <Button
                 variant="outlined"
                 component={Link}
-                to="/lista-clientes-pelo-diretor"
+                to="/lista-clientes-pelo-vendedor"
                 size="large"
                 sx={{
                   px: 4,
@@ -733,4 +733,4 @@ const EditarClienteDiretor = () => {
   );
 };
 
-export default EditarClienteDiretor;
+export default EditarClienteVendedor;

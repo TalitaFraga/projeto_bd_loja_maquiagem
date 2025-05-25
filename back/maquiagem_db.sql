@@ -198,7 +198,7 @@ INSERT INTO Item_venda VALUES
 ('V001', '1001', 'L001', 2),
 ('V001', '3001', 'L001', 1),
 ('V002', '2002', 'L002', 1),
-('V003', '3001', 'L001', 1);
+('V003', '4002', 'L002', 1);
 
 -- Inserindo pedidos com IDs
 INSERT INTO Pede_produto VALUES
@@ -207,4 +207,4 @@ INSERT INTO Pede_produto VALUES
 ('PED003', '3001', '11.222.333/0001-44', '078.379.601-90', 'L001', 25);
 
 INSERT INTO Troca (id_troca, fk_Venda_id_venda_antiga, fk_Venda_id_venda_nova) VALUES
-('T001', 'V001', 'V003');
+('T001', 'V002', 'V003');

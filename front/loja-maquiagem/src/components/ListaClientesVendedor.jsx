@@ -30,7 +30,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const ListarClientesDiretor = () => {
+const ListarClientesVendedor = () => {
     const [clientes, setClientes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
@@ -184,7 +184,7 @@ const ListarClientesDiretor = () => {
                             variant="contained"
                             startIcon={<Add />}
                             component={Link}
-                            to="/cadastro-cliente-pelo-diretor"
+                            to="/cadastro-cliente-pelo-vendedor"
                             sx={{
                                 backgroundColor: '#F06292',
                                 '&:hover': { backgroundColor: '#E91E63' },
@@ -242,7 +242,7 @@ const ListarClientesDiretor = () => {
                                                     <TableCell>{cliente.telefone}</TableCell>
                                                     <TableCell align="center">
                                                         <IconButton
-                                                            onClick={() => navigate(`/editar-cliente-pelo-diretor/${cliente.cpf}`)}
+                                                            onClick={() => navigate(`/editar-cliente-pelo-vendedor/${cliente.cpf}`)}
                                                             sx={{ color: '#1976D2' }}
                                                         >
                                                             <Edit />
@@ -322,4 +322,4 @@ const ListarClientesDiretor = () => {
     );
 };
 
-export default ListarClientesDiretor;
+export default ListarClientesVendedor;

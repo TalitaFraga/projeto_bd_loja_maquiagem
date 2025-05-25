@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const HistoricoVendasPeloDiretor = () => {
+const HistoricoVendasPeloVendedor = () => {
     const [vendas, setVendas] = useState([]);
     const [trocasDetalhadas, setTrocasDetalhadas] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -821,7 +821,7 @@ const HistoricoVendasPeloDiretor = () => {
                         </div>
 
                         <button
-                            onClick={() => window.location.href = '/registro-venda-pelo-diretor'}
+                            onClick={() => window.location.href = '/registro-venda-pelo-vendedor'}
                             style={{
                                 backgroundColor: '#F06292',
                                 color: 'white',
@@ -1466,4 +1466,4 @@ const HistoricoVendasPeloDiretor = () => {
     );
 };
 
-export default HistoricoVendasPeloDiretor;
+export default HistoricoVendasPeloVendedor
