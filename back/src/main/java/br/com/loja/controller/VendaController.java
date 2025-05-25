@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -59,5 +60,14 @@ public class VendaController {
         Venda vendaSalva = vendaService.registrarVendaComItens(venda);
         return ResponseEntity.status(HttpStatus.CREATED).body(vendaSalva);
     }
+
+    @GetMapping("/faturamento")
+    public List<Map<String, Object>> faturamentoFiltrado(
+            @RequestParam(required = false) Integer ano,
+            @RequestParam(required = false) Integer mes
+    ) {
+        return vendaService.getFaturamentoFiltrado(ano, mes);
+    }
+
 
 }

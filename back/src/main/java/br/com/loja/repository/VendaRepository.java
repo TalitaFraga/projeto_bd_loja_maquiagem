@@ -6,9 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public class VendaRepository {
@@ -115,6 +113,49 @@ public class VendaRepository {
         }
     }
 
+    public List<Map<String, Object>> findFaturamentoFiltrado(Integer ano, Integer mes) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT DATE_FORMAT(V.datahora_venda, '%Y-%m') AS mes,
+               ROUND(SUM(IV.qtde_produto * P.preco), 2) AS total_vendas
+        FROM Venda V
+        JOIN Item_venda IV ON V.id_venda = IV.fk_Venda_id_venda
+        JOIN Produto P ON IV.fk_Produto_codigo_barra = P.codigo_barra
+            AND IV.fk_Produto_lote_produto = P.lote_produto
+        WHERE 1=1
+    """);
+
+        if (ano != null) {
+            sql.append(" AND YEAR(V.datahora_venda) = ").append(ano);
+        }
+
+        if (mes != null) {
+            sql.append(" AND MONTH(V.datahora_venda) = ").append(mes);
+        }
+
+        sql.append(" GROUP BY mes ORDER BY mes DESC");
+
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString());
+             ResultSet rs = stmt.executeQuery()) {
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    row.put(metaData.getColumnLabel(i), rs.getObject(i));
+                }
+                resultado.add(row);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar faturamento filtrado", e);
+        }
+
+        return resultado;
+    }
 
     private Venda mapResultSetToVenda(ResultSet rs) throws SQLException {
         Venda venda = new Venda();
