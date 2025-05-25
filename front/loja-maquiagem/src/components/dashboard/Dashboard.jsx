@@ -22,6 +22,7 @@ import VendasEstoque from "./VendasEstoque";
 import ProdutosVencendo from "./ProdutosVencendo";
 import AnnualSalesChart from "../AnnualSalesChart"
 import OverviewCards from "../OverviewCards";
+import FaturamentoMensal from "./FaturamentoMensal";
 
 import axios from "axios";
 
@@ -180,7 +181,7 @@ const Dashboard = () => {
           </Grid>
 
           <Grid container spacing={4} justifyContent="center" alignItems="center">
-            <Grid item xs={12} md={6} >
+            <Grid item xs={12} md={3} >
               <Paper
                 sx={{
                   p: 3,
@@ -204,7 +205,7 @@ const Dashboard = () => {
               </Paper>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={3}>
               <Paper
                 sx={{
                   p: 3,
@@ -224,7 +225,7 @@ const Dashboard = () => {
               </Paper>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={3}>
               <Paper
                 sx={{
                   p: 3,
@@ -244,17 +245,8 @@ const Dashboard = () => {
               </Paper>
             </Grid>
 
-            <Grid item xs={12} md={50}>
-              <Paper sx={{ p: 2, minHeight: 400, display: "flex", flexDirection: "column", width: 1055 }} elevation={3}>
-                <Typography variant="h5" gutterBottom>
-                  Vendas - Frequência
-                </Typography>
-                <Box sx={{ flexGrow: 1 }}>
-                  <AnnualSalesChart />
-                </Box>
-              </Paper>
-            </Grid>
-            
+
+
             <Grid item xs={12} md={6}>
               <Paper
                 sx={{
@@ -275,12 +267,23 @@ const Dashboard = () => {
               </Paper>
             </Grid>
 
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 2, minHeight: 400, display: "flex", flexDirection: "column", width: 600 }} elevation={3}>
+                <Typography variant="h5" gutterBottom>
+                  Vendas - Frequência
+                </Typography>
+                <Box sx={{ flexGrow: 1 }}>
+                  <AnnualSalesChart />
+                </Box>
+              </Paper>
+            </Grid>
+
             <Grid item xs={12} >
               <Paper
                 sx={{
                   p: 3,
                   borderRadius: 2,
-                  // height:'flex',
+                  height:'flex',
                   display: "flex",
                   flexDirection: "column",
                 }}
@@ -298,6 +301,10 @@ const Dashboard = () => {
               </Paper>
             </Grid>
             
+            <Grid item xs={12} md={3}>
+              <FaturamentoMensal />
+            </Grid>
+
 
           </Grid>
         </Box>

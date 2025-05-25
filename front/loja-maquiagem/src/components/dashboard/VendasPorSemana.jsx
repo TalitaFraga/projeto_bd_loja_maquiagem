@@ -21,20 +21,20 @@ import {
   Legend,
 } from "recharts";
 
-// Array com os dias da semana em português, começando no domingo
+
 const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-// Retorna a segunda-feira da semana da data informada
+
 function getStartOfWeek(date) {
   const d = new Date(date);
-  const day = d.getDay(); // 0 (dom) até 6 (sab)
-  const diff = (day === 0 ? -6 : 1) - day; // ajustar para segunda-feira
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day; 
   d.setDate(d.getDate() + diff);
   d.setHours(0, 0, 0, 0);
   return d;
 }
 
-// Retorna a abreviação do dia da semana da data
+
 function getDiaSemana(date) {
   return diasSemana[date.getDay()];
 }
@@ -45,7 +45,7 @@ const VendasPorSemana = () => {
   const [graficoAberto, setGraficoAberto] = useState(false);
   const [dataGrafico, setDataGrafico] = useState([]);
 
-  // Busca vendas
+
   useEffect(() => {
     const fetchVendas = async () => {
       try {
@@ -58,7 +58,7 @@ const VendasPorSemana = () => {
     fetchVendas();
   }, []);
 
-  // Busca funcionários
+
   useEffect(() => {
     const fetchFuncionarios = async () => {
       try {
@@ -71,13 +71,12 @@ const VendasPorSemana = () => {
     fetchFuncionarios();
   }, []);
 
-  // Retorna o nome do vendedor dado o CPF
+
   const getNomeVendedor = (cpf) => {
     const f = funcionarios.find((func) => func.cpf === cpf);
     return f ? f.nome : cpf;
   };
 
-  // Processa vendas para mostrar por dia da semana atual e vendedor
   useEffect(() => {
     if (vendas.length === 0) return;
 
@@ -91,7 +90,7 @@ const VendasPorSemana = () => {
 
     vendas.forEach((venda) => {
       const dataVenda = new Date(venda.dataHoraVenda);
-      if (dataVenda < inicioSemana || dataVenda > fimSemana) return; // só vendas da semana atual
+      if (dataVenda < inicioSemana || dataVenda > fimSemana) return;
 
       const dia = getDiaSemana(dataVenda);
       const nomeVendedor = getNomeVendedor(venda.cpfVendedor);
@@ -110,7 +109,7 @@ const VendasPorSemana = () => {
       vendasPorDia[dia][nomeVendedor] += totalItens;
     });
 
-    // Ordena os dias da semana começando na segunda-feira
+    
     const ordemDias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
     const dataChart = ordemDias.map((dia) => ({
@@ -121,7 +120,7 @@ const VendasPorSemana = () => {
     setDataGrafico(dataChart);
   }, [vendas, funcionarios]);
 
-  // Pega os nomes únicos dos vendedores que tem vendas na semana atual
+  
   const nomesVendedores = Array.from(
     new Set(
       vendas

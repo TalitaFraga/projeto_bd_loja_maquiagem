@@ -77,7 +77,7 @@ const ProdutosVencendo = () => {
       </Typography> */}
 
       <Paper sx={{ p: 1, mb: 5 }}>
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={1} alignItems="center">
           <Grid item xs={6} sm={3}>
             <TextField
               label="Mês"

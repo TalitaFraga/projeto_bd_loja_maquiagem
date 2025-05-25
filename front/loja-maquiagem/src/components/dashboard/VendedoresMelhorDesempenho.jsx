@@ -103,9 +103,7 @@ const VendedoresMelhorDesempenho = () => {
         </TableBody>
       </Table>
       </Paper>
-
-
-
+      
       <Paper
         sx={{
           mt: 2,
