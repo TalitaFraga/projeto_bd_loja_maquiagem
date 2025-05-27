@@ -22,7 +22,7 @@ const CadastrarProduto = () => {
     marca: "",
     preco: "",
     data_validade: "",
-    fk_Fornecedor_cnpj: ""
+    fk_fornecedor_CNPJ: ""
   });
 
   const navigate = useNavigate();
@@ -36,6 +36,7 @@ const CadastrarProduto = () => {
     e.preventDefault();
 
     try {
+      console.log("Enviando para backend:", form);
       await axios.post("http://localhost:8081/produtos", form);
       alert("Produto cadastrado com sucesso!");
       navigate("/produtos");
@@ -70,7 +71,7 @@ const CadastrarProduto = () => {
                 ["marca", "Marca"],
                 ["preco", "Preço", "number"],
                 ["data_validade", "Data de Validade", "date"],
-                ["fk_Fornecedor_cnpj", "CNPJ do Fornecedor"],
+                ["fk_fornecedor_CNPJ", "CNPJ do Fornecedor"],
               ].map(([name, label, type = "text"]) => (
                 <Grid item xs={12} sm={name === "nome" || name === "preco" ? 12 : 6} key={name}>
                   <TextField

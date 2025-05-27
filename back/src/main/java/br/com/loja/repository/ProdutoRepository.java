@@ -22,14 +22,13 @@ public class ProdutoRepository {
     }
 
     public Produto save(Produto produto) {
-        String sql = "INSERT INTO Produto (codigo_barra, lote_produto, tipo_produto, nome, marca, preco, data_validade, " +
-                "fk_fornecedor_CNPJ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "{CALL cadastrar_produto(?, ?, ?, ?, ?, ?, ?, ?)}";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             CallableStatement stmt = conn.prepareCall(sql)) {
 
             setProdutoParameters(stmt, produto);
-            stmt.executeUpdate();
+            stmt.execute();
             return produto;
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao salvar produto", e);
