@@ -69,5 +69,30 @@ public class VendaController {
         return vendaService.getFaturamentoFiltrado(ano, mes);
     }
 
+    @GetMapping("/vendas-chart")
+    public ResponseEntity<List<Map<String, Object>>> getVendasParaGrafico(
+            @RequestParam String periodo,
+            @RequestParam String cpfVendedor,
+            @RequestParam(required = false) Integer ano) {
+        try {
+            if (cpfVendedor == null || cpfVendedor.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            List<Map<String, Object>> dados = vendaRepository.findVendasAgrupadas(periodo, cpfVendedor, ano);
+            return ResponseEntity.ok(dados);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Erro de argumento inválido em VendaController: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            System.err.println("Erro de Runtime em VendaController ao chamar findVendasAgrupadas:");
+            if (e.getCause() instanceof SQLException) {
+                System.err.println("Causa SQL: " + e.getCause().getMessage());
+            } else {
+                System.err.println("Causa: " + (e.getCause() != null ? e.getCause().getMessage() : e.getMessage()));
+            }
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }

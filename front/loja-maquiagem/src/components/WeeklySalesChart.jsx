@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
     BarChart,
@@ -7,19 +7,29 @@ import {
     Legend,
     YAxis,
     CartesianGrid,
-    ResponsiveContainer
+    ResponsiveContainer,
+    Tooltip
 } from "recharts";
-import Box from "@mui/material/Box";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Typography from "@mui/material/Typography";
-
-const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
-const meses = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+import {
+    Box,
+    ToggleButton,
+    ToggleButtonGroup,
+    Typography,
+    CircularProgress,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
+} from "@mui/material";
 
 export default function VendasChart({ sx }) {
     const [dadosGrafico, setDadosGrafico] = useState([]);
     const [periodo, setPeriodo] = useState('semanal');
+    const [loading, setLoading] = useState(true);
+    const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear().toString());
+    const anosDisponiveis = ["2023", "2024", "2025", "2026"]; // Ou popule dinamicamente
+
+    const cpfVendedor = localStorage.getItem("cpfVendedor");
 
     const handlePeriodoChange = (_, newPeriodo) => {
         if (newPeriodo !== null) {
@@ -27,124 +37,106 @@ export default function VendasChart({ sx }) {
         }
     };
 
+    const handleAnoChange = (event) => {
+        setAnoSelecionado(event.target.value);
+    };
+
     useEffect(() => {
         async function fetchData() {
-            const cpfFormatado = localStorage.getItem("cpfVendedor");
-            if (!cpfFormatado) return;
+            if (!cpfVendedor) {
+                console.warn("CPF do vendedor não encontrado no localStorage.");
+                setDadosGrafico([]);
+                setLoading(false);
+                return;
+            }
 
+            setLoading(true);
             try {
-                const resVendas = await axios.get("http://localhost:8081/vendas");
-                const vendas = resVendas.data || [];
-
-                let dados = [];
-
-                if (periodo === 'semanal') {
-                    const vendasPorDiaVendedor = {};
-                    const vendasPorDiaTotal = {};
-
-                    vendas.forEach(venda => {
-                        const dia = new Date(venda.dataHoraVenda).getDay();
-                        const nomeDia = diasSemana[dia];
-                        const quantidadeVendida = (venda.itens || []).reduce((acc, item) => acc + (item.qtdeProduto || 0), 0);
-
-                        vendasPorDiaTotal[nomeDia] = (vendasPorDiaTotal[nomeDia] || 0) + quantidadeVendida;
-
-                        if (venda.cpfVendedor === cpfFormatado) {
-                            vendasPorDiaVendedor[nomeDia] = (vendasPorDiaVendedor[nomeDia] || 0) + quantidadeVendida;
-                        }
-                    });
-
-                    dados = diasSemana.map(dia => ({
-                        name: dia,
-                        vendedor: vendasPorDiaVendedor[dia] || 0,
-                        total: vendasPorDiaTotal[dia] || 0
-                    }));
-
-                } else if (periodo === 'mensal') {
-                    const vendasPorMesVendedor = {};
-                    const vendasPorMesTotal = {};
-
-                    vendas.forEach(venda => {
-                        const mes = new Date(venda.dataHoraVenda).getMonth();
-                        const quantidadeVendida = (venda.itens || []).reduce((acc, item) => acc + (item.qtdeProduto || 0), 0);
-
-                        vendasPorMesTotal[mes] = (vendasPorMesTotal[mes] || 0) + quantidadeVendida;
-
-                        if (venda.cpfVendedor === cpfFormatado) {
-                            vendasPorMesVendedor[mes] = (vendasPorMesVendedor[mes] || 0) + quantidadeVendida;
-                        }
-                    });
-
-                    dados = meses.map((mesNome, index) => ({
-                        name: mesNome,
-                        vendedor: vendasPorMesVendedor[index] || 0,
-                        total: vendasPorMesTotal[index] || 0
-                    }));
-
-                } else if (periodo === 'trimestral') {
-                    const vendasPorTriVendedor = {};
-                    const vendasPorTriTotal = {};
-
-                    vendas.forEach(venda => {
-                        const mes = new Date(venda.dataHoraVenda).getMonth();
-                        const trimestre = Math.floor(mes / 3) + 1;
-                        const nomeTri = `T${trimestre}`;
-                        const quantidadeVendida = (venda.itens || []).reduce((acc, item) => acc + (item.qtdeProduto || 0), 0);
-
-                        vendasPorTriTotal[nomeTri] = (vendasPorTriTotal[nomeTri] || 0) + quantidadeVendida;
-
-                        if (venda.cpfVendedor === cpfFormatado) {
-                            vendasPorTriVendedor[nomeTri] = (vendasPorTriVendedor[nomeTri] || 0) + quantidadeVendida;
-                        }
-                    });
-
-                    dados = ["T1", "T2", "T3", "T4"].map(tri => ({
-                        name: tri,
-                        vendedor: vendasPorTriVendedor[tri] || 0,
-                        total: vendasPorTriTotal[tri] || 0
-                    }));
+                const params = {
+                    periodo: periodo,
+                    cpfVendedor: cpfVendedor,
+                };
+                if (anoSelecionado) {
+                    params.ano = parseInt(anoSelecionado);
                 }
 
-                setDadosGrafico(dados);
+                const res = await axios.get("http://localhost:8081/vendas/vendas-chart", { params });
+                setDadosGrafico(res.data || []);
             } catch (error) {
-                console.error("Erro ao buscar dados para gráfico:", error);
+                console.error("Erro ao buscar dados para gráfico (VendasChart):", error);
+                setDadosGrafico([]);
+            } finally {
+                setLoading(false);
             }
         }
 
-        fetchData();
-    }, [periodo]);
+        if (periodo && cpfVendedor) {
+            fetchData();
+        } else {
+            setDadosGrafico([]);
+            setLoading(false);
+        }
+
+    }, [periodo, cpfVendedor, anoSelecionado]);
 
     return (
-        <Box sx={{ width: "100%", ...sx }}>  {/* Adicione sx aqui */}
-            <Typography variant="h6" sx={{ mb: 2 }}>
-                Vendas - {periodo.charAt(0).toUpperCase() + periodo.slice(1)}
+        <Box sx={{ width: "100%", p: 2, ...sx }}>
+            <Typography variant="h6" sx={{ mb: 1, textAlign: 'center' }}>
+                Desempenho de Vendas {anoSelecionado && `(${anoSelecionado})`}
             </Typography>
 
-            <ToggleButtonGroup
-                value={periodo}
-                exclusive
-                onChange={handlePeriodoChange}
-                aria-label="Período"
-                sx={{ mb: 3 }}
-            >
-                <ToggleButton value="semanal">Semanal</ToggleButton>
-                <ToggleButton value="mensal">Mensal</ToggleButton>
-                <ToggleButton value="trimestral">Trimestral</ToggleButton>
-            </ToggleButtonGroup>
-
-            <ResponsiveContainer width="100%" height={400}>  {/* Aumente a altura para 400 */}
-                <BarChart
-                    data={dadosGrafico}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+                <ToggleButtonGroup
+                    value={periodo}
+                    exclusive
+                    onChange={handlePeriodoChange}
+                    aria-label="Período"
                 >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Bar dataKey="vendedor" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={20} />
-                    <Bar dataKey="total" fill="#FF9800" radius={[4, 4, 0, 0]} barSize={20} />
-                    <Legend />
-                </BarChart>
-            </ResponsiveContainer>
+                    <ToggleButton value="semanal" aria-label="Semanal">Semanal</ToggleButton>
+                    <ToggleButton value="mensal" aria-label="Mensal">Mensal</ToggleButton>
+                    <ToggleButton value="trimestral" aria-label="Trimestral">Trimestral</ToggleButton>
+                </ToggleButtonGroup>
+
+                <FormControl sx={{ minWidth: 120 }}>
+                    <InputLabel id="ano-select-label">Ano</InputLabel>
+                    <Select
+                        labelId="ano-select-label"
+                        id="ano-select"
+                        value={anoSelecionado}
+                        label="Ano"
+                        onChange={handleAnoChange}
+                    >
+                        {anosDisponiveis.map((ano) => (
+                            <MenuItem key={ano} value={ano}>{ano}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Box>
+
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
+                    <CircularProgress />
+                </Box>
+            ) : dadosGrafico.length === 0 ? (
+                <Typography sx={{ textAlign: 'center', mt: 4, color: 'text.secondary' }}>
+                    Nenhum dado de venda encontrado para o período e filtros selecionados.
+                </Typography>
+            ) : (
+                <ResponsiveContainer width="100%" height={350}>
+                    <BarChart
+                        data={dadosGrafico}
+                        margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                        <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                        <Tooltip />
+                        <Legend wrapperStyle={{ fontSize: 14, paddingTop: 10 }} />
+                        <Bar dataKey="vendedor" name="Minhas Vendas (Qtd)" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={20} />
+                        <Bar dataKey="total" name="Total Vendas Loja (Qtd)" fill="#FF9800" radius={[4, 4, 0, 0]} barSize={20} />
+                    </BarChart>
+                </ResponsiveContainer>
+            )}
         </Box>
     );
 }

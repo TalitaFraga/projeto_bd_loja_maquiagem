@@ -157,6 +157,88 @@ public class VendaRepository {
         return resultado;
     }
 
+    public List<Map<String, Object>> findVendasAgrupadas(String periodo, String cpfVendedor, Integer ano) {
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        String nomeCampoDataSQL;
+        String groupByBaseSQL;
+        String orderByClauseSQL;
+
+        switch (periodo.toLowerCase()) {
+            case "semanal":
+                nomeCampoDataSQL = """
+                    CASE DAYOFWEEK(V.datahora_venda)
+                        WHEN 1 THEN 'Dom' WHEN 2 THEN 'Seg' WHEN 3 THEN 'Ter' WHEN 4 THEN 'Qua'
+                        WHEN 5 THEN 'Qui' WHEN 6 THEN 'Sex' WHEN 7 THEN 'Sab'
+                    END
+                """;
+                groupByBaseSQL = " DAYOFWEEK(V.datahora_venda) ";
+                orderByClauseSQL = " DAYOFWEEK(V.datahora_venda) ASC ";
+                break;
+            case "mensal":
+                nomeCampoDataSQL = " DATE_FORMAT(V.datahora_venda, '%b') ";
+                groupByBaseSQL = " MONTH(V.datahora_venda) ";
+                orderByClauseSQL = " MONTH(V.datahora_venda) ASC ";
+                break;
+            case "trimestral":
+                nomeCampoDataSQL = " CONCAT('T', QUARTER(V.datahora_venda)) ";
+                groupByBaseSQL = " QUARTER(V.datahora_venda) ";
+                orderByClauseSQL = " QUARTER(V.datahora_venda) ASC ";
+                break;
+            default:
+                throw new IllegalArgumentException("Período inválido: " + periodo);
+        }
+
+        sql.append("SELECT ")
+                .append(nomeCampoDataSQL).append(" AS name, ")
+                .append("SUM(IV.qtde_produto) AS total, ")
+                .append("SUM(CASE WHEN V.cpf_vendedor = ? THEN IV.qtde_produto ELSE 0 END) AS vendedor ")
+                .append("FROM `Venda` V ")
+                .append("JOIN `Item_venda` IV ON V.id_venda = IV.fk_Venda_id_venda ");
+
+        params.add(cpfVendedor);
+
+        sql.append("WHERE 1=1 ");
+        if (ano != null) {
+            sql.append("AND YEAR(V.datahora_venda) = ? ");
+            params.add(ano);
+        }
+
+        sql.append("GROUP BY name, ").append(groupByBaseSQL);
+        sql.append("ORDER BY ").append(orderByClauseSQL);
+
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        System.out.println("Executando SQL (findVendasAgrupadas): " + sql.toString());
+        System.out.println("Com parâmetros: " + params);
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    for (int i = 1; i <= columnCount; i++) {
+                        row.put(metaData.getColumnLabel(i).toLowerCase(), rs.getObject(i));
+                    }
+                    resultado.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro SQL em findVendasAgrupadas: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar vendas agrupadas para gráfico: " + e.getMessage(), e);
+        }
+        return resultado;
+    }
+
     private Venda mapResultSetToVenda(ResultSet rs) throws SQLException {
         Venda venda = new Venda();
         venda.setIdVenda(rs.getString("id_venda"));

@@ -7,12 +7,8 @@
     <list default="true" id="6c1a1998-8d20-4997-87ba-544404ee2327" name="Changes" comment="">
       <changelist_data name="Talita Fraga" email="talitafraga@macbook-air-de-talita.local" automatic="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/Login.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/OverviewCards.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/OverviewCards.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/TopCustomersTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/TopCustomersTable.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/TopSellingProductsTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/TopSellingProductsTable.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/WeeklySalesChart.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/WeeklySalesChart.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/src/components/dashboard-vendedor/DashboardVendedor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/src/components/dashboard-vendedor/DashboardVendedor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/back/src/main/java/br/com/loja/repository/VendaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/back/src/main/java/br/com/loja/repository/VendaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/loja-maquiagem/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/loja-maquiagem/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,6 +100,7 @@
       <workItem from="1745327505161" duration="7623000" />
       <workItem from="1747877287249" duration="1072000" />
       <workItem from="1747908935455" duration="21118000" />
+      <workItem from="1748468021447" duration="1458000" />
     </task>
     <servers />
   </component>
