@@ -187,6 +187,44 @@ BEGIN
 END$$
 DELIMITER ;
 
+
+-- Procedure para cadastrar produto
+
+DELIMITER $$
+
+CREATE PROCEDURE cadastrar_produto (
+    IN p_codigo_barra VARCHAR(20),
+    IN p_lote_produto VARCHAR(20),
+    IN p_tipo_produto VARCHAR(50),
+    IN p_nome VARCHAR(100),
+    IN p_marca VARCHAR(50),
+    IN p_preco DECIMAL(10,2),
+    IN p_data_validade DATE,
+    IN p_cnpj_fornecedor VARCHAR(18)
+)
+BEGIN
+    INSERT INTO Produto (
+        codigo_barra,
+        lote_produto,
+        tipo_produto,
+        nome,
+        marca,
+        preco,
+        data_validade,
+        fk_Fornecedor_CNPJ
+    ) VALUES (
+        p_codigo_barra,
+        p_lote_produto,
+        p_tipo_produto,
+        p_nome,
+        p_marca,
+        p_preco,
+        p_data_validade,
+        p_cnpj_fornecedor
+    );
+END$$
+DELIMITER ;
+
 -- Vendas e itens vendidos
 
 INSERT INTO Venda VALUES
