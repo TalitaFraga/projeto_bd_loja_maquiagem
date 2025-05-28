@@ -4,12 +4,14 @@ import br.com.loja.entities.Vendedor;
 import br.com.loja.entities.Funcionario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +22,7 @@ public class VendedorRepository {
     private final PessoaRepository pessoaRepository;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Lazy
     public VendedorRepository(DataSource dataSource, FuncionarioRepository funcionarioRepository, PessoaRepository pessoaRepository) {
         this.dataSource = dataSource;
@@ -140,5 +143,32 @@ public class VendedorRepository {
             throw new RuntimeException("Erro ao deletar vendedor (silencioso)", e);
         }
     }
+
+
+    public List<Map<String, Object>> vendedorDesempenho(Integer mes, Integer ano) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT p.nome, p.cpf, COUNT(v.id_venda) AS quantidade_vendas " +
+                        "FROM Venda v " +
+                        "JOIN Vendedor vend ON v.fk_Vendedor_fk_Funcionario_fk_Pessoa_cpf = vend.fk_Funcionario_fk_Pessoa_cpf " +
+                        "JOIN Funcionario f ON vend.fk_Funcionario_fk_Pessoa_cpf = f.fk_Pessoa_cpf " +
+                        "JOIN Pessoa p ON f.fk_Pessoa_cpf = p.cpf " +
+                        "WHERE YEAR(v.datahora_venda) = ? "
+        );
+
+        List<Object> params = new ArrayList<>();
+        params.add(ano);
+
+        if (mes != null && mes != 0) {
+            sql.append(" AND MONTH(v.datahora_venda) = ? ");
+            params.add(mes);
+        }
+
+        sql.append(" GROUP BY p.nome, p.cpf ");
+        sql.append(" ORDER BY quantidade_vendas DESC");
+
+        return jdbcTemplate.queryForList(sql.toString(), params.toArray());
+    }
+
+
 
 }

@@ -25,49 +25,18 @@ const VendedoresMelhorDesempenho = () => {
 
   const buscarVendas = async () => {
     try {
-      const resVendas = await axios.get("http://localhost:8081/vendas");
-      const resPessoas = await axios.get("http://localhost:8081/pessoas");
-
-      const vendas = resVendas.data;
-      const pessoas = resPessoas.data;
-
-      const mapaCpfNome = {};
-      pessoas.forEach((pessoa) => {
-        mapaCpfNome[pessoa.cpf] = pessoa.nome;
+      const res = await axios.get("http://localhost:8081/vendedores/desempenho", {
+        params: { ano: ano, mes: mes }
       });
 
-      const vendedoresMap = {};
-
-      vendas.forEach((venda) => {
-        const dataVenda = new Date(venda.dataHoraVenda);
-        const anoVenda = dataVenda.getFullYear();
-        const mesVenda = dataVenda.getMonth() + 1;
-
-        const correspondeAoFiltro =
-          (Number(mes) === 0 || mesVenda === Number(mes)) &&
-          anoVenda === Number(ano);
-
-        if (correspondeAoFiltro) {
-          const cpf = venda.cpfVendedor || "Desconhecido";
-          const nome = mapaCpfNome[cpf] || "Sem nome";
-
-          if (!vendedoresMap[cpf]) {
-            vendedoresMap[cpf] = { nome, cpf, vendasRealizadas: 0 };
-          }
-
-          vendedoresMap[cpf].vendasRealizadas += 1;
-        }
-      });
-
-      const listaVendedores = Object.values(vendedoresMap).sort(
-        (a, b) => b.vendasRealizadas - a.vendasRealizadas
-      );
+      const listaVendedores = res.data;
 
       setVendedoresVendas(listaVendedores);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     }
   };
+
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -87,10 +56,10 @@ const VendedoresMelhorDesempenho = () => {
         <TableBody>
           {vendedoresVendas.length > 0 ? (
             vendedoresVendas.map((vendedor, index) => (
-              <TableRow key={index}>
+              <TableRow key={vendedor.cpf}>
                 <TableCell>{vendedor.nome}</TableCell>
                 <TableCell>{vendedor.cpf}</TableCell>
-                <TableCell>{vendedor.vendasRealizadas}</TableCell>
+                <TableCell>{vendedor.quantidade_vendas}</TableCell>
               </TableRow>
             ))
           ) : (

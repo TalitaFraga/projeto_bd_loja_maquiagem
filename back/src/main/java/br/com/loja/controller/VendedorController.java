@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/vendedores")
@@ -32,6 +33,15 @@ public class VendedorController {
         List<Vendedor> vendedores = vendedorService.listarTodos();
         return ResponseEntity.ok(vendedores);
     }
+
+    @GetMapping("/desempenho")
+    public List<Map<String, Object>> getDesempenho(
+            @RequestParam Integer mes,
+            @RequestParam Integer ano) {
+        return vendedorService.vendedorDesempenho(mes, ano);
+    }
+
+
 
     @PutMapping("/{cpf}")
     public ResponseEntity<Vendedor> atualizar(@PathVariable String cpf, @RequestBody Pessoa dadosAtualizados) {

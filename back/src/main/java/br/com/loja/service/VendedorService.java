@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -46,5 +47,10 @@ public class VendedorService {
         buscarPorCpfOuFalhar(vendedor.getCpf());
 
         return vendedorRepository.update(vendedor);
+    }
+
+
+    public List<Map<String, Object>> vendedorDesempenho(Integer mes, Integer ano) {
+        return vendedorRepository.vendedorDesempenho(mes, ano);
     }
 }

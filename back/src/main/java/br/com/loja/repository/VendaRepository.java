@@ -120,16 +120,20 @@ public class VendaRepository {
         FROM Venda V
         JOIN Item_venda IV ON V.id_venda = IV.fk_Venda_id_venda
         JOIN Produto P ON IV.fk_Produto_codigo_barra = P.codigo_barra
-            AND IV.fk_Produto_lote_produto = P.lote_produto
+                       AND IV.fk_Produto_lote_produto = P.lote_produto
         WHERE 1=1
-    """);
+        """);
+
+        List<Object> parametros = new ArrayList<>();
 
         if (ano != null) {
-            sql.append(" AND YEAR(V.datahora_venda) = ").append(ano);
+            sql.append(" AND YEAR(V.datahora_venda) = ?");
+            parametros.add(ano);
         }
 
         if (mes != null) {
-            sql.append(" AND MONTH(V.datahora_venda) = ").append(mes);
+            sql.append(" AND MONTH(V.datahora_venda) = ?");
+            parametros.add(mes);
         }
 
         sql.append(" GROUP BY mes ORDER BY mes DESC");
@@ -137,25 +141,32 @@ public class VendaRepository {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString());
-             ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            while (rs.next()) {
-                Map<String, Object> row = new HashMap<>();
-                for (int i = 1; i <= columnCount; i++) {
-                    row.put(metaData.getColumnLabel(i), rs.getObject(i));
-                }
-                resultado.add(row);
+            for (int i = 0; i < parametros.size(); i++) {
+                stmt.setObject(i + 1, parametros.get(i));
             }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    for (int i = 1; i <= columnCount; i++) {
+                        row.put(metaData.getColumnLabel(i), rs.getObject(i));
+                    }
+                    resultado.add(row);
+                }
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar faturamento filtrado", e);
         }
 
         return resultado;
     }
+
 
     private Venda mapResultSetToVenda(ResultSet rs) throws SQLException {
         Venda venda = new Venda();
