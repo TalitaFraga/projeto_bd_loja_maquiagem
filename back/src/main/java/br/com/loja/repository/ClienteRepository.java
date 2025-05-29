@@ -4,6 +4,7 @@ import br.com.loja.entities.Cliente;
 import br.com.loja.entities.Pessoa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +22,7 @@ public class ClienteRepository {
     private final PessoaRepository pessoaRepository;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Lazy
     public ClienteRepository(DataSource dataSource, PessoaRepository pessoaRepository) {
         this.dataSource = dataSource;
@@ -163,4 +166,27 @@ public class ClienteRepository {
             throw new RuntimeException("Erro ao deletar cliente (silencioso)", e);
         }
     }
+
+    public List<Map<String, Object>> buscarClientesQueMaisCompram() {
+        String sql = """
+            SELECT 
+                p.nome AS nome,
+                c.fk_pessoa_cpf AS cpf,
+                COUNT(v.id_venda) AS qtdCompras
+            FROM 
+                Cliente c
+            JOIN 
+                Pessoa p ON c.fk_pessoa_cpf = p.cpf
+            JOIN 
+                Venda v ON v.fk_cliente_fk_pessoa_cpf = c.fk_pessoa_cpf
+            GROUP BY 
+                p.nome, c.fk_pessoa_cpf
+            ORDER BY 
+                qtdCompras DESC
+            LIMIT 3
+        """;
+
+        return jdbcTemplate.queryForList(sql);
+    }
+
 }

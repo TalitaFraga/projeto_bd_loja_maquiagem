@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -127,5 +128,12 @@ public class VendaService {
         return vendaRepository.findFaturamentoFiltrado(ano, mes);
     }
 
+    public List<Map<String, Object>> obterQuantidadeVendidaEEstoque() throws SQLException {
+        return vendaRepository.listarQuantidadeVendidaEEstoque();
+    }
+
+    public List<Map<String, Object>> obterVendasPorVendedorPorSemana() {
+        return vendaRepository.findVendasPorVendedorPorSemana();
+    }
 
 }

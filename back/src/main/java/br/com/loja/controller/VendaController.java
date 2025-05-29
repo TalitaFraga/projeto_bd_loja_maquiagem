@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,6 +69,24 @@ public class VendaController {
     ) {
         return vendaService.getFaturamentoFiltrado(ano, mes);
     }
+
+    @GetMapping("/vendas-estoque")
+    public ResponseEntity<List<Map<String, Object>>> listarQuantidadeVendidaEEstoque() {
+        try {
+            List<Map<String, Object>> dados = vendaService.obterQuantidadeVendidaEEstoque();
+            return ResponseEntity.ok(dados);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/vendas-por-vendedor-semana")
+    public ResponseEntity<List<Map<String, Object>>> vendasPorVendedorSemana() {
+        List<Map<String, Object>> resultado = vendaService.obterVendasPorVendedorPorSemana();
+        return ResponseEntity.ok(resultado);
+    }
+
 
 
 }

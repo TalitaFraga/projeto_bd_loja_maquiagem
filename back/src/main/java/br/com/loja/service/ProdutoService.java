@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -50,7 +51,7 @@ public class ProdutoService {
         produtoRepository.delete(codigo_barra);
     }
 
-    public List<Produto> buscarProdutosPorMesEAno(int mes, int ano) throws SQLException {
+    public List<Map<String, Object>> buscarProdutosPorMesEAno(int mes, int ano) throws SQLException {
         if (mes < 1 || mes > 12) {
             throw new IllegalArgumentException("Mês deve estar entre 1 e 12.");
         }
@@ -61,4 +62,5 @@ public class ProdutoService {
 
         return produtoRepository.buscarProdutosPorMesEAno(mes, ano);
     }
+
 }

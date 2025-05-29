@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -22,50 +22,43 @@ import {
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const { vendas, estoque } = payload[0].payload;
+    const { quantidade_vendida, quantidade_estoque } = payload[0].payload;
     return (
       <Paper sx={{ p: 1 }}>
         <Typography variant="subtitle2">{label}</Typography>
-        <Typography variant="body2">Vendas: {vendas}</Typography>
-        <Typography variant="body2">Estoque: {estoque}</Typography>
+        <Typography variant="body2">Vendas: {quantidade_vendida}</Typography>
+        <Typography variant="body2">Estoque: {quantidade_estoque}</Typography>
       </Paper>
     );
   }
   return null;
 };
 
-const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
+const VendasEstoque = () => {
   const [graficoAberto, setGraficoAberto] = useState(false);
+  const [dados, setDados] = useState([]);
 
-  const vendasPorProduto = produtos.map(produto => {
-    const totalVendido = itensVenda.reduce((acc, item) => {
-      if (
-        item.codigoBarra === produto.codigo_barra &&
-        item.loteProduto === produto.lote_produto
-      ) {
-        return acc + item.qtdeProduto;
-      }
-      return acc;
-    }, 0);
 
-    const estoqueProduto = estoque.find(
-      est =>
-        est.codigoBarra === produto.codigo_barra &&
-        est.loteProduto === produto.lote_produto
-    );
+  const fetchDados = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/vendas/vendas-estoque");
+      if (!response.ok) throw new Error("Erro ao buscar dados");
+      const data = await response.json();
+      setDados(data);
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
+  };
 
-    return {
-      nome: produto.nome,
-      vendas: totalVendido,
-      estoque: estoqueProduto ? estoqueProduto.qtdeProduto : 0
-    };
-  });
+
+  useEffect(() => {
+    if (graficoAberto) {
+      fetchDados();
+    }
+  }, [graficoAberto]);
 
   return (
     <Box>
-      {/* <Typography variant="h5" gutterBottom sx={{textAlign: 'center'}}>
-        Vendas e estoque
-      </Typography> */}
       <Box textAlign="center" sx={{ my: 2 }}>
         <Button
           variant="contained"
@@ -106,7 +99,7 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
           <Box sx={{ height: 500 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={vendasPorProduto}
+                data={dados}
                 margin={{ top: 20, right: 30, bottom: 120, left: 20 }}
               >
                 <XAxis
@@ -120,8 +113,8 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
                 <YAxis />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
-                <Bar dataKey="vendas" fill="#F48FB1" />
-                <Bar dataKey="estoque" fill="#81D4FA" />
+                <Bar dataKey="quantidade_vendida" fill="#F48FB1" />
+                <Bar dataKey="quantidade_estoque" fill="#81D4FA" />
               </BarChart>
             </ResponsiveContainer>
           </Box>
@@ -130,4 +123,5 @@ const VendasEstoque = ({ produtos, itensVenda, estoque }) => {
     </Box>
   );
 };
+
 export default VendasEstoque;

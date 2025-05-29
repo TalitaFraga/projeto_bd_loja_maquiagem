@@ -15,42 +15,16 @@ const ClientesMaisCompram = () => {
   const [clientesCompras, setClientesCompras] = useState([]);
 
   useEffect(() => {
-    const fetchVendas = async () => {
+    const fetchClientes = async () => {
       try {
-        const resVendas = await axios.get("http://localhost:8081/vendas");
-        const resPessoas = await axios.get("http://localhost:8081/pessoas");
-
-        const vendas = resVendas.data;
-        const pessoas = resPessoas.data;
-
-        // Criar mapa CPF -> nome para busca rápida
-        const mapaCpfNome = {};
-        pessoas.forEach(pessoa => {
-          mapaCpfNome[pessoa.cpf] = pessoa.nome;
-        });
-
-        const clientesMap = {};
-
-        vendas.forEach(venda => {
-          const cpf = venda.cpfCliente || "Desconhecido";
-          const nome = mapaCpfNome[cpf] || "Sem nome";
-
-          if (!clientesMap[cpf]) {
-            clientesMap[cpf] = { nome, cpf, compras: 0 };
-          }
-
-          clientesMap[cpf].compras += 1;  // Conta o número de compras
-        });
-
-        // Ordenar por número de compras descrescente
-        const listaClientes = Object.values(clientesMap).sort((a, b) => b.compras - a.compras);
-        setClientesCompras(listaClientes);
+        const response = await axios.get("http://localhost:8081/clientes/mais-compram");
+        setClientesCompras(response.data);
       } catch (error) {
-        console.error("Erro ao buscar vendas:", error);
+        console.error("Erro ao buscar clientes que mais compram:", error);
       }
     };
 
-    fetchVendas();
+    fetchClientes();
   }, []);
 
   return (
@@ -72,7 +46,7 @@ const ClientesMaisCompram = () => {
               <TableRow key={index}>
                 <TableCell>{cliente.nome}</TableCell>
                 <TableCell>{cliente.cpf}</TableCell>
-                <TableCell>{cliente.compras}</TableCell>
+                <TableCell>{cliente.qtdCompras}</TableCell>
               </TableRow>
             ))}
           </TableBody>

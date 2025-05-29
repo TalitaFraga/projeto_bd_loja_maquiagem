@@ -6,10 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.sql.Date;
+import java.util.*;
 
 @Repository
 public class ProdutoRepository {
@@ -135,10 +133,16 @@ public class ProdutoRepository {
         }
     }
 
-    public List<Produto> buscarProdutosPorMesEAno(int mes, int ano) throws SQLException {
-        List<Produto> produtos = new ArrayList<>();
-        String sql = "SELECT * FROM Produto " +
-                "WHERE MONTH(data_validade) = ? AND YEAR(data_validade) = ?";
+    public List<Map<String, Object>>buscarProdutosPorMesEAno(int mes, int ano) throws SQLException {
+        List<Map<String, Object>> produtos = new ArrayList<>();
+
+        String sql = """
+        SELECT p.codigo_barra, p.lote_produto, p.tipo_produto, p.nome, p.marca, p.preco, p.data_validade, p.fk_fornecedor_CNPJ, e.qtde_produto
+        FROM Produto p
+        JOIN Estoque e ON p.codigo_barra = e.fk_produto_codigo_barra
+        WHERE MONTH(p.data_validade) = ? 
+            AND YEAR(p.data_validade) = ?
+    """;
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -148,21 +152,24 @@ public class ProdutoRepository {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Produto produto = new Produto();
-                    produto.setCodigo_barra(rs.getString("codigo_barra"));
-                    produto.setLote_produto(rs.getString("lote_produto"));
-                    produto.setTipo_produto(rs.getString("tipo_produto"));
-                    produto.setNome(rs.getString("nome"));
-                    produto.setMarca(rs.getString("marca"));
-                    produto.setPreco(rs.getBigDecimal("preco"));
-                    produto.setData_validade(rs.getDate("data_validade").toLocalDate());
-                    produto.setFk_fornecedor_CNPJ(rs.getString("fk_fornecedor_CNPJ"));
+                    Map<String, Object> produto = new HashMap<>();
+                    produto.put("codigo_barra", rs.getString("codigo_barra"));
+                    produto.put("lote_produto", rs.getString("lote_produto"));
+                    produto.put("tipo_produto", rs.getString("tipo_produto"));
+                    produto.put("nome", rs.getString("nome"));
+                    produto.put("marca", rs.getString("marca"));
+                    produto.put("preco", rs.getBigDecimal("preco"));
+                    produto.put("data_validade", rs.getDate("data_validade").toLocalDate());
+                    produto.put("fk_fornecedor_CNPJ", rs.getString("fk_fornecedor_CNPJ"));
+                    produto.put("qtde_produto", rs.getInt("qtde_produto"));
+
                     produtos.add(produto);
                 }
             }
         }
         return produtos;
     }
+
 
 
 

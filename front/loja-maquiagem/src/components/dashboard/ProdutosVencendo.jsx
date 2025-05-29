@@ -30,41 +30,29 @@ const ProdutosVencendo = () => {
   const [openModal, setOpenModal] = useState(false);
 
   const buscarProdutosVencendo = async () => {
-  setLoadingVencimento(true);
-  setErrorVencimento(null);
-  try {
-    console.log("Buscando produtos vencendo...");
-    const resVencendo = await axios.get(
-      `http://localhost:8081/produtos/vencimentos?mes=${mesVencimento}&ano=${anoVencimento}`
-    );
-    console.log("Produtos vencendo:", resVencendo.data);
-
-    const resEstoque = await axios.get(`http://localhost:8081/estoque`);
-    console.log("Estoque:", resEstoque.data);
-
-    const produtosComEstoque = resVencendo.data.map((produto) => {
-      const estoqueProduto = resEstoque.data.find(
-        (item) =>
-          item.codigoBarra === produto.codigo_barra &&
-          item.loteProduto === produto.lote_produto
+    setLoadingVencimento(true);
+    setErrorVencimento(null);
+    try {
+      console.log("Buscando produtos vencendo...");
+      const resVencendo = await axios.get(
+        `http://localhost:8081/produtos/vencimento?mes=${mesVencimento}&ano=${anoVencimento}`
       );
-      return {
-        ...produto,
-        quantidade_estoque: estoqueProduto ? estoqueProduto.qtdeProduto : 0,
-      };
-    }).filter((produto) => produto.quantidade_estoque > 0);
+      console.log("Produtos vencendo:", resVencendo.data);
 
-    setProdutosVencendo(produtosComEstoque);
-    setOpenModal(true);
-  } catch (error) {
-    console.error("Erro ao buscar produtos ou estoque:", error);
-    setErrorVencimento("Erro ao buscar produtos vencendo.");
-    setProdutosVencendo([]);
-  } finally {
-    setLoadingVencimento(false);
-  }
-};
+      const produtosComEstoque = resVencendo.data.filter(
+        (produto) => produto.qtde_produto > 0
+      );
 
+      setProdutosVencendo(produtosComEstoque);
+      setOpenModal(true);
+    } catch (error) {
+      console.error("Erro ao buscar produtos vencendo:", error);
+      setErrorVencimento("Erro ao buscar produtos vencendo.");
+      setProdutosVencendo([]);
+    } finally {
+      setLoadingVencimento(false);
+    }
+  };
 
   const handleClose = () => {
     setOpenModal(false);
@@ -72,10 +60,6 @@ const ProdutosVencendo = () => {
 
   return (
     <Box sx={{ mt: 2 }}>
-      {/* <Typography variant="h5" gutterBottom>
-        Produtos vencendo
-      </Typography> */}
-
       <Paper sx={{ p: 1, mb: 5 }}>
         <Grid container spacing={1} alignItems="center">
           <Grid item xs={6} sm={3}>
@@ -117,7 +101,6 @@ const ProdutosVencendo = () => {
             >
               {loadingVencimento ? <CircularProgress size={24} /> : "Buscar"}
             </Button>
-
           </Grid>
         </Grid>
       </Paper>
@@ -159,7 +142,7 @@ const ProdutosVencendo = () => {
                     <TableCell>
                       {new Date(produto.data_validade + 'T00:00:00').toLocaleDateString('pt-BR')}
                     </TableCell>
-                    <TableCell>{produto.quantidade_estoque ?? '-'}</TableCell>
+                    <TableCell>{produto.qtde_produto ?? '-'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

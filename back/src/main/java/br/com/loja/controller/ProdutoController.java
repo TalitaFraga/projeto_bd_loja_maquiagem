@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/produtos")
@@ -61,17 +62,17 @@ public class ProdutoController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/vencimentos")
-    public ResponseEntity<List<Produto>> buscarProdutosPorMesEAno(
-            @RequestParam int mes,
-            @RequestParam int ano) {
+    @GetMapping("/vencimento")
+    public ResponseEntity<?> buscarProdutosPorMesEAno(@RequestParam int mes, @RequestParam int ano) {
         try {
-            List<Produto> produtos = produtoService.buscarProdutosPorMesEAno(mes, ano);
+            List<Map<String, Object>> produtos = produtoService.buscarProdutosPorMesEAno(mes, ano);
             return ResponseEntity.ok(produtos);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (SQLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao buscar produtos: " + e.getMessage());
         }
     }
+
 }

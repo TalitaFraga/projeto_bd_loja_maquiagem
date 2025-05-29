@@ -2,6 +2,7 @@ package br.com.loja.repository;
 
 import br.com.loja.entities.Venda;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -16,6 +17,7 @@ public class VendaRepository {
 
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
     public VendaRepository(DataSource dataSource, ItemVendaRepository itemVendaRepository) {
         this.dataSource = dataSource;
         this.itemVendaRepository = itemVendaRepository;
@@ -165,6 +167,55 @@ public class VendaRepository {
         }
 
         return resultado;
+    }
+
+    public List<Map<String, Object>> listarQuantidadeVendidaEEstoque() throws SQLException {
+        String sql = """
+            SELECT
+                p.nome,
+                COALESCE(SUM(iv.qtde_produto), 0) AS quantidade_vendida,
+                COALESCE(e.qtde_produto, 0) AS quantidade_estoque
+            FROM Produto p
+            LEFT JOIN Item_venda iv ON p.codigo_barra = iv.fk_Produto_codigo_barra
+                AND p.lote_produto = iv.fk_Produto_lote_produto
+            LEFT JOIN Estoque e ON p.codigo_barra = e.fk_Produto_codigo_barra
+                AND p.lote_produto = e.fk_Produto_lote_produto
+            GROUP BY p.nome, e.qtde_produto
+            ORDER BY p.nome
+        """;
+
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, Object> linha = new HashMap<>();
+                linha.put("nome", rs.getString("nome"));
+                linha.put("quantidade_vendida", rs.getInt("quantidade_vendida"));
+                linha.put("quantidade_estoque", rs.getInt("quantidade_estoque"));
+                resultado.add(linha);
+            }
+        }
+
+        return resultado;
+    }
+
+    public List<Map<String, Object>> findVendasPorVendedorPorSemana() {
+        String sql = """
+            SELECT p.nome AS vendedor,
+              DAYNAME(v.datahora_venda) AS dia_semana,
+              COUNT(v.id_venda) AS qtd_vendas
+            FROM Venda v
+            JOIN Pessoa p ON v.fk_Vendedor_fk_Funcionario_fk_Pessoa_cpf = p.cpf
+            WHERE v.datahora_venda >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+              AND v.datahora_venda < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            GROUP BY p.nome, DAYNAME(v.datahora_venda)
+            ORDER BY p.nome, DAYNAME(v.datahora_venda);
+        """;
+
+        return jdbcTemplate.queryForList(sql);
     }
 
 

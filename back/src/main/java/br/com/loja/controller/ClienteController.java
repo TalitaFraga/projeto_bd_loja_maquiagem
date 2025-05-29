@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/clientes")
@@ -105,5 +106,10 @@ public class ClienteController {
                         .body("Erro ao excluir cliente: " + e.getMessage());
             }
         }
+    }
+
+    @GetMapping("/mais-compram")
+    public List<Map<String, Object>> listarClientesQueMaisCompram() {
+        return clienteService.obterClientesQueMaisCompram();
     }
 }

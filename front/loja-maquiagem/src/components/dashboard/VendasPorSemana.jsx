@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
-  Typography,
+  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   IconButton,
-  Button,
 } from "@mui/material";
 import { Close as CloseIcon, BarChart as BarChartIcon } from "@mui/icons-material";
 import axios from "axios";
@@ -21,138 +20,69 @@ import {
   Legend,
 } from "recharts";
 
-
 const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 
-function getStartOfWeek(date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = (day === 0 ? -6 : 1) - day; 
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-
-function getDiaSemana(date) {
-  return diasSemana[date.getDay()];
-}
+const diaSemanaIndex = (dia) => {
+  const map = {
+    Sunday: 0,
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6,
+  };
+  return map[dia] ?? -1;
+};
 
 const VendasPorSemana = () => {
-  const [vendas, setVendas] = useState([]);
-  const [funcionarios, setFuncionarios] = useState([]);
-  const [graficoAberto, setGraficoAberto] = useState(false);
   const [dataGrafico, setDataGrafico] = useState([]);
-
+  const [graficoAberto, setGraficoAberto] = useState(false);
+  const [nomesVendedores, setNomesVendedores] = useState([]);
 
   useEffect(() => {
-    const fetchVendas = async () => {
+    const fetchVendasPorSemana = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/vendas");
-        setVendas(res.data);
+        const res = await axios.get("http://localhost:8081/vendas/vendas-por-vendedor-semana");
+        const vendas = res.data;
+
+        const vendedoresUnicos = Array.from(new Set(vendas.map(v => v.vendedor)));
+        setNomesVendedores(vendedoresUnicos);
+
+        const dias = Array(7).fill(null).map((_, i) => ({ dia: diasSemana[i] }));
+
+        vendas.forEach(({ vendedor, dia_semana, qtd_vendas }) => {
+          const idx = diaSemanaIndex(dia_semana);
+          if (idx === -1) return;
+
+          if (!dias[idx][vendedor]) {
+            dias[idx][vendedor] = qtd_vendas;
+          } else {
+            dias[idx][vendedor] += qtd_vendas;
+          }
+        });
+
+        setDataGrafico(dias);
+
       } catch (error) {
-        console.error("Erro ao buscar vendas:", error);
+        console.error("Erro ao buscar vendas por semana:", error);
       }
     };
-    fetchVendas();
+
+    fetchVendasPorSemana();
   }, []);
-
-
-  useEffect(() => {
-    const fetchFuncionarios = async () => {
-      try {
-        const res = await axios.get("http://localhost:8081/funcionarios");
-        setFuncionarios(res.data);
-      } catch (error) {
-        console.error("Erro ao buscar funcionários:", error);
-      }
-    };
-    fetchFuncionarios();
-  }, []);
-
-
-  const getNomeVendedor = (cpf) => {
-    const f = funcionarios.find((func) => func.cpf === cpf);
-    return f ? f.nome : cpf;
-  };
-
-  useEffect(() => {
-    if (vendas.length === 0) return;
-
-    const hoje = new Date();
-    const inicioSemana = getStartOfWeek(hoje);
-    const fimSemana = new Date(inicioSemana);
-    fimSemana.setDate(fimSemana.getDate() + 6);
-    fimSemana.setHours(23, 59, 59, 999);
-
-    const vendasPorDia = {};
-
-    vendas.forEach((venda) => {
-      const dataVenda = new Date(venda.dataHoraVenda);
-      if (dataVenda < inicioSemana || dataVenda > fimSemana) return;
-
-      const dia = getDiaSemana(dataVenda);
-      const nomeVendedor = getNomeVendedor(venda.cpfVendedor);
-
-      if (!vendasPorDia[dia]) {
-        vendasPorDia[dia] = {};
-      }
-      if (!vendasPorDia[dia][nomeVendedor]) {
-        vendasPorDia[dia][nomeVendedor] = 0;
-      }
-
-      const totalItens = venda.itens.reduce(
-        (acc, item) => acc + (item.qtdeProduto || 0),
-        0
-      );
-      vendasPorDia[dia][nomeVendedor] += totalItens;
-    });
-
-    
-    const ordemDias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-
-    const dataChart = ordemDias.map((dia) => ({
-      dia,
-      ...(vendasPorDia[dia] || {}),
-    }));
-
-    setDataGrafico(dataChart);
-  }, [vendas, funcionarios]);
-
-  
-  const nomesVendedores = Array.from(
-    new Set(
-      vendas
-        .filter((v) => {
-          const dataVenda = new Date(v.dataHoraVenda);
-          const inicioSemana = getStartOfWeek(new Date());
-          const fimSemana = new Date(inicioSemana);
-          fimSemana.setDate(fimSemana.getDate() + 6);
-          fimSemana.setHours(23, 59, 59, 999);
-          return dataVenda >= inicioSemana && dataVenda <= fimSemana;
-        })
-        .map((v) => getNomeVendedor(v.cpfVendedor))
-        .filter(Boolean)
-    )
-  );
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
-      {/* <Typography variant="h5" gutterBottom>
-        Vendas da Semana
-      </Typography> */}
-
       <Button
         variant="contained"
         startIcon={<BarChartIcon />}
         onClick={() => setGraficoAberto(true)}
-          sx={{
-            backgroundColor: '#F48FB1',
-            color: '#fff',
-            '&:hover': {
-            backgroundColor: '#F06292',
-            },
+        sx={{
+          backgroundColor: '#F48FB1',
+          color: '#fff',
+          '&:hover': { backgroundColor: '#F06292' },
         }}
       >
         Mostrar Gráfico
@@ -164,9 +94,7 @@ const VendasPorSemana = () => {
         fullWidth
         maxWidth="lg"
       >
-        <DialogTitle
-          sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-        >
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           Vendas da Semana
           <IconButton onClick={() => setGraficoAberto(false)}>
             <CloseIcon />
@@ -175,18 +103,8 @@ const VendasPorSemana = () => {
         <DialogContent>
           <Box sx={{ height: 500 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={dataGrafico}
-                margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
-              >
-                <XAxis
-                  dataKey="dia"
-                  interval={0}
-                  angle={-35}
-                  textAnchor="end"
-                  height={120}
-                  tick={{ fontSize: 12 }}
-                />
+              <BarChart data={dataGrafico} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                <XAxis dataKey="dia" interval={0} angle={-35} textAnchor="end" height={120} tick={{ fontSize: 12 }} />
                 <YAxis />
                 <Tooltip />
                 <Legend />
